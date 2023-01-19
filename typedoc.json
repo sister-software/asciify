@@ -1,0 +1,6 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./mod.mts"],
+  "out": "docs",
+  "cname": "asciify.sister.software"
+}

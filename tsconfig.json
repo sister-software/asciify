@@ -1,0 +1,24 @@
+{
+  // This file is not used in compilation. It is here just for a nice editor experience.
+
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "target": "ES2022",
+    "module": "ES2022",
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "declaration": true,
+    "baseUrl": ".",
+    "strict": true,
+    "skipLibCheck": true,
+  },
+  "include": [
+    "mod.mts"
+  ]
+}
