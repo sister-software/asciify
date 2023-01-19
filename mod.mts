@@ -4,13 +4,49 @@
  * @author Teffen Ellis
  */
 
+/**
+ * A default character set to use for the ASCII art.
+ * More spaces will result in a more contrast ASCII art.
+ * This looks good with both black and white and color output.
+ *
+ * @see {@linkcode DEFAULT_BW_CHAR_LIST}
+ * @see {@linkcode DEFAULT_COLOR_CHAR_LIST}
+ */
 export const DEFAULT_CHAR_SET = `   ..,'":;-~=+*#&%@`.split('')
+
+/**
+ * A default character set to use for the ASCII art.
+ * Optimized for black and white output.
+ */
 export const DEFAULT_BW_CHAR_LIST = '  .,:;i1tfLCG08@'.split('')
+
+/**
+ * A default character set to use for the ASCII art.
+ * Optimized for richer color output.
+ */
 export const DEFAULT_COLOR_CHAR_LIST = '  CGO08@'.split('')
 
+/**
+ * Either a canvas or an offscreen canvas.
+ * Note that the offscreen canvas support varies between browsers.
+ * Safari tends to produce slight visual artifacts when using offscreen canvases.
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas MDN on Offscreen Canvas}
+ */
 export type CanvasLike = OffscreenCanvas | HTMLCanvasElement
+
+/**
+ * Either a canvas 2D context or an offscreen canvas 2D context.
+ * Note that the offscreen canvas support varies between browsers.
+ * Safari tends to produce slight visual artifacts when using offscreen canvases.
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvasRenderingContext2D MDN on Offscreen Canvas 2D Context}
+ */
 export type Canvas2dContextLike = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
 
+/**
+ * The fill style mode used to paint the canvas.
+ */
 export type ASCIIMode = 'bw' | 'color'
 
 export interface AsciifyOptions {
@@ -163,22 +199,38 @@ export class Asciify {
   /**
    * Updates the character set used for the ASCII art.
    * This can be used to change the character set on the fly during an animation.
-   *
-   * @param characterSet The next character set to use for the ASCII art.
    */
-  public updateCharacterSet(characterSet: string[]): void {
+  public updateCharacterSet(
+    /**
+     * The next character set to use for the ASCII art.
+     */
+    characterSet: string[]
+  ): void {
     this._characterCodeRadix = createCharacterCodeRadix(characterSet)
   }
 
   /**
    * Renders an image to the ASCII art canvas.
    *
-   * @param rgbaBuffer A buffer containing the RGBA values of the image.
-   * @param flipY Whether to flip the image vertically. Useful when rendering a Three.js scene.
-   * @param persistCanvas Whether to persist the canvas. Useful when composing multiple images.
-   * @see {readFromThreeJS}
+   * @see {@linkcode readFromThreeJS}
+   * @see {@linkcode readFromCanvas}
+   * @see {@linkcode readFromImage}
+   * @see {@linkcode readFromVideo}
    */
-  public rasterize(rgbaBuffer: Uint8ClampedArray, flipY?: boolean, persistCanvas?: boolean): void {
+  public rasterize(
+    /**
+     * A buffer containing the RGBA values of the image.
+     */
+    rgbaBuffer: Uint8ClampedArray,
+    /**
+     * Whether to flip the image vertically. Useful when rendering a Three.js scene.
+     */
+    flipY?: boolean,
+    /**
+     * Whether to persist the canvas. Useful when composing multiple images.
+     */
+    persistCanvas?: boolean
+  ): void {
     if (!persistCanvas) {
       this.ctx.fillStyle = this.backgroundColor
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
@@ -239,14 +291,27 @@ export class Asciify {
 
   /**
    * Returns the character that best matches the given brightness.
-   * @param luminance A number between 0 and 1.
    */
-  public getCharacterFromLuminance(luminance: number) {
+  public getCharacterFromLuminance(
+    /**
+     * A number between 0 and 1.
+     */
+    luminance: number
+  ) {
     const characterCode = this._characterCodeRadix[luminance]
     return String.fromCharCode(characterCode)
   }
 
-  constructor(canvas: HTMLCanvasElement, options: Partial<AsciifyOptions> = {}) {
+  constructor(
+    /**
+     * The canvas to render the ASCII art to.
+     */
+    canvas: HTMLCanvasElement,
+    /**
+     * Options to use when rendering the ASCII art.
+     */
+    options: Partial<AsciifyOptions> = {}
+  ) {
     this._mode = options.mode ?? DefaultOptions.mode
     this._fillStyleFn = _fillStyleFunctions.get(this._mode)!
 
@@ -274,12 +339,18 @@ export class Asciify {
 }
 
 /**
+ * Signature for a fill style function.
+ *
  * @internal
+ * @ignore
  */
 export type FillStyleFn = (red: number, green: number, blue: number, alpha: number, brightness: number) => string
 
 /**
+ * A map of fill style functions.
+ *
  * @internal
+ * @ignore
  */
 export const _fillStyleFunctions = new Map<ASCIIMode, FillStyleFn>([
   ['color', (red, green, blue) => `rgb(${red} ${green} ${blue})`],
@@ -287,14 +358,122 @@ export const _fillStyleFunctions = new Map<ASCIIMode, FillStyleFn>([
 ])
 
 /**
- * Read the pixel buffer from a ThreeJS WebGLRenderer
+ * Read the pixel buffer from a ThreeJS WebGLRenderer.
+ * This function is useful when you want to render a ThreeJS scene to ASCII art.
+ *
+ * @see {@linkcode Asciify.rasterize}
  * @returns A Uint8ClampedArray containing the RGBA pixel buffer
  */
-export function readFromThreeJS(renderer: THREE.WebGLRenderer, ctx = renderer.getContext()): Uint8ClampedArray {
+export function readFromThreeJS(
+  /**
+   * The Three.js renderer to read from.
+   */
+  renderer: THREE.WebGLRenderer,
+  /**
+   * The WebGL context to read from. Defaults to the context of the renderer.
+   * You should provide this if you'd like to cache the context once and reuse it.
+   */
+  ctx = renderer.getContext()
+): Uint8ClampedArray {
   const rgbaBuffer = new Uint8ClampedArray(ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4)
   ctx.readPixels(0, 0, renderer.domElement.width, renderer.domElement.height, ctx.RGBA, ctx.UNSIGNED_BYTE, rgbaBuffer)
 
   return rgbaBuffer
+}
+
+/**
+ * Reads the pixel buffer from a canvas element.
+ * This function is useful when you want to rasterize an existing canvas to ASCII art.
+ *
+ * @see {@linkcode Asciify.rasterize}
+ * @see {@linkcode readFromThreeJS}
+ * @see {@linkcode readFromImageElement}
+ */
+export function readFromCanvas(
+  /**
+   * The canvas to read from.
+   */
+  canvas: CanvasLike,
+  /**
+   * The 2D context to read from.
+   * You should provide this parameter if you'd like to cache the context,
+   * or provide a context optimized for your content.
+   */
+  ctx: Canvas2dContextLike = canvas.getContext('2d')! as Canvas2dContextLike
+) {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  return imageData.data
+}
+
+/**
+ * Reads the pixel buffer from an image element.
+ * This function is useful when you want to rasterize an image to ASCII art.
+ *
+ * @see {@linkcode Asciify.rasterize}
+ * @see {@linkcode readFromThreeJS}
+ * @see {@linkcode readFromCanvas}
+ */
+export function readFromImageElement(
+  /**
+   * The image to read pixels from.
+   */
+  image: HTMLImageElement,
+  /**
+   * A canvas to use for reading the image.
+   * You should provide this parameter if you'd like to cache the canvas.
+   */
+  canvas: CanvasLike = document.createElement('canvas'),
+  /**
+   * The 2D context to read from.
+   * You should provide this parameter if you'd like to cache the context,
+   * or provide a context optimized for your content.
+   */
+  ctx: Canvas2dContextLike = canvas.getContext('2d')! as Canvas2dContextLike
+) {
+  canvas.width = image.width
+  canvas.height = image.height
+
+  ctx.drawImage(image, 0, 0)
+
+  return readFromCanvas(canvas, ctx)
+}
+
+/**
+ * Reads the pixel buffer from a video element.
+ * This function is useful when you want to rasterize a video to ASCII art.
+ *
+ * @see {@linkcode Asciify.rasterize}
+ * @see {@linkcode readFromThreeJS}
+ * @see {@linkcode readFromCanvas}
+ * @returns A Uint8ClampedArray containing the RGBA pixel buffer
+ */
+export function readFromVideoElement(
+  /**
+   * The video to read pixels from.
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement MDN on HTMLVideoElement }
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement MDN on HTMLMediaElement }
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream MDN on captureStream }
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream MDN on captureStream }
+   */
+  video: HTMLVideoElement,
+  /**
+   * A canvas to use for reading the video.
+   * You should provide this parameter if you'd like to cache the canvas.
+   */
+  canvas: CanvasLike = document.createElement('canvas')
+  /**
+   * The 2D context to read from.
+   * You should provide this parameter if you'd like to cache the context,
+   * or provide a context optimized for your content.
+   */
+) {
+  canvas.width = video.width
+  canvas.height = video.height
+
+  const ctx = canvas.getContext('2d')! as Canvas2dContextLike
+  ctx.drawImage(video, 0, 0)
+
+  return readFromCanvas(canvas, ctx)
 }
 
 /**
@@ -303,7 +482,7 @@ export function readFromThreeJS(renderer: THREE.WebGLRenderer, ctx = renderer.ge
  *
  * This helps us avoid expensive operations like Math.floor() when rendering the ASCII art.
  * @internal
- * @see {@linkcode https://github.com/v8/v8/blob/b584c571b88c684222bee63861acaa7d218d6dce/src/compiler/typed-optimization.cc#L471 TypedOptimization::TryBuildCharacterCodeRadix}
+ * @see {@linkcode https://github.com/v8/v8/blob/b584c57/src/compiler/typed-optimization.cc#L471 TypedOptimization::TryBuildCharacterCodeRadix}
  */
 export function createCharacterCodeRadix(asciiCharacters: string[]): Uint16Array {
   const averagedCharacterSet = new Uint16Array(255)
