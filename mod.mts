@@ -1,8 +1,7 @@
 /**
- * @file This file is part of the Keywork project.
  * @copyright Sister Software. All rights reserved.
  * @license MIT
- * @author Sister Software, et al.
+ * @author Teffen Ellis
  */
 
 export const DEFAULT_CHAR_SET = `   ..,'":;-~=+*#&%@`.split('')
