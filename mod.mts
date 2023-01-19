@@ -11,18 +11,21 @@
  *
  * @see {@linkcode DEFAULT_BW_CHAR_LIST}
  * @see {@linkcode DEFAULT_COLOR_CHAR_LIST}
+ * @category Character Set
  */
 export const DEFAULT_CHAR_SET = `   ..,'":;-~=+*#&%@`.split('')
 
 /**
  * A default character set to use for the ASCII art.
  * Optimized for black and white output.
+ * @category Character Set
  */
 export const DEFAULT_BW_CHAR_LIST = '  .,:;i1tfLCG08@'.split('')
 
 /**
  * A default character set to use for the ASCII art.
  * Optimized for richer color output.
+ * @category Character Set
  */
 export const DEFAULT_COLOR_CHAR_LIST = '  CGO08@'.split('')
 
@@ -136,6 +139,7 @@ export const DefaultOptions: Readonly<AsciifyOptions> = {
  * asciify.rasterize(image)
  * ```
  *
+ * @category Main
  * @see {@link https://asciify.sister.software API documentation}
  */
 export class Asciify {
@@ -217,6 +221,7 @@ export class Asciify {
   /**
    * Triggers an internal style update.
    * @internal
+   * @ignore
    */
   public _updateStyles(devicePixelRatio = window.devicePixelRatio): void {
     const fontSize = this.fontSize * devicePixelRatio
@@ -393,6 +398,7 @@ export const _fillStyleFunctions = new Map<ASCIIMode, FillStyleFn>([
  * Read the pixel buffer from a ThreeJS WebGLRenderer.
  * This function is useful when you want to render a ThreeJS scene to ASCII art.
  *
+ * @category Helper
  * @see {@linkcode Asciify.rasterize}
  * @returns A Uint8ClampedArray containing the RGBA pixel buffer
  */
@@ -417,6 +423,7 @@ export function readFromThreeJS(
  * Reads the pixel buffer from a canvas element.
  * This function is useful when you want to rasterize an existing canvas to ASCII art.
  *
+ * @category Helper
  * @see {@linkcode Asciify.rasterize}
  * @see {@linkcode readFromThreeJS}
  * @see {@linkcode readFromImage}
@@ -441,6 +448,7 @@ export function readFromCanvas(
  * Reads the pixel buffer from an image element.
  * This function is useful when you want to rasterize an image to ASCII art.
  *
+ * @category Helper
  * @see {@linkcode Asciify.rasterize}
  * @see {@linkcode readFromThreeJS}
  * @see {@linkcode readFromCanvas}
@@ -474,6 +482,7 @@ export function readFromImage(
  * Reads the pixel buffer from a video element.
  * This function is useful when you want to rasterize a video to ASCII art.
  *
+ * @category Helper
  * @see {@linkcode Asciify.rasterize}
  * @see {@linkcode readFromThreeJS}
  * @see {@linkcode readFromCanvas}
@@ -513,6 +522,8 @@ export function readFromVideo(
  * returns something like a radix-sorted array of 255 characters that are evenly spaced.
  *
  * This helps us avoid expensive operations like Math.floor() when rendering the ASCII art.
+ *
+ * @category Utility
  * @internal
  * @see {@linkcode https://github.com/v8/v8/blob/b584c57/src/compiler/typed-optimization.cc#L471 TypedOptimization::TryBuildCharacterCodeRadix}
  */
