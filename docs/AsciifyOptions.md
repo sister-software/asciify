@@ -1,19 +1,17 @@
-[@sister.software/asciify](../Home.md) / [Exports](../modules.md) / AsciifyOptions
-
 # Interface: AsciifyOptions
 
 ## Table of contents
 
 ### Properties
 
-- [backgroundColor](AsciifyOptions.md#backgroundcolor)
-- [block](AsciifyOptions.md#block)
-- [characterSet](AsciifyOptions.md#characterset)
-- [context](AsciifyOptions.md#context)
-- [fontFamily](AsciifyOptions.md#fontfamily)
-- [fontSize](AsciifyOptions.md#fontsize)
-- [lineHeight](AsciifyOptions.md#lineheight)
-- [mode](AsciifyOptions.md#mode)
+- [backgroundColor](../wiki/AsciifyOptions#backgroundcolor)
+- [block](../wiki/AsciifyOptions#block)
+- [characterSet](../wiki/AsciifyOptions#characterset)
+- [context](../wiki/AsciifyOptions#context)
+- [fontFamily](../wiki/AsciifyOptions#fontfamily)
+- [fontSize](../wiki/AsciifyOptions#fontsize)
+- [lineHeight](../wiki/AsciifyOptions#lineheight)
+- [mode](../wiki/AsciifyOptions#mode)
 
 ## Properties
 
@@ -25,7 +23,7 @@ The background color of the canvas.
 
 #### Defined in
 
-[mod.mts:107](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L107)
+[mod.mts:107](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L107)
 
 ___
 
@@ -42,7 +40,7 @@ false
 
 #### Defined in
 
-[mod.mts:102](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L102)
+[mod.mts:102](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L102)
 
 ___
 
@@ -56,7 +54,7 @@ with a space being the least bright and the last character being the most bright
 
 #### Defined in
 
-[mod.mts:61](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L61)
+[mod.mts:61](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L61)
 
 ___
 
@@ -69,7 +67,7 @@ This is an optional parameter, and if not provided, a new context will be create
 
 #### Defined in
 
-[mod.mts:113](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L113)
+[mod.mts:113](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L113)
 
 ___
 
@@ -85,7 +83,7 @@ The font family to use for the ASCII art.
 
 #### Defined in
 
-[mod.mts:67](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L67)
+[mod.mts:67](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L67)
 
 ___
 
@@ -104,7 +102,7 @@ Make sure to use a known font size, otherwise Safari will choose an approximate 
 
 #### Defined in
 
-[mod.mts:76](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L76)
+[mod.mts:76](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L76)
 
 ___
 
@@ -120,13 +118,13 @@ The line height to use for the ASCII art. This should be a multiple of the font 
 
 #### Defined in
 
-[mod.mts:82](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L82)
+[mod.mts:82](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L82)
 
 ___
 
 ### mode
 
-• **mode**: [`ASCIIMode`](../modules.md#asciimode)
+• **mode**: [`ASCIIMode`](../wiki/Home#asciimode)
 
 The mode to use for the ASCII art.
 
@@ -147,4 +145,4 @@ Can be one of the following:
 
 #### Defined in
 
-[mod.mts:95](https://github.com/sister-software/asciify/blob/5168fb7/mod.mts#L95)
+[mod.mts:95](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L95)
