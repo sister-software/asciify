@@ -112,7 +112,7 @@ export class Asciify {
   public fontSize: number
 
   protected _computedLineHeight: number
-  protected _characterCodeRadix: Uint8Array
+  protected _characterCodeRadix: Uint16Array
 
   /**
    * Sets the size of the ASCII art canvas, updating the number of columns and rows.
@@ -303,9 +303,10 @@ export function readFromThreeJS(renderer: THREE.WebGLRenderer, ctx = renderer.ge
  *
  * This helps us avoid expensive operations like Math.floor() when rendering the ASCII art.
  * @internal
+ * @see {@linkcode https://github.com/v8/v8/blob/b584c571b88c684222bee63861acaa7d218d6dce/src/compiler/typed-optimization.cc#L471 TypedOptimization::TryBuildCharacterCodeRadix}
  */
-export function createCharacterCodeRadix(asciiCharacters: string[]): Uint8Array {
-  const averagedCharacterSet = new Uint8Array(255)
+export function createCharacterCodeRadix(asciiCharacters: string[]): Uint16Array {
+  const averagedCharacterSet = new Uint16Array(255)
 
   // We need at least one space to represent an empty pixel.
   if (asciiCharacters[0] !== ' ') {
