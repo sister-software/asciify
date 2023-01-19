@@ -6,7 +6,22 @@
 ![npm (scoped)](https://img.shields.io/npm/v/@sister.software/asciify)
 [![deno module](https://shield.deno.dev/x/asciify)](https://deno.land/x/asciify)
 
-**Live Demo:** [https://sister.software](https://sister.software)
+- **Live Demo:** [https://sister.software](https://sister.software)
+- API Documentation: [https://asciify.sister.software](https://asciify.sister.software)
+
+## Why use Asciify?
+
+### 🏃‍♀️ Fast
+
+Asciify rasterizes directly to a canvas element, so it's much faster than other libraries that use the DOM to render text nodes. This comes at the cost of an actual textual representation, but if you're looking for a fast way to convert 3D animations to ASCII art, Asciify is a perfect fit.
+
+### 🔍 Small
+
+weighing in at less than 3.5kb minified and gzipped, Asciify is a single file with no dependencies.
+
+### 🤸‍♀️ Flexible
+
+Asciify can rasterize images, videos, and 3D scenes. Anything that can be rendered to a canvas can be converted to ASCII art.
 
 ## Installation
 
@@ -51,20 +66,6 @@ const rgbaBuffer = readFromThreeJS(renderer)
 asciify.rasterize(rgbaBuffer)
 ```
 
-## Why use Asciify?
-
-### 🏃‍♀️ Fast
-
-Asciify rasterizes directly to a canvas element, so it's much faster than other libraries that use the DOM to render text nodes. This comes at the cost of an actual textual representation, but if you're looking for a fast way to convert 3D animations to ASCII art, Asciify is a perfect fit.
-
-### 🔍 Small
-
-weighing in at less than 3.5kb minified and gzipped, Asciify is a single file with no dependencies.
-
-### 🤸‍♀️ Flexible
-
-Asciify can rasterize images, videos, and 3D scenes. Anything that can be rendered to a canvas can be converted to ASCII art.
-
 ## Alternatives
 
 - [Three.js's ASCII Effect](https://threejs.org/examples/?q=ascii#webgl_effects_ascii) - A Three.js effect that converts a 3D scene into ASCII art. Significantly slower than Asciify, but more flexible if you're already using Three.js and need text output.
@@ -72,4 +73,4 @@ Asciify can rasterize images, videos, and 3D scenes. Anything that can be render
 
 # License
 
-Asciify is licensed under the [MIT License](https://opensource.org/licenses/MIT). If you use Asciify in your project, please consider [sponsoring me](
+Asciify is licensed under the [MIT License](https://opensource.org/licenses/MIT). If you use Asciify in your project, let us know at [@SisterSoftware](https://twitter.com/SisterSoftware)! We would love to see what you're working on.
