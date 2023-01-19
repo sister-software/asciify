@@ -1,12 +1,26 @@
 {
   "name": "@sister.software/asciify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts images, videos, and 3D renders into ASCII art.",
-  "main": "index.js",
   "repository": "git@github.com:sister-software/asciify.git",
   "author": "Teffen Ellis <teffen@sister.software>",
   "license": "MIT",
   "private": false,
+  "main": "./dist/mod.mjs",
+  "module": "./dist/mod.mjs",
+  "types": "./dist/mod.d.ts",
+  "keywords": [
+    "ascii",
+    "art",
+    "image",
+    "video",
+    "3d",
+    "render",
+    "three",
+    "threejs",
+    "rasterizer"
+  ],
+  "homepage": "https://asciify.sister.software",
   "exports": {
     ".": {
       "import": "./dist/mod.mjs"
