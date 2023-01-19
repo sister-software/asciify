@@ -110,6 +110,11 @@ export interface AsciifyOptions {
   context?: CanvasRenderingContext2D
 }
 
+/**
+ * The default options for the ASCII art.
+ * @internal
+ * @ignore
+ */
 export const DefaultOptions: Readonly<AsciifyOptions> = {
   characterSet: DEFAULT_CHAR_SET,
   fontSize: 10,
@@ -130,16 +135,42 @@ export const DefaultOptions: Readonly<AsciifyOptions> = {
  * asciify.setSize(window.innerWidth, window.innerHeight)
  * asciify.rasterize(image)
  * ```
+ *
+ * @see {@link https://asciify.sister.software API documentation}
  */
 export class Asciify {
+  /**
+   * The canvas where ASCII art is rasterized to.
+   *
+   * @remarks
+   * If rendering to the screen, make sure to mount the canvas to the DOM.
+   * You can use this canvas to render the ASCII art to the screen.
+   * If used with a Three.js renderer, you should resize the render after calling {@linkcode Asciify.setSize}.
+   *
+   */
   public canvas: CanvasLike
+
+  /**
+   * The canvas context where ASCII art is rasterized to.
+   */
   public ctx: Canvas2dContextLike
 
+  /**
+   * The number of columns in the ASCII art.
+   * This corresponds to the width of the source material.
+   */
   public columnCount = 0
+  /**
+   * The number of rows in the ASCII art.
+   * This corresponds to the height of the source material.
+   */
   public rowCount = 0
 
+  /** @ignore */
   protected readonly _mode: ASCIIMode
+  /** @ignore */
   protected readonly _fillStyleFn: FillStyleFn
+  /** @ignore */
   protected readonly _block: boolean
 
   public backgroundColor: string
@@ -306,9 +337,10 @@ export class Asciify {
     /**
      * The canvas to render the ASCII art to.
      */
-    canvas: HTMLCanvasElement,
+    canvas: CanvasLike,
     /**
      * Options to use when rendering the ASCII art.
+     * @see {@linkcode AsciifyOptions} for more information.
      */
     options: Partial<AsciifyOptions> = {}
   ) {
@@ -329,10 +361,10 @@ export class Asciify {
 
     this.ctx =
       options.context ??
-      this.canvas.getContext('2d', {
+      (this.canvas.getContext('2d', {
         alpha: false,
         desynchronized: true,
-      })!
+      }) as CanvasRenderingContext2D)
 
     this._updateStyles()
   }
@@ -387,7 +419,7 @@ export function readFromThreeJS(
  *
  * @see {@linkcode Asciify.rasterize}
  * @see {@linkcode readFromThreeJS}
- * @see {@linkcode readFromImageElement}
+ * @see {@linkcode readFromImage}
  */
 export function readFromCanvas(
   /**
@@ -413,7 +445,7 @@ export function readFromCanvas(
  * @see {@linkcode readFromThreeJS}
  * @see {@linkcode readFromCanvas}
  */
-export function readFromImageElement(
+export function readFromImage(
   /**
    * The image to read pixels from.
    */
@@ -447,7 +479,7 @@ export function readFromImageElement(
  * @see {@linkcode readFromCanvas}
  * @returns A Uint8ClampedArray containing the RGBA pixel buffer
  */
-export function readFromVideoElement(
+export function readFromVideo(
   /**
    * The video to read pixels from.
    * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement MDN on HTMLVideoElement }
