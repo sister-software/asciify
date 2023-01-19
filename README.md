@@ -2,10 +2,9 @@
 
 **Asciify** is a small library for converting images, videos, and 3D renders into _rasterized_ ASCII art.
 
-![npm](https://img.shields.io/npm/dm/sister.software/asciify)
-![npm (scoped)](https://img.shields.io/npm/v/sister.software/asciify)
+![npm](https://img.shields.io/npm/dm/@sister.software/asciify)
+![npm (scoped)](https://img.shields.io/npm/v/@sister.software/asciify)
 [![deno module](https://shield.deno.dev/x/asciify)](https://deno.land/x/asciify)
-![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/@sister.software/asciify)
 
 **Live Demo:** [https://sister.software](https://sister.software)
 
