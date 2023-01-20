@@ -1,6 +1,6 @@
 {
   "name": "@sister.software/asciify",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Converts images, videos, and 3D renders into ASCII art.",
   "repository": "git@github.com:sister-software/asciify.git",
   "author": "Teffen Ellis <teffen@sister.software>",
@@ -9,6 +9,11 @@
   "main": "./dist/mod.mjs",
   "module": "./dist/mod.mjs",
   "types": "./dist/mod.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "keywords": [
     "ascii",
     "art",
