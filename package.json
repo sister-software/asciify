@@ -1,18 +1,19 @@
 {
   "name": "@sister.software/asciify",
-  "version": "1.1.1",
+  "version": "1.1.4",
   "description": "Converts images, videos, and 3D renders into ASCII art.",
   "repository": "git@github.com:sister-software/asciify.git",
+  "bugs": {
+    "url": "https://github.com/sister-software/asciify/issues"
+  },
   "author": "Teffen Ellis <teffen@sister.software>",
   "license": "MIT",
   "private": false,
   "main": "./dist/mod.mjs",
   "module": "./dist/mod.mjs",
-  "types": "./dist/mod.d.ts",
+  "types": "./dist/mod.d.mts",
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "dist/**/*"
   ],
   "keywords": [
     "ascii",
@@ -28,7 +29,20 @@
   "homepage": "https://asciify.sister.software",
   "exports": {
     ".": {
-      "import": "./dist/mod.mjs"
+      "import": "./dist/mod.mjs",
+      "types": "./dist/mod.d.mts"
+    },
+    "./mod": {
+      "import": "./dist/mod.mjs",
+      "types": "./dist/mod.d.mts"
+    },
+    "./mod.mjs": {
+      "import": "./dist/mod.mjs",
+      "types": "./dist/mod.d.mts"
+    },
+    "./mod.d.mts": {
+      "import": "./dist/mod.d.mts",
+      "types": "./dist/mod.d.mts"
     },
     "./package.json": "./package.json"
   },
