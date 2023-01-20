@@ -145,7 +145,7 @@ export const DefaultOptions: Readonly<AsciifyOptions> = {
  * ```
  *
  * @category Main
- * @see {@link https://asciify.sister.software API documentation}
+ * @see {@link https://sister.software/asciify API documentation}
  */
 export class Asciify {
   /**
