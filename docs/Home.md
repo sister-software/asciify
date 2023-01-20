@@ -81,7 +81,7 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 
 #### Defined in
 
-[mod.mts:436](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L436)
+[mod.mts:436](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L436)
 
 ___
 
@@ -112,7 +112,7 @@ This function is useful when you want to rasterize an image to ASCII art.
 
 #### Defined in
 
-[mod.mts:461](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L461)
+[mod.mts:461](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L461)
 
 ___
 
@@ -142,7 +142,7 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[mod.mts:410](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L410)
+[mod.mts:410](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L410)
 
 ___
 
@@ -174,7 +174,7 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[mod.mts:496](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L496)
+[mod.mts:496](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L496)
 
 ___
 
@@ -205,7 +205,7 @@ This helps us avoid expensive operations like Math.floor() when rendering the AS
 
 #### Defined in
 
-[mod.mts:535](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L535)
+[mod.mts:535](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L535)
 
 ## Character Set Variables
 
@@ -218,7 +218,7 @@ Optimized for black and white output.
 
 #### Defined in
 
-[mod.mts:28](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L28)
+[mod.mts:28](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L28)
 
 ___
 
@@ -237,7 +237,7 @@ This looks good with both black and white and color output.
 
 #### Defined in
 
-[mod.mts:21](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L21)
+[mod.mts:21](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L21)
 
 ___
 
@@ -250,7 +250,7 @@ Optimized for richer color output.
 
 #### Defined in
 
-[mod.mts:35](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L35)
+[mod.mts:35](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L35)
 
 ## Type Aliases
 
@@ -262,7 +262,7 @@ The fill style mode used to paint the canvas.
 
 #### Defined in
 
-[mod.mts:58](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L58)
+[mod.mts:58](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L58)
 
 ___
 
@@ -280,7 +280,7 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[mod.mts:53](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L53)
+[mod.mts:53](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L53)
 
 ___
 
@@ -298,4 +298,4 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[mod.mts:44](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L44)
+[mod.mts:44](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L44)
