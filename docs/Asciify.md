@@ -52,7 +52,7 @@ asciify.rasterize(image)
 
 #### Defined in
 
-[mod.mts:341](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L341)
+[mod.mts:346](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L346)
 
 ## Properties
 
@@ -62,7 +62,7 @@ asciify.rasterize(image)
 
 #### Defined in
 
-[mod.mts:180](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L180)
+[mod.mts:185](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L185)
 
 ___
 
@@ -80,7 +80,7 @@ If used with a Three.js renderer, you should resize the render after calling [`s
 
 #### Defined in
 
-[mod.mts:155](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L155)
+[mod.mts:160](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L160)
 
 ___
 
@@ -93,7 +93,7 @@ This corresponds to the width of the source material.
 
 #### Defined in
 
-[mod.mts:166](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L166)
+[mod.mts:171](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L171)
 
 ___
 
@@ -105,7 +105,7 @@ The canvas context where ASCII art is rasterized to.
 
 #### Defined in
 
-[mod.mts:160](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L160)
+[mod.mts:165](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L165)
 
 ___
 
@@ -115,7 +115,7 @@ ___
 
 #### Defined in
 
-[mod.mts:182](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L182)
+[mod.mts:187](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L187)
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-[mod.mts:183](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L183)
+[mod.mts:188](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L188)
 
 ___
 
@@ -138,7 +138,7 @@ This corresponds to the height of the source material.
 
 #### Defined in
 
-[mod.mts:171](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L171)
+[mod.mts:176](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L176)
 
 ## Methods
 
@@ -160,7 +160,7 @@ Returns the character that best matches the given brightness.
 
 #### Defined in
 
-[mod.mts:331](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L331)
+[mod.mts:336](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L336)
 
 ___
 
@@ -191,7 +191,7 @@ Renders an image to the ASCII art canvas.
 
 #### Defined in
 
-[mod.mts:256](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L256)
+[mod.mts:261](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L261)
 
 ___
 
@@ -223,7 +223,7 @@ renderer.setSize(asciify.columnCount, asciify.rowCount)
 
 #### Defined in
 
-[mod.mts:199](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L199)
+[mod.mts:204](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L204)
 
 ___
 
@@ -246,4 +246,4 @@ This can be used to change the character set on the fly during an animation.
 
 #### Defined in
 
-[mod.mts:239](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L239)
+[mod.mts:244](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L244)

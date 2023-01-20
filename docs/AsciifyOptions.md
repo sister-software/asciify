@@ -23,7 +23,7 @@ The background color of the canvas.
 
 #### Defined in
 
-[mod.mts:107](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L107)
+[mod.mts:112](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L112)
 
 ___
 
@@ -40,7 +40,7 @@ false
 
 #### Defined in
 
-[mod.mts:102](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L102)
+[mod.mts:107](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L107)
 
 ___
 
@@ -54,7 +54,7 @@ with a space being the least bright and the last character being the most bright
 
 #### Defined in
 
-[mod.mts:61](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L61)
+[mod.mts:66](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L66)
 
 ___
 
@@ -67,7 +67,7 @@ This is an optional parameter, and if not provided, a new context will be create
 
 #### Defined in
 
-[mod.mts:113](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L113)
+[mod.mts:118](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L118)
 
 ___
 
@@ -83,7 +83,7 @@ The font family to use for the ASCII art.
 
 #### Defined in
 
-[mod.mts:67](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L67)
+[mod.mts:72](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L72)
 
 ___
 
@@ -102,7 +102,7 @@ Make sure to use a known font size, otherwise Safari will choose an approximate 
 
 #### Defined in
 
-[mod.mts:76](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L76)
+[mod.mts:81](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L81)
 
 ___
 
@@ -118,7 +118,7 @@ The line height to use for the ASCII art. This should be a multiple of the font 
 
 #### Defined in
 
-[mod.mts:82](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L82)
+[mod.mts:87](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L87)
 
 ___
 
@@ -145,4 +145,4 @@ Can be one of the following:
 
 #### Defined in
 
-[mod.mts:95](https://github.com/sister-software/asciify/blob/fbda2ec/mod.mts#L95)
+[mod.mts:100](https://github.com/sister-software/asciify/blob/bef821a/mod.mts#L100)
