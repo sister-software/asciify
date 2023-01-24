@@ -53,6 +53,22 @@ export type CanvasLike = OffscreenCanvas | HTMLCanvasElement
 export type Canvas2dContextLike = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
 
 /**
+ * A Three.js style renderer
+ * @ignore
+ */
+export interface Sizable {
+  setSize: (width: number, height: number, updateStyle?: boolean) => void
+}
+
+/**
+ * @ignore
+ * @internal
+ */
+export const isSizable = (object: unknown): object is Sizable => {
+  return typeof object === 'object' && object !== null && 'setSize' in object
+}
+
+/**
  * The fill style mode used to paint the canvas.
  */
 export type ASCIIMode = 'bw' | 'color'
@@ -137,10 +153,11 @@ export const DefaultOptions: Readonly<AsciifyOptions> = {
  * Converts images, videos, and 3D renders into ASCII art.
  *
  * ```ts
- * const canvas = document.createElement('canvas')
- * const asciify = new ASCIIRasterizer(canvas)
+ * const outputCanvas = document.createElement('canvas')
+ * const asciify = new Asciify(canvas)
+ * const sourceCanvas = document.createElement('canvas')
  *
- * asciify.setSize(window.innerWidth, window.innerHeight)
+ * asciify.setSize(window.innerWidth, window.innerHeight, sourceCanvas)
  * asciify.rasterize(image)
  * ```
  *
@@ -193,15 +210,30 @@ export class Asciify {
   /**
    * Sets the size of the ASCII art canvas, updating the number of columns and rows.
    *
-   * You should call this method whenever the size of the parent canvas changes.
-   * If used with a Three.js renderer, you should resize the render after calling this method.
+   * You should call this method whenever an instance of asciify changes dimensions.
+   *
+   * ```ts
+   * asciify.setSize(width, height, renderer)
+   * ```
+   *
+   * Alternatively, you can use use the `columnCount` and `rowCount`
+   * properties to set separately the size of the source canvas.
    *
    * ```ts
    * asciify.setSize(width, height)
    * renderer.setSize(asciify.columnCount, asciify.rowCount)
    * ```
    */
-  public setSize(nextWidth: number, nextHeight: number, devicePixelRatio = window.devicePixelRatio): void {
+  public setSize(
+    /** The width of the ASCII art canvas. */
+    nextWidth: number,
+    /** The height of the ASCII art canvas. */
+    nextHeight: number,
+    /** An optional source canvas to resize. */
+    imageSource?: CanvasLike | Sizable,
+    /** The device pixel ratio to use. */
+    devicePixelRatio = window.devicePixelRatio
+  ): void {
     this.canvas.width = nextWidth
     this.canvas.height = nextHeight
 
@@ -219,6 +251,15 @@ export class Asciify {
     // The width and height of each cell is determined by the font size and device pixel ratio.
     this.columnCount = Math.round(this.canvas.width / this.fontSize)
     this.rowCount = Math.round(this.canvas.height / this.fontSize)
+
+    if (imageSource) {
+      if (isSizable(imageSource)) {
+        imageSource.setSize(this.columnCount, this.rowCount)
+      } else {
+        imageSource.width = this.columnCount
+        imageSource.height = this.rowCount
+      }
+    }
 
     this._updateStyles()
   }
@@ -347,7 +388,7 @@ export class Asciify {
     /**
      * The canvas to render the ASCII art to.
      */
-    canvas: CanvasLike,
+    outputCanvas: CanvasLike,
     /**
      * Options to use when rendering the ASCII art.
      * @see {@linkcode AsciifyOptions} for more information.
@@ -357,8 +398,7 @@ export class Asciify {
     this._mode = options.mode ?? DefaultOptions.mode
     this._fillStyleFn = _fillStyleFunctions.get(this._mode)!
 
-    const characterSetSource =
-      options.characterSet ?? (options.mode === 'bw' ? DEFAULT_BW_CHAR_LIST : DEFAULT_COLOR_CHAR_LIST)
+    const characterSetSource = options.characterSet ?? (options.mode === 'bw' ? DEFAULT_BW_CHAR_LIST : DEFAULT_CHAR_SET)
     this._characterCodeRadix = createCharacterCodeRadix(characterSetSource)
 
     this.backgroundColor = options.backgroundColor ?? DefaultOptions.backgroundColor
@@ -367,7 +407,7 @@ export class Asciify {
     this._block = options.block ?? DefaultOptions.block
 
     this._computedLineHeight = this.fontSize * (options.lineHeight ?? DefaultOptions.lineHeight)
-    this.canvas = canvas
+    this.canvas = outputCanvas
 
     this.ctx =
       options.context ??
@@ -435,17 +475,16 @@ export function readFromThreeJS(
  */
 export function readFromCanvas(
   /**
-   * The canvas to read from.
-   */
-  canvas: CanvasLike,
-  /**
    * The 2D context to read from.
-   * You should provide this parameter if you'd like to cache the context,
-   * or provide a context optimized for your content.
+   *
+   * Make sure to provide a canvas with the same dimensions as
+   * the asciify instance you're using.
+   *
+   * @see {@linkcode Asciify.setSize}
    */
-  ctx: Canvas2dContextLike = canvas.getContext('2d')! as Canvas2dContextLike
+  ctx: Canvas2dContextLike
 ) {
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
   return imageData.data
 }
 
@@ -458,29 +497,34 @@ export function readFromCanvas(
  * @see {@linkcode readFromThreeJS}
  * @see {@linkcode readFromCanvas}
  */
-export function readFromImage(
+export async function readFromImage(
   /**
    * The image to read pixels from.
+   * This will be resized to match the next given `canvas` argument.
    */
-  image: HTMLImageElement,
-  /**
-   * A canvas to use for reading the image.
-   * You should provide this parameter if you'd like to cache the canvas.
-   */
-  canvas: CanvasLike = document.createElement('canvas'),
+  image: ImageBitmapSource,
   /**
    * The 2D context to read from.
-   * You should provide this parameter if you'd like to cache the context,
-   * or provide a context optimized for your content.
+   *
+   * Make sure to provide a canvas with the same dimensions as
+   * the asciify instance you're using.
+   *
+   * @see {@linkcode Asciify.setSize}
    */
-  ctx: Canvas2dContextLike = canvas.getContext('2d')! as Canvas2dContextLike
+  ctx: Canvas2dContextLike
 ) {
-  canvas.width = image.width
-  canvas.height = image.height
+  const resizeWidth = ctx.canvas.width
+  const resizeHeight = ctx.canvas.height
 
-  ctx.drawImage(image, 0, 0)
+  const bitmap = await createImageBitmap(image, {
+    resizeWidth,
+    resizeHeight,
+    resizeQuality: 'high',
+  })
 
-  return readFromCanvas(canvas, ctx)
+  ctx.drawImage(bitmap, 0, 0, resizeWidth, resizeHeight)
+
+  return readFromCanvas(ctx)
 }
 
 /**
@@ -516,10 +560,13 @@ export function readFromVideo(
   canvas.width = video.width
   canvas.height = video.height
 
-  const ctx = canvas.getContext('2d')! as Canvas2dContextLike
+  const ctx = canvas.getContext('2d', {
+    willReadFrequently: true,
+    desynchronized: true,
+  })! as Canvas2dContextLike
   ctx.drawImage(video, 0, 0)
 
-  return readFromCanvas(canvas, ctx)
+  return readFromCanvas(ctx)
 }
 
 /**

@@ -49,7 +49,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "demo": "http-server ./ -p 8080"
   },
   "devDependencies": {
     "@types/three": "^0.148.0",
@@ -60,6 +61,7 @@
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-tsdoc": "^0.2.16",
+    "http-server": "^14.1.1",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.1.0",
     "typedoc": "0.23.24",

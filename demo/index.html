@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asciify Demo</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+    <script type="module">
+      import { Asciify, readFromImage } from '/dist/mod.mjs'
+
+      const canvas = document.getElementById('demo')
+      const asciify = new Asciify(canvas)
+
+      const filePicker = document.getElementById('file-picker')
+      const imageCanvas = document.createElement('canvas')
+      const imageCtx = imageCanvas.getContext('2d', { willReadFrequently: true })
+
+      asciify.setSize(window.innerWidth, window.innerHeight, imageCanvas)
+
+      filePicker.addEventListener('change', async (e) => {
+        const [file] = e.target.files
+
+        const rgbaBuffer = await readFromImage(file, imageCtx)
+        asciify.rasterize(rgbaBuffer)
+      })
+    </script>
+  </head>
+  <body>
+    <h1>Asciify Demo</h1>
+
+    <h2>Image conversion</h2>
+    <input type="file" accept="image/*" id="file-picker" />
+    <canvas id="demo" style="max-width: 100vw"></canvas>
+  </body>
+</html>
