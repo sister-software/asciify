@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asciify Demo</title>
+    <title>Asciify Image Demo</title>
 
     <style>
       * {
@@ -21,26 +21,26 @@
 
       const canvas = document.getElementById('demo')
       const asciify = new Asciify(canvas)
+      window.asciify = asciify // for debugging
+      asciify.setSize(window.innerWidth, window.innerHeight)
 
+      // document.body.appendChild(asciify._scratchCtx.canvas)
       const filePicker = document.getElementById('file-picker')
-      const imageCanvas = document.createElement('canvas')
-      const imageCtx = imageCanvas.getContext('2d', { willReadFrequently: true })
-
-      asciify.setSize(window.innerWidth, window.innerHeight, imageCanvas)
 
       filePicker.addEventListener('change', async (e) => {
         const [file] = e.target.files
 
-        const rgbaBuffer = await readFromImage(file, imageCtx)
-        asciify.rasterize(rgbaBuffer)
+        await asciify.rasterizeImage(file)
+        filePicker.value = ''
       })
     </script>
   </head>
   <body>
-    <h1>Asciify Demo</h1>
+    <h1>Asciify Image Demo</h1>
 
     <h2>Image conversion</h2>
+    <label for="file-picker">Select an image</label>
     <input type="file" accept="image/*" id="file-picker" />
-    <canvas id="demo" style="max-width: 100vw"></canvas>
+    <canvas id="demo" style="width: 100%; height: 100%"></canvas>
   </body>
 </html>

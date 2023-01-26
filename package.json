@@ -53,7 +53,8 @@
     "demo": "http-server ./ -p 8080"
   },
   "devDependencies": {
-    "@types/three": "^0.148.0",
+    "@types/stats": "^0.16.30",
+    "@types/three": "^0.148.1",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.22.0",
@@ -64,6 +65,8 @@
     "http-server": "^14.1.1",
     "prettier": "^2.7.1",
     "prettier-plugin-organize-imports": "^3.1.0",
+    "stats-js": "^1.0.1",
+    "three": "^0.148.0",
     "typedoc": "0.23.24",
     "typedoc-github-wiki-theme": "^1.0.1",
     "typedoc-plugin-markdown": "^3.14.0",

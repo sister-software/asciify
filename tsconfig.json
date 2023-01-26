@@ -9,6 +9,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "sourceMap": true,
     "target": "ES2022",
     "module": "ES2022",
     "outDir": "./dist",
@@ -17,6 +18,7 @@
     "baseUrl": ".",
     "strict": true,
     "skipLibCheck": true,
+
   },
   "include": [
     "mod.mts"
