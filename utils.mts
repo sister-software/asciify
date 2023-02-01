@@ -250,7 +250,7 @@ export class LookupTable {
    */
   public readonly pixelIndexFlippedY: Uint32Array
   public readonly coords: CharacterCoords
-  public readonly coordsFlippedY: CharacterCoords
+  public readonly coordsFlipped: CharacterCoords
 
   constructor(public rowCount: number, public columnCount: number, characterHeight: number, pixelRatio: number) {
     const lookupTables = [
@@ -267,6 +267,7 @@ export class LookupTable {
 
       for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
         const x = (columnCount - columnIndex - 1) * characterHeight * pixelRatio
+        const xFlipped = columnIndex * characterHeight * pixelRatio
 
         // Times 4 because each pixel is represented by 4 grouped values in the buffer.
         const redIndex = (rowIndex * columnCount + columnIndex) * 4
@@ -275,6 +276,7 @@ export class LookupTable {
         const alphaIndex = redIndex + 3
 
         for (const [tableIndex, lookupTable] of lookupTables.entries()) {
+          const xVal = tableIndex === 0 ? xFlipped : x
           const yVal = tableIndex === 0 ? y : flippedY
 
           lookupTable[redIndex] = redIndex
@@ -282,7 +284,7 @@ export class LookupTable {
           lookupTable[blueIndex] = blueIndex
           lookupTable[alphaIndex] = alphaIndex
 
-          coordPairs[tableIndex].set(redIndex, [x, yVal])
+          coordPairs[tableIndex].set(redIndex, [xVal, yVal])
         }
       }
     }
@@ -290,7 +292,7 @@ export class LookupTable {
     this.pixelIndex = lookupTables[0]
     this.pixelIndexFlippedY = lookupTables[1]
     this.coords = coordPairs[0]
-    this.coordsFlippedY = coordPairs[1]
+    this.coordsFlipped = coordPairs[1]
   }
 
   get length() {

@@ -358,7 +358,7 @@ export class Asciify {
       this._scratchFrameBuffer,
       false,
       this._lookupTable.pixelIndexFlippedY,
-      this._lookupTable.coordsFlippedY
+      this._lookupTable.coordsFlipped
     )
   }
 
@@ -384,7 +384,7 @@ export class Asciify {
     /**
      * An optional lookup table to use for the next frame.
      */
-    lookupTable: Uint32Array = this._lookupTable.pixelIndex,
+    pixelIndex: Uint32Array = this._lookupTable.pixelIndex,
     /**
      */
     coords: CharacterCoords = this._lookupTable.coords
@@ -393,11 +393,11 @@ export class Asciify {
       this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
     }
 
-    for (let cursorIndex = 0; cursorIndex < lookupTable.length; cursorIndex += 4) {
-      const redIndex = lookupTable[cursorIndex]
-      const greenIndex = lookupTable[cursorIndex + 1]
-      const blueIndex = lookupTable[cursorIndex + 2]
-      const alphaIndex = lookupTable[cursorIndex + 3]
+    for (let cursorIndex = 0; cursorIndex < pixelIndex.length; cursorIndex += 4) {
+      const redIndex = pixelIndex[cursorIndex]
+      const greenIndex = pixelIndex[cursorIndex + 1]
+      const blueIndex = pixelIndex[cursorIndex + 2]
+      const alphaIndex = pixelIndex[cursorIndex + 3]
 
       const red = nextFrameBuffer[redIndex]
       const green = nextFrameBuffer[greenIndex]
