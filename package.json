@@ -57,6 +57,7 @@
     "@types/three": "^0.148.1",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
+    "dat.gui": "^0.7.9",
     "eslint": "^8.22.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-react": "^7.30.1",

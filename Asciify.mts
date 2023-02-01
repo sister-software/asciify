@@ -9,7 +9,7 @@
  * @author Teffen Ellis
  */
 
-import { FrameBuffer, readFromImage, readFromThree } from './readers.mjs'
+import { FrameBuffer, readFromImage } from './readers.mjs'
 import {
   Canvas2dContextLike,
   CanvasLike,
@@ -20,11 +20,11 @@ import {
   LookupTable,
   LuminanceCharacterCodeMap,
   pluck2dContext,
-  Sizable,
   TextureCache,
 } from './utils.mjs'
 
-import { AsciifyOptions, createDefaultOptions } from './options.mjs'
+import * as THREE from 'three'
+import { AsciifyOptions, createDefaultOptions } from './configuration.mjs'
 
 /**
  * Converts images, videos, and 3D renders into ASCII art.
@@ -42,6 +42,8 @@ import { AsciifyOptions, createDefaultOptions } from './options.mjs'
  * @see {@link https://sister.software/asciify API documentation}
  */
 export class Asciify {
+  //#region Public Properties
+
   /**
    * The canvas where ASCII art is rasterized to.
    *
@@ -93,6 +95,10 @@ export class Asciify {
    */
   public options!: AsciifyOptions
 
+  //#endregion
+
+  //#region Protected Properties
+
   /**
    * The function used to draw the ASCII art to the canvas.
    * @ignore */
@@ -124,11 +130,64 @@ export class Asciify {
   protected _frameBuffer!: FrameBuffer
 
   /**
+   * @internal
+   */
+  protected _scratchFrameBuffer!: FrameBuffer
+
+  /**
    * A scratch canvas used to rasterize images and videos.
    * This is not used when {@linkcode Asciify.rasterize} is called directly.
    * @ignore
    */
-  protected _scratchCtx: Canvas2dContextLike
+  protected _scratchCtx!: Canvas2dContextLike
+
+  protected _threeRenderer!: THREE.WebGLRenderTarget
+
+  //#endregion
+
+  constructor(
+    /**
+     * The canvas where the ASCII art will be rendered to.
+     * This can either be a canvas element or a canvas's 2D context.
+     */
+    outputCanvas: CanvasLike | Canvas2dContextLike = createCanvasLike('canvas'),
+    /**
+     * Options to use when rendering the ASCII art.
+     * @see {@linkcode AsciifyOptions} for more information.
+     */
+    options: Partial<AsciifyOptions> = {}
+  ) {
+    if (isCanvasLike(outputCanvas)) {
+      // Canvas was provided, not a context.
+
+      this.canvas = outputCanvas
+      this.ctx = this.canvas.getContext('2d', {
+        alpha: false,
+        desynchronized: true,
+      }) as CanvasRenderingContext2D
+    } else {
+      // Context was provided, not a canvas.
+      this.ctx = outputCanvas
+      this.canvas = this.ctx.canvas
+    }
+
+    this.setOptions(options)
+  }
+
+  //#region Public Methods
+
+  /**
+   * Returns the character that best matches the given brightness.
+   */
+  public getCharacterFromLuminance(
+    /**
+     * A number between 0 and 1.
+     */
+    luminance: number
+  ) {
+    const characterCode = this._luminanceCodeMap.get(luminance)!
+    return String.fromCharCode(characterCode)
+  }
 
   /**
    * Sets the size of the ASCII art canvas, updating the number of columns and rows.
@@ -153,7 +212,7 @@ export class Asciify {
     /** The height of the ASCII art canvas. */
     nextHeight: number,
     /** An optional source canvas to pass to {@linkcode Asciify.resize} */
-    imageSource: CanvasLike | Sizable = this._scratchCtx.canvas
+    imageSource: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget = this._scratchCtx.canvas
   ): void {
     const { pixelRatio } = this.options
     if (this.canvas instanceof HTMLCanvasElement) {
@@ -171,7 +230,6 @@ export class Asciify {
     }
 
     this._updateContextStyles()
-
     this.resize(imageSource)
   }
 
@@ -186,7 +244,9 @@ export class Asciify {
    * @see {@linkcode Asciify.setSize}
    * @see {@linkcode Asciify.setOptions}
    */
-  public resize(imageSource: CanvasLike | Sizable = this._scratchCtx.canvas): void {
+  public resize(
+    imageSource: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget = this._scratchCtx.canvas
+  ): void {
     if (isSizable(imageSource)) {
       imageSource.setSize(this.columnCount, this.rowCount)
     } else {
@@ -238,31 +298,68 @@ export class Asciify {
     )
     this._characterSize = fontSize * characterSpacingRatio
 
+    this._scratchCtx = pluck2dContext(this.options.scratchCanvas, {
+      willReadFrequently: true,
+    })
+
     this._updateContextStyles()
+    this.resize(this._scratchCtx.canvas)
   }
 
-  /** @ignore */
-  protected _updateContextStyles(): void {
-    const { fontSize, fontFamily, pixelRatio, backgroundColor } = this.options
-    this.ctx.font = `${fontSize * pixelRatio}px ${fontFamily}`
+  /**
+   * Rasterizes the given image to the ASCII art canvas.
+   *
+   * @category Rasterization
+   * @see {@linkcode Asciify.rasterize}
+   * @see {@linkcode readFromImage}
+   */
+  public async rasterizeImage(
+    /**
+     * The image to read pixels from.
+     * This will be resized to match the next given `canvas` argument.
+     */
+    imageSource: ImageBitmapSource
+  ): Promise<FrameBuffer> {
+    const rgbaBuffer = await readFromImage(imageSource, this._scratchCtx)
+    this.rasterize(rgbaBuffer, true)
 
-    this.ctx.fillStyle = backgroundColor
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    return rgbaBuffer
+  }
 
-    // The canvas is split into a grid of cells.
-    // The width and height of each cell is determined by the font size and device pixel ratio.
-    const trueColumnCount = this.canvas.width / (this._characterSize * pixelRatio)
-    const trueRowCount = this.canvas.height / (this._characterSize * pixelRatio)
+  /**
+   * Rasterizes the given Three.js renderer to the ASCII art canvas.
+   *
+   * @category Rasterization
+   * @see {@linkcode Asciify.rasterize}
+   * @see {@linkcode readFromWebGLRenderer}
+   */
+  public rasterizeWebGLRenderer(
+    /**
+     * The Three.js renderer to read pixel data from.
+     */
+    renderer: THREE.WebGLRenderer,
+    /**
+     * The WebGL context to read from. Defaults to the context of the renderer.
+     * You should provide this if you'd like to cache the context once and reuse it.
+     */
+    ctx = renderer.getContext()
+  ): void {
+    ctx.readPixels(
+      0,
+      0,
+      renderer.domElement.width,
+      renderer.domElement.height,
+      ctx.RGBA,
+      ctx.UNSIGNED_BYTE,
+      this._scratchFrameBuffer
+    )
 
-    this.columnCount = Math.floor(trueColumnCount)
-    this.rowCount = Math.floor(trueRowCount)
-
-    // Additionally, we need the sprites to sit at the center of the canvas.
-    this._offsetX = (trueColumnCount - this.columnCount) * this._characterSize
-    this._offsetY = (trueRowCount - this.rowCount) * this._characterSize
-
-    this._lookupTable = new LookupTable(this.rowCount, this.columnCount, this._characterSize)
-    this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+    this.rasterize(
+      this._scratchFrameBuffer,
+      false,
+      this._lookupTable.pixelIndexFlippedY,
+      this._lookupTable.coordsFlippedY
+    )
   }
 
   /**
@@ -271,14 +368,14 @@ export class Asciify {
    * This method may be used directly when performance is critical.
    * @category Rasterization
    *
-   * @see {@linkcode Asciify.rasterizeThree}
+   * @see {@linkcode Asciify.rasterizeWebGLRenderer}
    * @see {@linkcode Asciify.rasterizeImage}
    */
   public rasterize(
     /**
      * A buffer containing the RGBA values of the image.
      */
-    nextFrameBuffer: Uint8ClampedArray,
+    nextFrameBuffer: FrameBuffer,
 
     /**
      * Whether to persist the canvas. Useful when composing multiple images.
@@ -330,6 +427,35 @@ export class Asciify {
     this._frameBuffer.set(nextFrameBuffer)
   }
 
+  //#endregion
+
+  //#region Protected Methods
+
+  /** @ignore */
+  protected _updateContextStyles(): void {
+    const { fontSize, fontFamily, pixelRatio, backgroundColor } = this.options
+    this.ctx.font = `${fontSize * pixelRatio}px ${fontFamily}`
+
+    this.ctx.fillStyle = backgroundColor
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+    // The canvas is split into a grid of cells.
+    // The width and height of each cell is determined by the font size and device pixel ratio.
+    const trueColumnCount = this.canvas.width / (this._characterSize * pixelRatio)
+    const trueRowCount = this.canvas.height / (this._characterSize * pixelRatio)
+
+    this.columnCount = Math.floor(trueColumnCount)
+    this.rowCount = Math.floor(trueRowCount)
+
+    // Additionally, we need the sprites to sit at the center of the canvas.
+    this._offsetX = (trueColumnCount - this.columnCount) * this._characterSize
+    this._offsetY = (trueRowCount - this.rowCount) * this._characterSize
+
+    this._lookupTable = new LookupTable(this.rowCount, this.columnCount, this._characterSize, pixelRatio)
+    this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+    this._scratchFrameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+  }
+
   /**
    * Draws a single ASCII character to the canvas in the given color.
    * @internal
@@ -365,16 +491,6 @@ export class Asciify {
   protected _drawGrayscale: DrawFn = (x, y, _red, _green, _blue, luminance, sourceTexture) => {
     const data = new Uint8ClampedArray(sourceTexture.data, 0, sourceTexture.data.length)
 
-    // The & 0xff operation is used to extract the least significant 8 bits of the color values,
-    // which correspond to the red, green, and blue color channels.
-    // The & 0xff operation ensures that the resulting color values are within the range of 0 - 255,
-    // which is the range of valid RGB values.
-    for (let i = 0; i < data.length; i += 4) {
-      data[i] = ((data[i] * (luminance & 255)) / 255) & 255
-      data[i + 1] = ((data[i + 1] * (luminance & 255)) / 255) & 255
-      data[i + 2] = ((data[i + 2] * (luminance & 255)) / 255) & 255
-    }
-
     this.ctx.putImageData(
       new ImageData(data, sourceTexture.width, sourceTexture.height, globalImageDataSettings),
       x + this._offsetX,
@@ -396,93 +512,7 @@ export class Asciify {
     this.ctx.fillRect(x, y, this.options.fontSize, this.options.fontSize)
   }
 
-  /**
-   * Rasterizes the given image to the ASCII art canvas.
-   *
-   * @category Rasterization
-   * @see {@linkcode Asciify.rasterize}
-   * @see {@linkcode readFromImage}
-   */
-  public async rasterizeImage(
-    /**
-     * The image to read pixels from.
-     * This will be resized to match the next given `canvas` argument.
-     */
-    imageSource: ImageBitmapSource
-  ): Promise<void> {
-    const rgbaBuffer = await readFromImage(imageSource, this._scratchCtx)
-    this.rasterize(rgbaBuffer)
-  }
-
-  /**
-   * Rasterizes the given Three.js renderer to the ASCII art canvas.
-   *
-   * @category Rasterization
-   * @see {@linkcode Asciify.rasterize}
-   * @see {@linkcode readFromImage}
-   */
-  public rasterizeThree(
-    /**
-     * The Three.js renderer to read from.
-     */
-    renderer: THREE.WebGLRenderer,
-    /**
-     * The WebGL context to read from. Defaults to the context of the renderer.
-     * You should provide this if you'd like to cache the context once and reuse it.
-     */
-    ctx = renderer.getContext()
-  ): void {
-    this.rasterize(
-      readFromThree(renderer, ctx),
-      false,
-      this._lookupTable.pixelIndexFlippedY,
-      this._lookupTable.coordsFlippedY
-    )
-  }
-
-  /**
-   * Returns the character that best matches the given brightness.
-   */
-  public getCharacterFromLuminance(
-    /**
-     * A number between 0 and 1.
-     */
-    luminance: number
-  ) {
-    const characterCode = this._luminanceCodeMap.get(luminance)!
-    return String.fromCharCode(characterCode)
-  }
-
-  constructor(
-    /**
-     * The canvas where the ASCII art will be rendered to.
-     * This can either be a canvas element or a canvas's 2D context.
-     */
-    outputCanvas: CanvasLike | Canvas2dContextLike = createCanvasLike('canvas'),
-    /**
-     * Options to use when rendering the ASCII art.
-     * @see {@linkcode AsciifyOptions} for more information.
-     */
-    options: Partial<AsciifyOptions> = {}
-  ) {
-    if (isCanvasLike(outputCanvas)) {
-      // Canvas was provided, not a context.
-
-      this.canvas = outputCanvas
-      this.ctx = this.canvas.getContext('2d', {
-        alpha: false,
-        desynchronized: true,
-      }) as CanvasRenderingContext2D
-    } else {
-      // Context was provided, not a canvas.
-      this.ctx = outputCanvas
-      this.canvas = this.ctx.canvas
-    }
-
-    this._scratchCtx = pluck2dContext(createCanvasLike('offscreen'))
-
-    this.setOptions(options)
-  }
+  //#endregion
 }
 
 /**
@@ -502,4 +532,5 @@ export type DrawFn = (
   sourceTexture: ImageData
 ) => void
 
-const globalImageDataSettings: ImageDataSettings = { colorSpace: 'srgb' }
+/** @ignore */
+const globalImageDataSettings: Readonly<ImageDataSettings> = { colorSpace: 'srgb' }

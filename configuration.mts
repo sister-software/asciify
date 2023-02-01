@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * This file is the entry point for the @sister.software/asciify module.
+ * This file contains options for the @sister.software/asciify module.
  *
  * @see {@link https://sister.software/asciify API documentation}
  * @module @sister.software/asciify
@@ -9,31 +9,26 @@
  * @author Teffen Ellis
  */
 
-import { Canvas2dContextLike, CanvasLike } from './utils.mjs'
+import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './utils.mjs'
 
 /**
  * A default character set to use for the ASCII art.
- * More spaces will result in a more contrast ASCII art.
  * This looks good with both black and white and color output.
  *
- * @see {@linkcode DEFAULT_GRAYSCALE_CHAR_SET}
- * @see {@linkcode DEFAULT_RICH_CHAR_SET}
- * @category Character Set
+ * @category Configuration
  */
 export const DEFAULT_CHAR_SET = `..,'":;-~=+*#&%@`.split('')
 
 /**
- * A default character set to use for the ASCII art.
- * Optimized for richer color output.
- * @category Character Set
- */
-export const DEFAULT_RICH_CHAR_SET = 'CGO08@'.split('')
-
-/**
  * The fill style mode used to paint the canvas.
+ * @category Configuration
  */
 export type ASCIIMode = 'grayscale' | 'color' | 'block'
 
+/**
+ * The options used to configure the ASCII art.
+ * @category Configuration
+ */
 export interface AsciifyOptions {
   /**
    * The available characters to use for the ASCII art.
@@ -89,8 +84,11 @@ export interface AsciifyOptions {
   mode: ASCIIMode
 
   /**
-   * The background color of the canvas.
-   * This can be any valid CSS color.
+   * The background color of the character set.
+   *
+   * This may be set to any valid CSS color.
+   * Note that this will only apply to the background of the ASCII characters.
+   * The source image pixel data ultimately determines which character is used.
    *
    * @default black
    */
@@ -98,7 +96,7 @@ export interface AsciifyOptions {
 
   /**
    * The device pixel ratio to use for the ASCII art.
-   * @default window.devicePixelRatio Browser
+   * @default `devicePixelRatio` Browser
    * @default 1 Node.js and Workers
    */
   pixelRatio: number
@@ -115,10 +113,9 @@ export interface AsciifyOptions {
 
   /**
    * A cached canvas to use while performing operations.
-   * This is an advanced option optional parameter.
-   * Asciify will cache a canvas internally if not provided.
+   * Asciify will automatically cache a canvas internally if not provided.
    */
-  scratchCanvas?: CanvasLike | Canvas2dContextLike
+  scratchCanvas: CanvasLike | Canvas2dContextLike
 
   /**
    * Whether to flip the canvas vertically for Three.js
@@ -133,7 +130,7 @@ export interface AsciifyOptions {
    * @internal
    * @ignore
    */
-  debug?: boolean
+  debug: boolean
 }
 
 /**
@@ -151,8 +148,10 @@ export function createDefaultOptions(options: Partial<AsciifyOptions>): AsciifyO
   const pixelRatio = typeof devicePixelRatio !== 'undefined' ? devicePixelRatio : 1
   const flipY = options.flipY ?? true
   const contrastRatio = options.contrastRatio ?? 3
+  const debug = options.debug ?? false
+  const scratchCanvas = options.scratchCanvas ?? createCanvasLike('offscreen')
 
-  return {
+  const defaultOptions: AsciifyOptions = {
     characterSet,
     fontSize,
     fontFamily,
@@ -162,5 +161,9 @@ export function createDefaultOptions(options: Partial<AsciifyOptions>): AsciifyO
     flipY,
     contrastRatio,
     characterSpacingRatio: characterSpacingRatio - (mode === 'block' ? 0.5 : 0),
+    debug,
+    scratchCanvas,
   }
+
+  return defaultOptions
 }

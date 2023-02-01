@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * This file is the entry point for the @sister.software/asciify module.
+ * This file contains utility functions for the @sister.software/asciify module.
  *
  * @see {@link https://sister.software/asciify API documentation}
  * @module @sister.software/asciify
@@ -88,7 +88,7 @@ export function createCanvasLike(
  * @internal
  */
 export function pluck2dContext(
-  canvasLike: CanvasLike,
+  canvasLike: CanvasLike | Canvas2dContextLike,
   options: CanvasRenderingContext2DSettings = {}
 ): Canvas2dContextLike {
   if (isCanvasLike(canvasLike)) {
@@ -191,16 +191,16 @@ export class TextureCache extends Map<number, ImageData> {
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         ctx.fillStyle = 'black'
-        // Draw a circle
+        // We use a circle to make it easier to see the edges of the individual characters.
         ctx.beginPath()
         ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, 2 * Math.PI)
         ctx.fill()
-      }
-
-      if (characterCode === 0) {
+      } else {
         ctx.fillStyle = backgroundColor
         ctx.fillRect(0, 0, canvas.width, canvas.height)
-      } else {
+      }
+
+      if (characterCode !== 0) {
         ctx.fillStyle = 'white'
 
         const text = String.fromCharCode(characterCode)
@@ -225,22 +225,24 @@ export class TextureCache extends Map<number, ImageData> {
 export type CharacterCoords = Map<number, [number, number]>
 
 /**
- * A precomputed lookup table to help us traverse the pixel buffer.
- * The length of this array is equal to the area of the row and column counts.
- *
- * @remarks
- * Each character cell is represented by six values:
+ * A precalculated lookup table to help us traverse the pixel buffer.
  * ```ts
  * [red1, green1, blue1, alpha1, redN, greenN, blueN, alphaN...]
  * ```
  *
- * This is used to avoid expensive and repetitive calculations when rendering the ASCII art.
- * The lookup table is a Uint16Array containing pairs of four values:
+ * @remarks
  *
- * - The index of the red channel from the pixel buffer
- * - The index of the green channel from the pixel buffer
- * - The index of the blue channel from the pixel buffer
- * - The index of the alpha channel from the pixel buffer
+ * By precalculating a frequent traversal through a pixel buffer,
+ * we can avoid expensive and repetitive calculations while during rasterization.
+ *
+ * The pixel index contains groups of four values that represent the RGBA values of a pixel:
+ *
+ * - Red channel index
+ * - Green channel index
+ * - Blue channel index
+ * - Alpha channel index
+ *
+ * The length of this array is equal to the area of the row and column counts.
  *
  * @category Utility
  * @internal
@@ -258,7 +260,7 @@ export class LookupTable {
   public readonly coords: CharacterCoords
   public readonly coordsFlippedY: CharacterCoords
 
-  constructor(public rowCount: number, public columnCount: number, characterHeight: number) {
+  constructor(public rowCount: number, public columnCount: number, characterHeight: number, pixelRatio: number) {
     const lookupTables = [
       new Uint32Array(rowCount * columnCount * 4),
       // We need a second buffer for the flipped Y axis.
@@ -269,12 +271,12 @@ export class LookupTable {
 
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
       const y = rowIndex * characterHeight * 2
-      const flippedY = (rowCount - rowIndex - 2) * characterHeight * 2 + characterHeight * 2
+      const flippedY = (rowCount - rowIndex - 2) * characterHeight * pixelRatio + characterHeight * pixelRatio
 
       for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-        const x = (columnCount - columnIndex - 1) * characterHeight * 2
+        const x = (columnCount - columnIndex - 1) * characterHeight * pixelRatio
 
-        // Times 4 because each pixel is represented by 4 values in the buffer.
+        // Times 4 because each pixel is represented by 4 grouped values in the buffer.
         const redIndex = (rowIndex * columnCount + columnIndex) * 4
         const greenIndex = redIndex + 1
         const blueIndex = redIndex + 2
