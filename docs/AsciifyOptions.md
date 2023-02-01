@@ -7,11 +7,12 @@
 - [backgroundColor](../wiki/AsciifyOptions#backgroundcolor)
 - [block](../wiki/AsciifyOptions#block)
 - [characterSet](../wiki/AsciifyOptions#characterset)
-- [context](../wiki/AsciifyOptions#context)
 - [fontFamily](../wiki/AsciifyOptions#fontfamily)
 - [fontSize](../wiki/AsciifyOptions#fontsize)
 - [lineHeight](../wiki/AsciifyOptions#lineheight)
 - [mode](../wiki/AsciifyOptions#mode)
+- [pixelRatio](../wiki/AsciifyOptions#pixelratio)
+- [scratchCanvas](../wiki/AsciifyOptions#scratchcanvas)
 
 ## Properties
 
@@ -20,10 +21,15 @@
 • **backgroundColor**: `string`
 
 The background color of the canvas.
+This can be any valid CSS color.
+
+**`Default`**
+
+black
 
 #### Defined in
 
-[mod.mts:112](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L112)
+[options.mts:100](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L100)
 
 ___
 
@@ -40,7 +46,7 @@ false
 
 #### Defined in
 
-[mod.mts:107](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L107)
+[options.mts:92](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L92)
 
 ___
 
@@ -54,20 +60,7 @@ with a space being the least bright and the last character being the most bright
 
 #### Defined in
 
-[mod.mts:66](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L66)
-
-___
-
-### context
-
-• `Optional` **context**: `CanvasRenderingContext2D`
-
-The canvas context to use for the ASCII art.
-This is an optional parameter, and if not provided, a new context will be created.
-
-#### Defined in
-
-[mod.mts:118](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L118)
+[options.mts:50](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L50)
 
 ___
 
@@ -83,7 +76,7 @@ The font family to use for the ASCII art.
 
 #### Defined in
 
-[mod.mts:72](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L72)
+[options.mts:56](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L56)
 
 ___
 
@@ -102,7 +95,7 @@ Make sure to use a known font size, otherwise Safari will choose an approximate 
 
 #### Defined in
 
-[mod.mts:81](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L81)
+[options.mts:65](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L65)
 
 ___
 
@@ -118,7 +111,7 @@ The line height to use for the ASCII art. This should be a multiple of the font 
 
 #### Defined in
 
-[mod.mts:87](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L87)
+[options.mts:71](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L71)
 
 ___
 
@@ -128,16 +121,11 @@ ___
 
 The mode to use for the ASCII art.
 
-**`Default`**
-
-'bw'
-
-**`Remarks`**
-
 Can be one of the following:
 
-- `'bw'` Black and white
 - `'color'` Color
+- `'grayscale'` Black and white
+- `'block'` Color block characters
 
 **`Default`**
 
@@ -145,4 +133,38 @@ Can be one of the following:
 
 #### Defined in
 
-[mod.mts:100](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L100)
+[options.mts:84](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L84)
+
+___
+
+### pixelRatio
+
+• **pixelRatio**: `number`
+
+The device pixel ratio to use for the ASCII art.
+
+**`Default`**
+
+window.devicePixelRatio Browser
+
+**`Default`**
+
+1 Node.js and Workers
+
+#### Defined in
+
+[options.mts:107](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L107)
+
+___
+
+### scratchCanvas
+
+• `Optional` **scratchCanvas**: [`CanvasLike`](../wiki/Home#canvaslike) \| [`Canvas2dContextLike`](../wiki/Home#canvas2dcontextlike)
+
+A cached canvas to use while performing operations.
+This is an advanced option optional parameter.
+Asciify will cache a canvas internally if not provided.
+
+#### Defined in
+
+[options.mts:114](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L114)

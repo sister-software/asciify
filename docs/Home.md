@@ -26,6 +26,10 @@ Teffen Ellis
 
 - [Asciify](../wiki/Asciify)
 
+### Other Classes
+
+- [IndexLookupTable](../wiki/IndexLookupTable)
+
 ### Interfaces
 
 - [AsciifyOptions](../wiki/AsciifyOptions)
@@ -34,12 +38,13 @@ Teffen Ellis
 
 - [readFromCanvas](../wiki/Home#readfromcanvas)
 - [readFromImage](../wiki/Home#readfromimage)
-- [readFromThreeJS](../wiki/Home#readfromthreejs)
+- [readFromThree](../wiki/Home#readfromthree)
 - [readFromVideo](../wiki/Home#readfromvideo)
 
 ### Utility Functions
 
 - [createCharacterCodeRadix](../wiki/Home#createcharactercoderadix)
+- [createIndexLookupTable](../wiki/Home#createindexlookuptable)
 
 ### Character Set Variables
 
@@ -57,7 +62,7 @@ Teffen Ellis
 
 ### readFromCanvas
 
-▸ **readFromCanvas**(`canvas`, `ctx?`): `Uint8ClampedArray`
+▸ **readFromCanvas**(`ctx`): `Uint8ClampedArray`
 
 Reads the pixel buffer from a canvas element.
 This function is useful when you want to rasterize an existing canvas to ASCII art.
@@ -65,15 +70,14 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThreeJS`](../wiki/Home#readfromthreejs)
+ - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromImage`](../wiki/Home#readfromimage)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `canvas` | [`CanvasLike`](../wiki/Home#canvaslike) | The canvas to read from. |
-| `ctx` | [`Canvas2dContextLike`](../wiki/Home#canvas2dcontextlike) | The 2D context to read from. You should provide this parameter if you'd like to cache the context, or provide a context optimized for your content. |
+| `ctx` | [`Canvas2dContextLike`](../wiki/Home#canvas2dcontextlike) | The 2D context to read from. Make sure to provide a canvas with the same dimensions as the asciify instance you're using. **`See`** [`setSize`](../wiki/Asciify#setsize) |
 
 #### Returns
 
@@ -81,13 +85,13 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 
 #### Defined in
 
-[mod.mts:436](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L436)
+[readers.mts:48](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L48)
 
 ___
 
 ### readFromImage
 
-▸ **readFromImage**(`image`, `canvas?`, `ctx?`): `Uint8ClampedArray`
+▸ **readFromImage**(`sourceImage`, `ctx`): `Promise`<`Uint8ClampedArray`\>
 
 Reads the pixel buffer from an image element.
 This function is useful when you want to rasterize an image to ASCII art.
@@ -95,37 +99,36 @@ This function is useful when you want to rasterize an image to ASCII art.
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThreeJS`](../wiki/Home#readfromthreejs)
+ - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromCanvas`](../wiki/Home#readfromcanvas)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `image` | `HTMLImageElement` | The image to read pixels from. |
-| `canvas` | [`CanvasLike`](../wiki/Home#canvaslike) | A canvas to use for reading the image. You should provide this parameter if you'd like to cache the canvas. |
-| `ctx` | [`Canvas2dContextLike`](../wiki/Home#canvas2dcontextlike) | The 2D context to read from. You should provide this parameter if you'd like to cache the context, or provide a context optimized for your content. |
+| `sourceImage` | `ImageBitmapSource` | The image to read pixels from. This will be resized to match the next given `canvas` argument. |
+| `ctx` | [`Canvas2dContextLike`](../wiki/Home#canvas2dcontextlike) | The 2D context to read from. Make sure to provide a canvas with the same dimensions as the asciify instance you're using. **`See`** [`setSize`](../wiki/Asciify#setsize) |
 
 #### Returns
 
-`Uint8ClampedArray`
+`Promise`<`Uint8ClampedArray`\>
 
 #### Defined in
 
-[mod.mts:461](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L461)
+[readers.mts:72](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L72)
 
 ___
 
-### readFromThreeJS
+### readFromThree
 
-▸ **readFromThreeJS**(`renderer`, `ctx?`): `Uint8ClampedArray`
+▸ **readFromThree**(`renderer`, `ctx?`): `Uint8ClampedArray`
 
 Read the pixel buffer from a ThreeJS WebGLRenderer.
 This function is useful when you want to render a ThreeJS scene to ASCII art.
 
 **`See`**
 
-[`rasterize`](../wiki/Asciify#rasterize)
+[`rasterizeThree`](../wiki/Asciify#rasterizethree)
 
 #### Parameters
 
@@ -142,7 +145,7 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[mod.mts:410](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L410)
+[readers.mts:22](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L22)
 
 ___
 
@@ -156,14 +159,14 @@ This function is useful when you want to rasterize a video to ASCII art.
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThreeJS`](../wiki/Home#readfromthreejs)
+ - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromCanvas`](../wiki/Home#readfromcanvas)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `video` | `HTMLVideoElement` | The video to read pixels from. **`See`** - [MDN on HTMLVideoElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement) - [MDN on HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) - [MDN on captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream) - [MDN on captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream) |
+| `video` | `HTMLVideoElement` | The video to read pixels from. **`See`** - [MDN on HTMLVideoElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLVideoElement) - [MDN on HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) - [MDN on Media captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/captureStream) - [MDN on Canvas captureStream](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/captureStream) |
 | `canvas` | [`CanvasLike`](../wiki/Home#canvaslike) | A canvas to use for reading the video. You should provide this parameter if you'd like to cache the canvas. |
 
 #### Returns
@@ -174,7 +177,7 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[mod.mts:496](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L496)
+[readers.mts:112](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L112)
 
 ___
 
@@ -205,7 +208,42 @@ This helps us avoid expensive operations like Math.floor() when rendering the AS
 
 #### Defined in
 
-[mod.mts:535](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L535)
+[utils.mts:107](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L107)
+
+___
+
+### createIndexLookupTable
+
+▸ **createIndexLookupTable**(`rowCount`, `columnCount`, `fontSize`, `lineHeight`): [`IndexLookupTable`](../wiki/IndexLookupTable)[]
+
+Creates a precomputed lookup table for a given pixel buffer.
+
+This is used to avoid expensive and repetitive calculations when rendering the ASCII art.
+The lookup table is a Uint16Array containing pairs of six values:
+
+- The x coordinate of the character cell
+- The y coordinate of the character cell
+- The index of the red channel from the pixel buffer
+- The index of the green channel from the pixel buffer
+- The index of the blue channel from the pixel buffer
+- The index of the alpha channel from the pixel buffer
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `rowCount` | `number` |
+| `columnCount` | `number` |
+| `fontSize` | `number` |
+| `lineHeight` | `number` |
+
+#### Returns
+
+[`IndexLookupTable`](../wiki/IndexLookupTable)[]
+
+#### Defined in
+
+[utils.mts:175](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L175)
 
 ## Character Set Variables
 
@@ -218,7 +256,7 @@ Optimized for black and white output.
 
 #### Defined in
 
-[mod.mts:28](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L28)
+[options.mts:30](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L30)
 
 ___
 
@@ -237,7 +275,7 @@ This looks good with both black and white and color output.
 
 #### Defined in
 
-[mod.mts:21](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L21)
+[options.mts:23](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L23)
 
 ___
 
@@ -250,19 +288,19 @@ Optimized for richer color output.
 
 #### Defined in
 
-[mod.mts:35](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L35)
+[options.mts:37](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L37)
 
 ## Type Aliases
 
 ### ASCIIMode
 
-Ƭ **ASCIIMode**: ``"bw"`` \| ``"color"``
+Ƭ **ASCIIMode**: ``"grayscale"`` \| ``"color"`` \| ``"block"``
 
 The fill style mode used to paint the canvas.
 
 #### Defined in
 
-[mod.mts:58](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L58)
+[options.mts:42](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L42)
 
 ___
 
@@ -280,7 +318,7 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[mod.mts:53](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L53)
+[utils.mts:28](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L28)
 
 ___
 
@@ -298,4 +336,4 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[mod.mts:44](https://github.com/sister-software/asciify/blob/6529c8e/mod.mts#L44)
+[utils.mts:19](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L19)
