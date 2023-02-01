@@ -1,6 +1,6 @@
 /**
  * @fileoverview
- * This file is the entry point for the @sister.software/asciify module.
+ * This file contains media reader functions for the @sister.software/asciify module.
  *
  * @see {@link https://sister.software/asciify API documentation}
  * @module @sister.software/asciify
@@ -11,29 +11,10 @@
 
 import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './utils.mjs'
 
-/**
- * Read the pixel buffer from a ThreeJS WebGLRenderer.
- * This function is useful when you want to render a ThreeJS scene to ASCII art.
- *
- * @category Helper
- * @see {@linkcode Asciify.rasterizeThree}
- * @returns A Uint8ClampedArray containing the RGBA pixel buffer
- */
-export function readFromThree(
-  /**
-   * The Three.js renderer to read from.
-   */
-  renderer: THREE.WebGLRenderer,
-  /**
-   * The WebGL context to read from. Defaults to the context of the renderer.
-   * You should provide this if you'd like to cache the context once and reuse it.
-   */
-  ctx = renderer.getContext()
-): Uint8ClampedArray {
-  const rgbaBuffer = new Uint8ClampedArray(ctx.drawingBufferWidth * ctx.drawingBufferHeight * 4)
-  ctx.readPixels(0, 0, renderer.domElement.width, renderer.domElement.height, ctx.RGBA, ctx.UNSIGNED_BYTE, rgbaBuffer)
-
-  return rgbaBuffer
+export class FrameBuffer extends Uint8ClampedArray {
+  constructor(rowCount: number, columnCount: number) {
+    super(rowCount * columnCount * 4)
+  }
 }
 
 /**
@@ -42,7 +23,7 @@ export function readFromThree(
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromThree}
+ * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromImage}
  */
 export function readFromCanvas(
@@ -66,7 +47,7 @@ export function readFromCanvas(
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromThree}
+ * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromCanvas}
  */
 export async function readFromImage(
@@ -105,7 +86,7 @@ export async function readFromImage(
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromThree}
+ * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromCanvas}
  * @returns A Uint8ClampedArray containing the RGBA pixel buffer
  */

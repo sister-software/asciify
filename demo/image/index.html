@@ -4,43 +4,150 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asciify Image Demo</title>
+    <title>Asciify Three.js Demo</title>
+    <script>
+      if (typeof OffscreenCanvas === 'undefined') {
+        window.OffscreenCanvas = class OffscreenCanvas {
+          constructor(width, height) {
+            return document.createElement('canvas')
+          }
+        }
+      }
+    </script>
+
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
 
     <style>
       * {
         box-sizing: border-box;
       }
+      html {
+        min-height: 100%;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          /* height: -webkit-fill-available; */
+          background-color: #000;
+          color: #fff;
+        }
+      }
+
       body {
+        height: 100vmax;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+          'Open Sans', 'Helvetica Neue', sans-serif;
         margin: 0;
         padding: 0;
       }
+
+      canvas#demo {
+        outline: 1px dashed red;
+        outline-offset: -2px;
+        cursor: crosshair;
+      }
     </style>
 
+    <script type="importmap">
+      {
+        "imports": {
+          "stats": "/node_modules/stats-js/src/Stats.js",
+          "three": "/node_modules/three/build/three.module.js",
+          "three/addons/": "/node_modules/three/examples/jsm/",
+          "dat.gui": "/node_modules/dat.gui/build/dat.gui.module.js"
+        }
+      }
+    </script>
+
     <script type="module">
-      import { Asciify, readFromImage } from '/dist/mod.mjs'
+      import { Asciify } from '/dist/mod.mjs'
+      import Stats from 'stats'
+      import { GUI } from 'dat.gui'
 
+      const startTime = Date.now()
       const canvas = document.getElementById('demo')
-      const asciify = new Asciify(canvas)
-      window.asciify = asciify // for debugging
-      asciify.setSize(window.innerWidth, window.innerHeight)
 
-      // document.body.appendChild(asciify._scratchCtx.canvas)
+      const asciiOptions = {
+        fontSize: 10,
+        characterSpacingRatio: 1,
+        contrastRatio: 3,
+        mode: 'color',
+        backgroundColor: '#000000',
+        debug: false,
+      }
+      const asciify = new Asciify(canvas, asciiOptions)
+
       const filePicker = document.getElementById('file-picker')
+      let fileRef = null
+      let timeoutRef = -1
 
       filePicker.addEventListener('change', async (e) => {
-        const [file] = e.target.files
+        const file = e.target.files[0]
+        fileRef = new File([file], file.name, { type: file.type })
 
         await asciify.rasterizeImage(file)
         filePicker.value = ''
       })
+
+      // Expose asciify to the window for debugging
+      window.asciify = asciify
+
+      asciify.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight)
+
+      const onOptionChange = async () => {
+        clearTimeout(timeoutRef)
+        asciify.setOptions(asciiOptions)
+
+        timeoutRef = setTimeout(() => {
+          if (fileRef) {
+            asciify.rasterizeImage(fileRef)
+          }
+        }, 100)
+      }
+
+      const gui = new GUI({ name: 'Asciify Three.js Demo' })
+      const asciiFolder = gui.addFolder('Options')
+      asciiFolder.open()
+      asciiFolder.add(asciiOptions, 'fontSize').min(5).max(30).step(1).onChange(onOptionChange)
+      asciiFolder.add(asciiOptions, 'characterSpacingRatio').min(0.8).max(3).step(0.1).onChange(onOptionChange)
+      asciiFolder.add(asciiOptions, 'contrastRatio').min(0).max(5).step(1).onChange(onOptionChange)
+      asciiFolder.add(asciiOptions, 'mode', ['color', 'grayscale', 'block']).onChange(onOptionChange)
+      asciiFolder.addColor(asciiOptions, 'backgroundColor').onChange(onOptionChange)
+      asciiFolder.add(asciiOptions, 'debug').onChange(onOptionChange)
+
+      const onWindowResize = () => {
+        cancelAnimationFrame(timeoutRef)
+        asciify.setSize(window.innerWidth, window.innerHeight, renderer)
+
+        animate()
+      }
+
+      window.addEventListener('resize', onWindowResize)
+
+      const stats = new Stats()
+      stats.dom.style.left = 'auto'
+      stats.dom.style.top = 'auto'
+      stats.dom.style.right = '0'
+      stats.dom.style.bottom = '0'
+      stats.showPanel(0)
+      document.body.appendChild(stats.dom)
     </script>
   </head>
   <body>
-    <h1>Asciify Image Demo</h1>
+    <section>
+      <h1>Asciify Image Demo</h1>
 
-    <h2>Image conversion</h2>
-    <label for="file-picker">Select an image</label>
-    <input type="file" accept="image/*" id="file-picker" />
-    <canvas id="demo" style="width: 100%; height: 100%"></canvas>
+      <form>
+        <fieldset>
+          <legend>Select an image...</legend>
+          <label for="file-picker">Image Source</label>
+          <input type="file" accept="image/*" id="file-picker" />
+        </fieldset>
+      </form>
+    </section>
+
+    <canvas id="demo" style="width: 100%"></canvas>
   </body>
 </html>

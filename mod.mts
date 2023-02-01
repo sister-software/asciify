@@ -10,6 +10,6 @@
  */
 
 export * from './Asciify.mjs'
-export * from './options.mjs'
+export * from './configuration.mjs'
 export * from './readers.mjs'
 export * from './utils.mjs'
