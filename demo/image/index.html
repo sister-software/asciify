@@ -53,7 +53,6 @@
     <script type="importmap">
       {
         "imports": {
-          "stats": "/node_modules/stats-js/src/Stats.js",
           "three": "/node_modules/three/build/three.module.js",
           "three/addons/": "/node_modules/three/examples/jsm/",
           "dat.gui": "/node_modules/dat.gui/build/dat.gui.module.js"
@@ -63,7 +62,6 @@
 
     <script type="module">
       import { Asciify } from '/dist/mod.mjs'
-      import Stats from 'stats'
       import { GUI } from 'dat.gui'
 
       const startTime = Date.now()
@@ -125,14 +123,6 @@
       }
 
       window.addEventListener('resize', onWindowResize)
-
-      const stats = new Stats()
-      stats.dom.style.left = 'auto'
-      stats.dom.style.top = 'auto'
-      stats.dom.style.right = '0'
-      stats.dom.style.bottom = '0'
-      stats.showPanel(0)
-      document.body.appendChild(stats.dom)
     </script>
   </head>
   <body>
