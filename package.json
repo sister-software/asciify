@@ -1,6 +1,6 @@
 {
   "name": "@sister.software/asciify",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Converts images, videos, and 3D renders into ASCII art.",
   "repository": "git@github.com:sister-software/asciify.git",
   "bugs": {
