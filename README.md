@@ -6,7 +6,8 @@
 [![deno module](https://shield.deno.dev/x/asciify)](https://deno.land/x/asciify)
 ![npm](https://img.shields.io/npm/dm/@sister.software/asciify)
 
-- [**Live Demo**](https://sister.software)
+- [**Three.js Demo**](https://asciify.sister.software/demo/3d/)
+- [**Image Demo**](https://asciify.sister.software/demo/image/)
 - [API Documentation](https://github.com/sister-software/asciify/wiki)
 - [Source Code](https://github.com/sister-software/asciify)
 
