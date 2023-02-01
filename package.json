@@ -40,10 +40,6 @@
       "import": "./dist/mod.mjs",
       "types": "./dist/mod.d.mts"
     },
-    "./mod.d.mts": {
-      "import": "./dist/mod.d.mts",
-      "types": "./dist/mod.d.mts"
-    },
     "./package.json": "./package.json"
   },
   "type": "module",
