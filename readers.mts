@@ -23,7 +23,6 @@ export class FrameBuffer extends Uint8ClampedArray {
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromImage}
  */
 export function readFromCanvas(
@@ -47,7 +46,6 @@ export function readFromCanvas(
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromCanvas}
  */
 export async function readFromImage(
@@ -86,7 +84,6 @@ export async function readFromImage(
  *
  * @category Helper
  * @see {@linkcode Asciify.rasterize}
- * @see {@linkcode readFromWebGLRenderer}
  * @see {@linkcode readFromCanvas}
  * @returns A Uint8ClampedArray containing the RGBA pixel buffer
  */

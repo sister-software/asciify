@@ -331,7 +331,6 @@ export class Asciify {
    *
    * @category Rasterization
    * @see {@linkcode Asciify.rasterize}
-   * @see {@linkcode readFromWebGLRenderer}
    */
   public rasterizeWebGLRenderer(
     /**

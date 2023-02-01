@@ -246,7 +246,7 @@ export class LookupTable {
   public readonly pixelIndex: Uint32Array
   /**
    * The lookup table used to map the RGBA buffer to the ASCII art canvas.
-   * This is the same as {@linkcode _indexLookupTable}, but with the Y axis flipped for WebGL.
+   * This is the same as {@linkcode pixelIndex}, but with the Y axis flipped for WebGL.
    */
   public readonly pixelIndexFlippedY: Uint32Array
   public readonly coords: CharacterCoords
