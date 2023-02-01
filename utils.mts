@@ -28,18 +28,10 @@ export type CanvasLike = OffscreenCanvas | HTMLCanvasElement
 export type Canvas2dContextLike = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D
 
 /**
- * A Three.js style renderer
- * @ignore
- */
-export interface Sizable {
-  setSize: (width: number, height: number, updateStyle?: boolean) => void
-}
-
-/**
  * @ignore
  * @internal
  */
-export const isSizable = (object: unknown): object is Sizable => {
+export const isWebGLRenderer = (object: unknown): object is THREE.WebGLRenderer => {
   return typeof object === 'object' && object !== null && 'setSize' in object
 }
 

@@ -18,9 +18,8 @@ import {
   createIndexLookupTable,
   IndexLookupTable,
   isCanvasLike,
-  isSizable,
+  isWebGLRenderer,
   pluck2dContext,
-  Sizable,
 } from './utils.mjs'
 
 import { AsciifyOptions, createDefaultOptions, DEFAULT_BW_CHAR_LIST, DEFAULT_CHAR_SET } from './options.mjs'
@@ -53,7 +52,7 @@ export class Asciify {
 
   /**
    * A type-friendly getter for the canvas element.
-   * @throws {@linkcode Error} if Asciify is used with an {@linkcode OffscreenCanvas}
+   * @throws `Error` if Asciify is used with an `OffscreenCanvas`
    */
   public get domElement(): HTMLCanvasElement {
     if (this.canvas instanceof HTMLCanvasElement) {
@@ -140,7 +139,7 @@ export class Asciify {
     /** The height of the ASCII art canvas. */
     nextHeight: number,
     /** An optional source canvas to pass to {@linkcode Asciify.resize} */
-    imageSource: CanvasLike | Sizable = this._scratchCtx.canvas
+    imageSource: CanvasLike | THREE.WebGLRenderer = this._scratchCtx.canvas
   ): void {
     const { pixelRatio } = this.options
     if (this.canvas instanceof HTMLCanvasElement) {
@@ -173,8 +172,8 @@ export class Asciify {
    * @see {@linkcode Asciify.setSize}
    * @see {@linkcode Asciify.setOptions}
    */
-  public resize(imageSource: CanvasLike | Sizable = this._scratchCtx.canvas): void {
-    if (isSizable(imageSource)) {
+  public resize(imageSource: CanvasLike | THREE.WebGLRenderer = this._scratchCtx.canvas): void {
+    if (isWebGLRenderer(imageSource)) {
       imageSource.setSize(this.columnCount, this.rowCount)
     } else {
       imageSource.width = this.columnCount
