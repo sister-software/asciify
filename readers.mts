@@ -36,6 +36,12 @@ export function readFromThree(
   return rgbaBuffer
 }
 
+export class FrameBuffer extends Uint8ClampedArray {
+  constructor(rowCount: number, columnCount: number) {
+    super(rowCount * columnCount * 4)
+  }
+}
+
 /**
  * Reads the pixel buffer from a canvas element.
  * This function is useful when you want to rasterize an existing canvas to ASCII art.

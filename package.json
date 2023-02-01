@@ -50,7 +50,7 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
     "docs": "typedoc",
-    "demo": "http-server ./ -p 8080"
+    "demo": "http-server ./ -p 8081"
   },
   "devDependencies": {
     "@types/stats": "^0.16.30",

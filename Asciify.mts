@@ -9,21 +9,22 @@
  * @author Teffen Ellis
  */
 
-import { readFromImage, readFromThree } from './readers.mjs'
+import { FrameBuffer, readFromImage, readFromThree } from './readers.mjs'
 import {
   Canvas2dContextLike,
   CanvasLike,
+  CharacterCoords,
   createCanvasLike,
-  createCharacterCodeRadix,
-  createIndexLookupTable,
-  IndexLookupTable,
   isCanvasLike,
   isSizable,
+  LookupTable,
+  LuminanceCharacterCodeMap,
   pluck2dContext,
   Sizable,
+  TextureCache,
 } from './utils.mjs'
 
-import { AsciifyOptions, createDefaultOptions, DEFAULT_BW_CHAR_LIST, DEFAULT_CHAR_SET } from './options.mjs'
+import { AsciifyOptions, createDefaultOptions } from './options.mjs'
 
 /**
  * Converts images, videos, and 3D renders into ASCII art.
@@ -80,12 +81,10 @@ export class Asciify {
    */
   public rowCount = 0
 
-  /**
-   * A scratch canvas used to rasterize images and videos.
-   * This is not used when {@linkcode Asciify.rasterize} is called directly.
-   * @ignore
-   */
-  protected _scratchCtx: Canvas2dContextLike
+  /** @ignore */
+  protected _offsetX = 0
+  /** @internal */
+  protected _offsetY = 0
 
   /**
    * The options used to initialize the Asciify instance.
@@ -94,28 +93,42 @@ export class Asciify {
    */
   public options!: AsciifyOptions
 
-  /** @ignore */
+  /**
+   * The function used to draw the ASCII art to the canvas.
+   * @ignore */
   protected _drawFn!: DrawFn
 
-  /** @ignore */
-  protected _computedCharacterSize!: number
+  /**
+   * Computed character size in pixels.
+   * @ignore */
+  protected _characterSize!: number
 
-  protected _characterCodeRadix!: Uint16Array
+  protected _luminanceCodeMap!: LuminanceCharacterCodeMap
+  protected _textureCache!: TextureCache
 
   /**
-   * The lookup table used to map the RGBA buffer to the ASCII art canvas.
-   * @see {@linkcode createIndexLookupTable}
+   * The lookup table is used to map the RGBA values of each pixel to a character.
+   * The frame buffer is used to store the RGBA values of the image.
+   *
+   * @see {@linkcode LookupTable}
    * @internal
    */
-  protected _indexLookupTable!: IndexLookupTable
+  protected _lookupTable!: LookupTable
 
   /**
-   * The lookup table used to map the RGBA buffer to the ASCII art canvas.
-   * This is the same as {@linkcode _indexLookupTable}, but with the Y axis flipped for WebGL.
-   * @see {@linkcode createIndexLookupTable}
+   * The frame buffer is used to store the RGBA values of the image.
+   *
+   * @see {@linkcode FrameBuffer}
    * @internal
    */
-  protected _indexLookupTableFlippedY!: IndexLookupTable
+  protected _frameBuffer!: FrameBuffer
+
+  /**
+   * A scratch canvas used to rasterize images and videos.
+   * This is not used when {@linkcode Asciify.rasterize} is called directly.
+   * @ignore
+   */
+  protected _scratchCtx: Canvas2dContextLike
 
   /**
    * Sets the size of the ASCII art canvas, updating the number of columns and rows.
@@ -187,12 +200,20 @@ export class Asciify {
    * Useful for changing the asciify instance on the fly.
    */
   public setOptions(nextOptions: Partial<AsciifyOptions> = {}): void {
-    this.options = {
-      ...(this.options || createDefaultOptions()),
-      ...nextOptions,
-    }
+    this.options = createDefaultOptions(nextOptions)
 
-    const { characterSet, mode, fontSize, lineHeight } = this.options
+    const {
+      // -- Options --
+      characterSet,
+      mode,
+      fontSize,
+      fontFamily,
+      characterSpacingRatio,
+      pixelRatio,
+      contrastRatio,
+      backgroundColor,
+      debug,
+    } = this.options
 
     switch (mode) {
       case 'color':
@@ -206,42 +227,42 @@ export class Asciify {
         this._drawFn = this._drawBlock
     }
 
-    const characterSetSource = characterSet ?? (mode === 'grayscale' ? DEFAULT_BW_CHAR_LIST : DEFAULT_CHAR_SET)
-    this._characterCodeRadix = createCharacterCodeRadix(characterSetSource)
-    this._computedCharacterSize = fontSize * lineHeight
+    this._luminanceCodeMap = new LuminanceCharacterCodeMap(characterSet, contrastRatio)
+    this._textureCache = new TextureCache(
+      this._luminanceCodeMap,
+      fontSize,
+      fontFamily,
+      pixelRatio,
+      backgroundColor,
+      debug
+    )
+    this._characterSize = fontSize * characterSpacingRatio
 
     this._updateContextStyles()
   }
 
   /** @ignore */
   protected _updateContextStyles(): void {
-    const { fontSize, fontFamily, pixelRatio, lineHeight } = this.options
-    this.ctx.fontKerning = 'none'
-    this.ctx.textAlign = 'left'
-    this.ctx.textBaseline = 'top'
+    const { fontSize, fontFamily, pixelRatio, backgroundColor } = this.options
     this.ctx.font = `${fontSize * pixelRatio}px ${fontFamily}`
+
+    this.ctx.fillStyle = backgroundColor
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
     // The canvas is split into a grid of cells.
     // The width and height of each cell is determined by the font size and device pixel ratio.
-    this.columnCount = Math.floor(this.canvas.width / this._computedCharacterSize)
-    this.rowCount = Math.floor(this.canvas.height / this._computedCharacterSize)
+    const trueColumnCount = this.canvas.width / (this._characterSize * pixelRatio)
+    const trueRowCount = this.canvas.height / (this._characterSize * pixelRatio)
 
-    const lookupTables = createIndexLookupTable(this.rowCount, this.columnCount, fontSize, lineHeight)
-    this._indexLookupTable = lookupTables[0]
-    this._indexLookupTableFlippedY = lookupTables[1]
-  }
+    this.columnCount = Math.floor(trueColumnCount)
+    this.rowCount = Math.floor(trueRowCount)
 
-  /**
-   * Updates the character set used for the ASCII art.
-   * This can be used to change the character set on the fly during an animation.
-   */
-  public updateCharacterSet(
-    /**
-     * The next character set to use for the ASCII art.
-     */
-    characterSet: string[]
-  ): void {
-    this._characterCodeRadix = createCharacterCodeRadix(characterSet)
+    // Additionally, we need the sprites to sit at the center of the canvas.
+    this._offsetX = (trueColumnCount - this.columnCount) * this._characterSize
+    this._offsetY = (trueRowCount - this.rowCount) * this._characterSize
+
+    this._lookupTable = new LookupTable(this.rowCount, this.columnCount, this._characterSize)
+    this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
   }
 
   /**
@@ -257,71 +278,112 @@ export class Asciify {
     /**
      * A buffer containing the RGBA values of the image.
      */
-    rgbaBuffer: Uint8ClampedArray,
-    /**
-     * Useful when rendering a Three.js scene.
-     */
-    bufferIsUpsideDown?: boolean,
+    nextFrameBuffer: Uint8ClampedArray,
+
     /**
      * Whether to persist the canvas. Useful when composing multiple images.
      */
-    persistCanvas?: boolean
+    resetFramebuffer = false,
+    /**
+     * An optional lookup table to use for the next frame.
+     */
+    lookupTable: Uint32Array = this._lookupTable.pixelIndex,
+    /**
+     */
+    coords: CharacterCoords = this._lookupTable.coords
   ): void {
-    if (!persistCanvas) {
-      this.ctx.fillStyle = this.options.backgroundColor
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    if (resetFramebuffer) {
+      this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
     }
 
-    const lookupTable = bufferIsUpsideDown ? this._indexLookupTableFlippedY : this._indexLookupTable
+    for (let cursorIndex = 0; cursorIndex < lookupTable.length; cursorIndex += 4) {
+      const redIndex = lookupTable[cursorIndex]
+      const greenIndex = lookupTable[cursorIndex + 1]
+      const blueIndex = lookupTable[cursorIndex + 2]
+      const alphaIndex = lookupTable[cursorIndex + 3]
 
-    for (let cursorIndex = 0; cursorIndex < lookupTable.length; cursorIndex += 6) {
-      const x = lookupTable[cursorIndex]
-      const y = lookupTable[cursorIndex + 1]
+      const red = nextFrameBuffer[redIndex]
+      const green = nextFrameBuffer[greenIndex]
+      const blue = nextFrameBuffer[blueIndex]
+      const alpha = nextFrameBuffer[alphaIndex]
 
-      const red = rgbaBuffer[lookupTable[cursorIndex + 2]]
-      const green = rgbaBuffer[lookupTable[cursorIndex + 3]]
-      const blue = rgbaBuffer[lookupTable[cursorIndex + 4]]
-      const alpha = rgbaBuffer[lookupTable[cursorIndex + 5]]
+      const cellIsUnchanged =
+        this._frameBuffer[redIndex] === red &&
+        this._frameBuffer[greenIndex] === green &&
+        this._frameBuffer[blueIndex] === blue &&
+        this._frameBuffer[alphaIndex] === alpha
 
-      if (alpha === 0 || (red === 0 && green === 0 && blue === 0)) {
+      if (cellIsUnchanged) {
         continue
       }
 
       // Approximate of luminance. See https://en.wikipedia.org/wiki/Relative_luminance
       // This gives us a number between 0 and 255.
       const luminance = (red * 299 + green * 587 + blue * 114) >> 10
+      // Now, we need to find the character texture that best matches the luminance...
+      const sourceTexture = this._textureCache.get(luminance)!
 
-      // Now, we need to find the character that best matches the luminance.
-      const characterCode = this._characterCodeRadix[luminance]
-
-      if (characterCode === 0) {
-        // If the character code is 0, it means that the luminance is too low to
-        // be represented by any of the characters in the character set.
-        continue
-      }
-
-      this._drawFn(x, y, red, green, blue, luminance, characterCode)
+      const coord = coords.get(cursorIndex)!
+      this._drawFn(coord[0], coord[1], red, green, blue, luminance, sourceTexture)
     }
+
+    this._frameBuffer.set(nextFrameBuffer)
   }
 
   /**
    * Draws a single ASCII character to the canvas in the given color.
    * @internal
    */
-  protected _drawColor: DrawFn = (x, y, red, green, blue, _luminance, characterCode) => {
-    this.ctx.fillStyle = 'rgb(' + red + ' ' + green + ' ' + blue + ')'
+  protected _drawColor: DrawFn = (x, y, red, green, blue, _luminance, sourceTexture) => {
+    const data = new Uint8ClampedArray(sourceTexture.data, 0, sourceTexture.data.length)
 
-    this.ctx.fillText(String.fromCharCode(characterCode), x, y)
+    // The & 0xff operation is used to extract the least significant 8 bits of the color values,
+    // which correspond to the red, green, and blue color channels.
+    // The & 0xff operation ensures that the resulting color values are within the range of 0 - 255,
+    // which is the range of valid RGB values.
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = ((data[i] * (red & 255)) / 255) & 255
+      data[i + 1] = ((data[i + 1] * (green & 255)) / 255) & 255
+      data[i + 2] = ((data[i + 2] * (blue & 255)) / 255) & 255
+    }
+
+    this.ctx.putImageData(
+      new ImageData(data, sourceTexture.width, sourceTexture.height, globalImageDataSettings),
+      x + this._offsetX,
+      y + this._offsetY,
+      0,
+      0,
+      sourceTexture.width,
+      sourceTexture.height
+    )
   }
 
   /**
    * Draws a single ASCII character to the canvas in grayscale.
    * @internal
    */
-  protected _drawGrayscale: DrawFn = (x, y, _red, _green, _blue, luminance, characterCode) => {
-    this.ctx.fillStyle = `rgb(${luminance * 255} ${luminance * 255} ${luminance * 255})`
+  protected _drawGrayscale: DrawFn = (x, y, _red, _green, _blue, luminance, sourceTexture) => {
+    const data = new Uint8ClampedArray(sourceTexture.data, 0, sourceTexture.data.length)
 
-    this.ctx.fillText(String.fromCharCode(characterCode), x, y)
+    // The & 0xff operation is used to extract the least significant 8 bits of the color values,
+    // which correspond to the red, green, and blue color channels.
+    // The & 0xff operation ensures that the resulting color values are within the range of 0 - 255,
+    // which is the range of valid RGB values.
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = ((data[i] * (luminance & 255)) / 255) & 255
+      data[i + 1] = ((data[i + 1] * (luminance & 255)) / 255) & 255
+      data[i + 2] = ((data[i + 2] * (luminance & 255)) / 255) & 255
+    }
+
+    this.ctx.putImageData(
+      new ImageData(data, sourceTexture.width, sourceTexture.height, globalImageDataSettings),
+      x + this._offsetX,
+      y + this._offsetY,
+      0,
+      0,
+      sourceTexture.width,
+      sourceTexture.height
+    )
   }
 
   /**
@@ -370,8 +432,12 @@ export class Asciify {
      */
     ctx = renderer.getContext()
   ): void {
-    const rgbaBuffer = readFromThree(renderer, ctx)
-    this.rasterize(rgbaBuffer, true)
+    this.rasterize(
+      readFromThree(renderer, ctx),
+      false,
+      this._lookupTable.pixelIndexFlippedY,
+      this._lookupTable.coordsFlippedY
+    )
   }
 
   /**
@@ -383,7 +449,7 @@ export class Asciify {
      */
     luminance: number
   ) {
-    const characterCode = this._characterCodeRadix[luminance]
+    const characterCode = this._luminanceCodeMap.get(luminance)!
     return String.fromCharCode(characterCode)
   }
 
@@ -392,7 +458,7 @@ export class Asciify {
      * The canvas where the ASCII art will be rendered to.
      * This can either be a canvas element or a canvas's 2D context.
      */
-    outputCanvas: CanvasLike | Canvas2dContextLike = createCanvasLike(),
+    outputCanvas: CanvasLike | Canvas2dContextLike = createCanvasLike('canvas'),
     /**
      * Options to use when rendering the ASCII art.
      * @see {@linkcode AsciifyOptions} for more information.
@@ -433,5 +499,7 @@ export type DrawFn = (
   green: number,
   blue: number,
   luminance: number,
-  characterCode: number
+  sourceTexture: ImageData
 ) => void
+
+const globalImageDataSettings: ImageDataSettings = { colorSpace: 'srgb' }

@@ -20,7 +20,9 @@
       import { Asciify, readFromImage } from '/dist/mod.mjs'
 
       const canvas = document.getElementById('demo')
-      const asciify = new Asciify(canvas)
+      const asciify = new Asciify(canvas, {
+        lineHeight: 0.5,
+      })
       window.asciify = asciify // for debugging
       asciify.setSize(window.innerWidth, window.innerHeight)
 

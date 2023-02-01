@@ -64,10 +64,10 @@ export function createCanvasLike(
   preferred?: 'canvas' | 'offscreen'
 ): CanvasLike {
   if (typeof preferred === 'undefined') {
-    if (typeof document !== 'undefined') {
+    if (typeof OffscreenCanvas !== 'undefined') {
       // Given a browser-like environment, prefer a canvas...
       preferred = 'canvas'
-    } else if (typeof OffscreenCanvas !== 'undefined') {
+    } else if (typeof document !== 'undefined') {
       preferred = 'offscreen'
     }
   }
@@ -89,14 +89,14 @@ export function createCanvasLike(
  */
 export function pluck2dContext(
   canvasLike: CanvasLike,
-  options: CanvasRenderingContext2DSettings = {
-    alpha: false,
-    willReadFrequently: true,
-    desynchronized: true,
-  }
+  options: CanvasRenderingContext2DSettings = {}
 ): Canvas2dContextLike {
   if (isCanvasLike(canvasLike)) {
-    return canvasLike.getContext('2d', options) as CanvasRenderingContext2D
+    return canvasLike.getContext('2d', {
+      alpha: false,
+      desynchronized: true,
+      ...options,
+    }) as CanvasRenderingContext2D
   }
 
   return canvasLike as CanvasRenderingContext2D
@@ -112,66 +112,131 @@ export function pluck2dContext(
  * @internal
  * @see {@linkcode https://github.com/v8/v8/blob/b584c57/src/compiler/typed-optimization.cc#L471 TypedOptimization::TryBuildCharacterCodeRadix}
  */
-export function createCharacterCodeRadix(asciiCharacters: string[]): Uint16Array {
-  const averagedCharacterSet = new Uint16Array(255)
+export class LuminanceCharacterCodeMap extends Map<
+  /** The luminance of the pixel. 0 to 255. */
+  number,
+  /** The character code of the character to render. */
+  number
+> {
+  constructor(readonly characterSet: string[], contrastRatio: number) {
+    const asciiCharacters = characterSet.slice()
+    const averagedCharacterSet: Array<[number, number]> = []
 
-  // We need at least one space to represent an empty pixel.
-  if (asciiCharacters[0] !== ' ') {
-    asciiCharacters = [' ', ...asciiCharacters]
-  }
-
-  if (asciiCharacters.length > 255) {
-    console.warn('The character set is too large. Only first 255 characters will be used.')
-  }
-
-  for (let i = 0; i < 255; i++) {
-    const index = Math.floor((i / 255) * asciiCharacters.length)
-    let characterCode = asciiCharacters[index].charCodeAt(0)
-
-    if (!(characterCode >= 0 && characterCode <= 127)) {
-      console.warn(`Character "${asciiCharacters[index]}" is not in the ASCII range.`)
-      characterCode = 0
-    }
-    if (characterCode >= 0 && characterCode <= 31) {
-      console.warn(`Character "${asciiCharacters[index]}" is a control character.`)
-      characterCode = 0
+    for (let i = 0; i < contrastRatio; i++) {
+      asciiCharacters.unshift(' ')
     }
 
-    if (characterCode === 32) {
-      // Spaces are labeled as 0 so we can skip them.
-      characterCode = 0
+    if (asciiCharacters.length > 255) {
+      console.warn('The character set is too large. Only first 255 characters will be used.')
     }
 
-    averagedCharacterSet[i] = characterCode
-  }
+    for (let luminance = 0; luminance < 255; luminance++) {
+      const index = Math.floor((luminance / 255) * asciiCharacters.length)
+      let characterCode = asciiCharacters[index].charCodeAt(0)
 
-  return averagedCharacterSet
+      if (!(characterCode >= 0 && characterCode <= 127)) {
+        console.warn(`Character "${asciiCharacters[index]}" is not in the ASCII range.`)
+        characterCode = 0
+      }
+      if (characterCode >= 0 && characterCode <= 31) {
+        console.warn(`Character "${asciiCharacters[index]}" is a control character.`)
+        characterCode = 0
+      }
+
+      if (characterCode === 32) {
+        // Spaces are labeled as 0 so we can skip them.
+        characterCode = 0
+      }
+
+      averagedCharacterSet.push([luminance, characterCode])
+    }
+
+    super(averagedCharacterSet)
+  }
 }
+
+// export type TextureCache = ImageData[]
+
+export class TextureCache extends Map<number, ImageData> {
+  constructor(
+    luminanceCodeMap: LuminanceCharacterCodeMap,
+    fontSize: number,
+    fontFamily: string,
+    pixelRatio: number,
+    backgroundColor: string,
+    debug = false
+  ) {
+    const canvas = createCanvasLike()
+    const ctx = pluck2dContext(canvas, {
+      willReadFrequently: true,
+    })
+
+    const renderedFontSize = fontSize * pixelRatio
+    canvas.width = renderedFontSize
+    canvas.height = renderedFontSize
+
+    ctx.font = `${renderedFontSize * 1}px ${fontFamily}`
+    ctx.fillStyle = 'black'
+    ctx.fontKerning = 'none'
+    ctx.textBaseline = 'top'
+    ctx.save()
+
+    const texturePairs: Array<[number, ImageData]> = []
+
+    for (const [luminance, characterCode] of luminanceCodeMap.entries()) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      if (debug) {
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        ctx.fillStyle = 'black'
+        // Draw a circle
+        ctx.beginPath()
+        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, 2 * Math.PI)
+        ctx.fill()
+      }
+
+      if (characterCode === 0) {
+        ctx.fillStyle = backgroundColor
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      } else {
+        ctx.fillStyle = 'white'
+
+        const text = String.fromCharCode(characterCode)
+        const textMetrics = ctx.measureText(text)
+        const x = (canvas.width - textMetrics.width) / 2
+        const y = (canvas.height - renderedFontSize) / 2
+
+        ctx.fillText(text, x, y)
+      }
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+      ctx.restore()
+
+      texturePairs.push([luminance, imageData])
+    }
+
+    super(texturePairs)
+  }
+}
+
+export type CharacterCoords = Map<number, [number, number]>
 
 /**
  * A precomputed lookup table to help us traverse the pixel buffer.
+ * The length of this array is equal to the area of the row and column counts.
  *
+ * @remarks
  * Each character cell is represented by six values:
  * ```ts
- * [x1, y1, red1, green1, blue1, alpha1, xN, yN, redN, greenN, blueN, alphaN...]
+ * [red1, green1, blue1, alpha1, redN, greenN, blueN, alphaN...]
  * ```
  *
- * The length of this array is equal to the area of the row and column counts.
- */
-export class IndexLookupTable extends Uint32Array {
-  constructor(rowCount: number, columnCount: number) {
-    super(rowCount * columnCount * 6)
-  }
-}
-
-/**
- * Creates a precomputed lookup table for a given pixel buffer.
- *
  * This is used to avoid expensive and repetitive calculations when rendering the ASCII art.
- * The lookup table is a Uint16Array containing pairs of six values:
+ * The lookup table is a Uint16Array containing pairs of four values:
  *
- * - The x coordinate of the character cell
- * - The y coordinate of the character cell
  * - The index of the red channel from the pixel buffer
  * - The index of the green channel from the pixel buffer
  * - The index of the blue channel from the pixel buffer
@@ -180,35 +245,61 @@ export class IndexLookupTable extends Uint32Array {
  * @category Utility
  * @internal
  */
-export function createIndexLookupTable(rowCount: number, columnCount: number, fontSize: number, lineHeight: number) {
-  const lookupTables = [
-    new IndexLookupTable(rowCount, columnCount),
-    // We need a second buffer for the flipped Y axis.
-    new IndexLookupTable(rowCount, columnCount),
-  ]
+export class LookupTable {
+  /**
+   * The lookup table used to map the RGBA buffer to the ASCII art canvas.
+   */
+  public readonly pixelIndex: Uint32Array
+  /**
+   * The lookup table used to map the RGBA buffer to the ASCII art canvas.
+   * This is the same as {@linkcode _indexLookupTable}, but with the Y axis flipped for WebGL.
+   */
+  public readonly pixelIndexFlippedY: Uint32Array
+  public readonly coords: CharacterCoords
+  public readonly coordsFlippedY: CharacterCoords
 
-  const characterSize = fontSize * lineHeight
+  constructor(public rowCount: number, public columnCount: number, characterHeight: number) {
+    const lookupTables = [
+      new Uint32Array(rowCount * columnCount * 4),
+      // We need a second buffer for the flipped Y axis.
+      new Uint32Array(rowCount * columnCount * 4),
+    ]
 
-  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-    const y = rowIndex * characterSize
-    const flippedY = (rowCount - rowIndex) * characterSize
+    const coordPairs: CharacterCoords[] = [new Map(), new Map()]
 
-    for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-      const x = columnIndex * characterSize
-      const i = (rowIndex * columnCount + columnIndex) * 6
-      // Times 4 because each pixel is represented by 4 values in the buffer.
-      const redIndex = (rowIndex * columnCount + columnIndex) * 4
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+      const y = rowIndex * characterHeight * 2
+      const flippedY = (rowCount - rowIndex - 2) * characterHeight * 2 + characterHeight * 2
 
-      for (const [tableIndex, lookupTable] of lookupTables.entries()) {
-        lookupTable[i] = x
-        lookupTable[i + 1] = tableIndex === 0 ? y : flippedY
-        lookupTable[i + 2] = redIndex // Red channel
-        lookupTable[i + 3] = redIndex + 1 // Green channel
-        lookupTable[i + 4] = redIndex + 2 // Blue channel
-        lookupTable[i + 5] = redIndex + 3 // Alpha channel
+      for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+        const x = (columnCount - columnIndex - 1) * characterHeight * 2
+
+        // Times 4 because each pixel is represented by 4 values in the buffer.
+        const redIndex = (rowIndex * columnCount + columnIndex) * 4
+        const greenIndex = redIndex + 1
+        const blueIndex = redIndex + 2
+        const alphaIndex = redIndex + 3
+
+        for (const [tableIndex, lookupTable] of lookupTables.entries()) {
+          const yVal = tableIndex === 0 ? y : flippedY
+
+          lookupTable[redIndex] = redIndex
+          lookupTable[greenIndex] = greenIndex
+          lookupTable[blueIndex] = blueIndex
+          lookupTable[alphaIndex] = alphaIndex
+
+          coordPairs[tableIndex].set(redIndex, [x, yVal])
+        }
       }
     }
+
+    this.pixelIndex = lookupTables[0]
+    this.pixelIndexFlippedY = lookupTables[1]
+    this.coords = coordPairs[0]
+    this.coordsFlippedY = coordPairs[1]
   }
 
-  return lookupTables
+  get length() {
+    return this.coords.size
+  }
 }
