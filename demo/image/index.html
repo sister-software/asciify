@@ -53,15 +53,14 @@
     <script type="importmap">
       {
         "imports": {
-          "three": "/node_modules/three/build/three.module.js",
-          "three/addons/": "/node_modules/three/examples/jsm/",
-          "dat.gui": "/node_modules/dat.gui/build/dat.gui.module.js"
+          "@sister.software/asciify": "https://esm.sh/@sister.software/asciify@2.0.2",
+          "dat.gui": "https://esm.sh/dat.gui@0.7.9"
         }
       }
     </script>
 
     <script type="module">
-      import { Asciify } from '/dist/mod.mjs'
+      import { Asciify } from '@sister.software/asciify'
       import { GUI } from 'dat.gui'
 
       const startTime = Date.now()

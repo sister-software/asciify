@@ -45,22 +45,24 @@
     <script type="importmap">
       {
         "imports": {
-          "stats": "/node_modules/stats-js/src/Stats.js",
-          "three": "/node_modules/three/build/three.module.js",
-          "three/addons/": "/node_modules/three/examples/jsm/",
-          "dat.gui": "/node_modules/dat.gui/build/dat.gui.module.js"
+          "@sister.software/asciify": "https://esm.sh/@sister.software/asciify@2.0.2",
+          "dat.gui": "https://esm.sh/dat.gui@0.7.9",
+          "three": "https://esm.sh/three@0.149.0",
+          "stats-js": "https://esm.sh/stats-js@1.0.1",
+          "three/addons/": "https://esm.sh/three@0.149.0/examples/jsm/"
         }
       }
     </script>
 
     <script type="module">
-      import { Asciify } from '/dist/mod.mjs'
-      import Stats from 'stats'
+      import { Asciify } from '@sister.software/asciify'
+      import { GUI } from 'dat.gui'
+      import Stats from 'stats-js'
+
       import * as THREE from 'three'
       import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js'
       import { VertexTangentsHelper } from 'three/addons/helpers/VertexTangentsHelper.js'
       import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-      import { GUI } from 'dat.gui'
 
       const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 4000)
       camera.position.y = 800
