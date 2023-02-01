@@ -39,13 +39,12 @@ asciify.rasterize(image)
 - [resize](../wiki/Asciify#resize)
 - [setOptions](../wiki/Asciify#setoptions)
 - [setSize](../wiki/Asciify#setsize)
-- [updateCharacterSet](../wiki/Asciify#updatecharacterset)
 
 ### Rasterization Methods
 
 - [rasterize](../wiki/Asciify#rasterize)
 - [rasterizeImage](../wiki/Asciify#rasterizeimage)
-- [rasterizeThree](../wiki/Asciify#rasterizethree)
+- [rasterizeWebGLRenderer](../wiki/Asciify#rasterizewebglrenderer)
 
 ## Constructors
 
@@ -62,7 +61,7 @@ asciify.rasterize(image)
 
 #### Defined in
 
-[Asciify.mts:389](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L389)
+[Asciify.mts:148](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L148)
 
 ## Properties
 
@@ -83,7 +82,7 @@ You can use this canvas to render the ASCII art to the screen.
 
 #### Defined in
 
-[Asciify.mts:51](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L51)
+[Asciify.mts:55](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L55)
 
 ___
 
@@ -96,7 +95,7 @@ This corresponds to the width of the source material.
 
 #### Defined in
 
-[Asciify.mts:74](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L74)
+[Asciify.mts:78](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L78)
 
 ___
 
@@ -108,7 +107,7 @@ The canvas context where ASCII art is rasterized to.
 
 #### Defined in
 
-[Asciify.mts:68](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L68)
+[Asciify.mts:72](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L72)
 
 ___
 
@@ -125,7 +124,7 @@ The options used to initialize the Asciify instance.
 
 #### Defined in
 
-[Asciify.mts:94](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L94)
+[Asciify.mts:96](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L96)
 
 ___
 
@@ -142,7 +141,7 @@ This corresponds to the height of the source material.
 
 #### Defined in
 
-[Asciify.mts:80](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L80)
+[Asciify.mts:84](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L84)
 
 ## Accessors
 
@@ -162,7 +161,7 @@ A type-friendly getter for the canvas element.
 
 #### Defined in
 
-[Asciify.mts:57](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L57)
+[Asciify.mts:61](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L61)
 
 ## Other Methods
 
@@ -184,7 +183,7 @@ Returns the character that best matches the given brightness.
 
 #### Defined in
 
-[Asciify.mts:379](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L379)
+[Asciify.mts:182](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L182)
 
 ___
 
@@ -208,7 +207,7 @@ when the source canvas is resized, or when the asciify instance options are chan
 
 | Name | Type |
 | :------ | :------ |
-| `imageSource` | [`CanvasLike`](../wiki/Home#canvaslike) \| `WebGLRenderer` |
+| `imageSource` | [`CanvasLike`](../wiki/Home#canvaslike) \| `WebGLRenderer` \| `WebGLRenderTarget` |
 
 #### Returns
 
@@ -216,7 +215,7 @@ when the source canvas is resized, or when the asciify instance options are chan
 
 #### Defined in
 
-[Asciify.mts:175](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L175)
+[Asciify.mts:247](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L247)
 
 ___
 
@@ -239,7 +238,7 @@ Useful for changing the asciify instance on the fly.
 
 #### Defined in
 
-[Asciify.mts:188](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L188)
+[Asciify.mts:262](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L262)
 
 ___
 
@@ -269,7 +268,7 @@ renderer.setSize(asciify.columnCount, asciify.rowCount)
 | :------ | :------ | :------ |
 | `nextWidth` | `number` | The width of the ASCII art canvas. |
 | `nextHeight` | `number` | The height of the ASCII art canvas. |
-| `imageSource` | [`CanvasLike`](../wiki/Home#canvaslike) \| `WebGLRenderer` | An optional source canvas to pass to [`resize`](../wiki/Asciify#resize) |
+| `imageSource` | [`CanvasLike`](../wiki/Home#canvaslike) \| `WebGLRenderer` \| `WebGLRenderTarget` | An optional source canvas to pass to [`resize`](../wiki/Asciify#resize) |
 
 #### Returns
 
@@ -277,30 +276,7 @@ renderer.setSize(asciify.columnCount, asciify.rowCount)
 
 #### Defined in
 
-[Asciify.mts:136](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L136)
-
-___
-
-### updateCharacterSet
-
-▸ **updateCharacterSet**(`characterSet`): `void`
-
-Updates the character set used for the ASCII art.
-This can be used to change the character set on the fly during an animation.
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `characterSet` | `string`[] | The next character set to use for the ASCII art. |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[Asciify.mts:237](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L237)
+[Asciify.mts:209](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L209)
 
 ___
 
@@ -308,7 +284,7 @@ ___
 
 ### rasterize
 
-▸ **rasterize**(`rgbaBuffer`, `bufferIsUpsideDown?`, `persistCanvas?`): `void`
+▸ **rasterize**(`nextFrameBuffer`, `resetFramebuffer?`, `pixelIndex?`, `coords?`): `void`
 
 Renders given RGBA buffer to the ASCII art canvas.
 
@@ -316,16 +292,17 @@ This method may be used directly when performance is critical.
 
 **`See`**
 
- - [`rasterizeThree`](../wiki/Asciify#rasterizethree)
+ - [`rasterizeWebGLRenderer`](../wiki/Asciify#rasterizewebglrenderer)
  - [`rasterizeImage`](../wiki/Asciify#rasterizeimage)
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `rgbaBuffer` | `Uint8ClampedArray` | A buffer containing the RGBA values of the image. |
-| `bufferIsUpsideDown?` | `boolean` | Useful when rendering a Three.js scene. |
-| `persistCanvas?` | `boolean` | Whether to persist the canvas. Useful when composing multiple images. |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `nextFrameBuffer` | [`FrameBuffer`](../wiki/FrameBuffer) | `undefined` | A buffer containing the RGBA values of the image. |
+| `resetFramebuffer` | `boolean` | `false` | Whether to persist the canvas. Useful when composing multiple images. |
+| `pixelIndex` | `Uint32Array` | `undefined` | An optional lookup table to use for the next frame. |
+| `coords` | [`CharacterCoords`](../wiki/Home#charactercoords) | `undefined` |  |
 
 #### Returns
 
@@ -333,13 +310,13 @@ This method may be used directly when performance is critical.
 
 #### Defined in
 
-[Asciify.mts:255](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L255)
+[Asciify.mts:373](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L373)
 
 ___
 
 ### rasterizeImage
 
-▸ **rasterizeImage**(`imageSource`): `Promise`<`void`\>
+▸ **rasterizeImage**(`imageSource`): `Promise`<[`FrameBuffer`](../wiki/FrameBuffer)\>
 
 Rasterizes the given image to the ASCII art canvas.
 
@@ -356,30 +333,29 @@ Rasterizes the given image to the ASCII art canvas.
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`<[`FrameBuffer`](../wiki/FrameBuffer)\>
 
 #### Defined in
 
-[Asciify.mts:343](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L343)
+[Asciify.mts:316](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L316)
 
 ___
 
-### rasterizeThree
+### rasterizeWebGLRenderer
 
-▸ **rasterizeThree**(`renderer`, `ctx?`): `void`
+▸ **rasterizeWebGLRenderer**(`renderer`, `ctx?`): `void`
 
 Rasterizes the given Three.js renderer to the ASCII art canvas.
 
 **`See`**
 
- - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromImage`](../wiki/Home#readfromimage)
+[`rasterize`](../wiki/Asciify#rasterize)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `renderer` | `WebGLRenderer` | The Three.js renderer to read from. |
+| `renderer` | `WebGLRenderer` | The Three.js renderer to read pixel data from. |
 | `ctx` | `WebGLRenderingContext` \| `WebGL2RenderingContext` | The WebGL context to read from. Defaults to the context of the renderer. You should provide this if you'd like to cache the context once and reuse it. |
 
 #### Returns
@@ -388,4 +364,4 @@ Rasterizes the given Three.js renderer to the ASCII art canvas.
 
 #### Defined in
 
-[Asciify.mts:361](https://github.com/sister-software/asciify/blob/836ead9/Asciify.mts#L361)
+[Asciify.mts:335](https://github.com/sister-software/asciify/blob/9750ae3/Asciify.mts#L335)

@@ -28,9 +28,15 @@ Teffen Ellis
 
 ### Other Classes
 
-- [IndexLookupTable](../wiki/IndexLookupTable)
+- [FrameBuffer](../wiki/FrameBuffer)
+- [TextureCache](../wiki/TextureCache)
 
-### Interfaces
+### Utility Classes
+
+- [LookupTable](../wiki/LookupTable)
+- [LuminanceCharacterCodeMap](../wiki/LuminanceCharacterCodeMap)
+
+### Configuration Interfaces
 
 - [AsciifyOptions](../wiki/AsciifyOptions)
 
@@ -38,25 +44,21 @@ Teffen Ellis
 
 - [readFromCanvas](../wiki/Home#readfromcanvas)
 - [readFromImage](../wiki/Home#readfromimage)
-- [readFromThree](../wiki/Home#readfromthree)
 - [readFromVideo](../wiki/Home#readfromvideo)
 
-### Utility Functions
+### Configuration Variables
 
-- [createCharacterCodeRadix](../wiki/Home#createcharactercoderadix)
-- [createIndexLookupTable](../wiki/Home#createindexlookuptable)
-
-### Character Set Variables
-
-- [DEFAULT\_BW\_CHAR\_LIST](../wiki/Home#default_bw_char_list)
 - [DEFAULT\_CHAR\_SET](../wiki/Home#default_char_set)
-- [DEFAULT\_COLOR\_CHAR\_LIST](../wiki/Home#default_color_char_list)
 
-### Type Aliases
+### Configuration Type Aliases
 
 - [ASCIIMode](../wiki/Home#asciimode)
+
+### Other Type Aliases
+
 - [Canvas2dContextLike](../wiki/Home#canvas2dcontextlike)
 - [CanvasLike](../wiki/Home#canvaslike)
+- [CharacterCoords](../wiki/Home#charactercoords)
 
 ## Helper Functions
 
@@ -70,7 +72,6 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromImage`](../wiki/Home#readfromimage)
 
 #### Parameters
@@ -85,7 +86,7 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 
 #### Defined in
 
-[readers.mts:48](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L48)
+[readers.mts:28](https://github.com/sister-software/asciify/blob/9750ae3/readers.mts#L28)
 
 ___
 
@@ -99,7 +100,6 @@ This function is useful when you want to rasterize an image to ASCII art.
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromCanvas`](../wiki/Home#readfromcanvas)
 
 #### Parameters
@@ -115,37 +115,7 @@ This function is useful when you want to rasterize an image to ASCII art.
 
 #### Defined in
 
-[readers.mts:72](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L72)
-
-___
-
-### readFromThree
-
-▸ **readFromThree**(`renderer`, `ctx?`): `Uint8ClampedArray`
-
-Read the pixel buffer from a ThreeJS WebGLRenderer.
-This function is useful when you want to render a ThreeJS scene to ASCII art.
-
-**`See`**
-
-[`rasterizeThree`](../wiki/Asciify#rasterizethree)
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `renderer` | `WebGLRenderer` | The Three.js renderer to read from. |
-| `ctx` | `WebGLRenderingContext` \| `WebGL2RenderingContext` | The WebGL context to read from. Defaults to the context of the renderer. You should provide this if you'd like to cache the context once and reuse it. |
-
-#### Returns
-
-`Uint8ClampedArray`
-
-A Uint8ClampedArray containing the RGBA pixel buffer
-
-#### Defined in
-
-[readers.mts:22](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L22)
+[readers.mts:51](https://github.com/sister-software/asciify/blob/9750ae3/readers.mts#L51)
 
 ___
 
@@ -159,7 +129,6 @@ This function is useful when you want to rasterize a video to ASCII art.
 **`See`**
 
  - [`rasterize`](../wiki/Asciify#rasterize)
- - [`readFromThree`](../wiki/Home#readfromthree)
  - [`readFromCanvas`](../wiki/Home#readfromcanvas)
 
 #### Parameters
@@ -177,120 +146,22 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[readers.mts:112](https://github.com/sister-software/asciify/blob/836ead9/readers.mts#L112)
+[readers.mts:90](https://github.com/sister-software/asciify/blob/9750ae3/readers.mts#L90)
 
-___
-
-## Utility Functions
-
-### createCharacterCodeRadix
-
-▸ **createCharacterCodeRadix**(`asciiCharacters`): `Uint16Array`
-
-Given an array of 255 or less ASCII characters representing the brightness of each pixel,
-returns something like a radix-sorted array of 255 characters that are evenly spaced.
-
-This helps us avoid expensive operations like Math.floor() when rendering the ASCII art.
-
-**`See`**
-
-[`TypedOptimization::TryBuildCharacterCodeRadix`](https://github.com/v8/v8/blob/b584c57/src/compiler/typed-optimization.cc#L471)
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `asciiCharacters` | `string`[] |
-
-#### Returns
-
-`Uint16Array`
-
-#### Defined in
-
-[utils.mts:107](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L107)
-
-___
-
-### createIndexLookupTable
-
-▸ **createIndexLookupTable**(`rowCount`, `columnCount`, `fontSize`, `lineHeight`): [`IndexLookupTable`](../wiki/IndexLookupTable)[]
-
-Creates a precomputed lookup table for a given pixel buffer.
-
-This is used to avoid expensive and repetitive calculations when rendering the ASCII art.
-The lookup table is a Uint16Array containing pairs of six values:
-
-- The x coordinate of the character cell
-- The y coordinate of the character cell
-- The index of the red channel from the pixel buffer
-- The index of the green channel from the pixel buffer
-- The index of the blue channel from the pixel buffer
-- The index of the alpha channel from the pixel buffer
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `rowCount` | `number` |
-| `columnCount` | `number` |
-| `fontSize` | `number` |
-| `lineHeight` | `number` |
-
-#### Returns
-
-[`IndexLookupTable`](../wiki/IndexLookupTable)[]
-
-#### Defined in
-
-[utils.mts:175](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L175)
-
-## Character Set Variables
-
-### DEFAULT\_BW\_CHAR\_LIST
-
-• `Const` **DEFAULT\_BW\_CHAR\_LIST**: `string`[]
-
-A default character set to use for the ASCII art.
-Optimized for black and white output.
-
-#### Defined in
-
-[options.mts:30](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L30)
-
-___
+## Configuration Variables
 
 ### DEFAULT\_CHAR\_SET
 
 • `Const` **DEFAULT\_CHAR\_SET**: `string`[]
 
 A default character set to use for the ASCII art.
-More spaces will result in a more contrast ASCII art.
 This looks good with both black and white and color output.
 
-**`See`**
-
- - [`DEFAULT_BW_CHAR_LIST`](../wiki/Home#default_bw_char_list)
- - [`DEFAULT_COLOR_CHAR_LIST`](../wiki/Home#default_color_char_list)
-
 #### Defined in
 
-[options.mts:23](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L23)
+[configuration.mts:20](https://github.com/sister-software/asciify/blob/9750ae3/configuration.mts#L20)
 
-___
-
-### DEFAULT\_COLOR\_CHAR\_LIST
-
-• `Const` **DEFAULT\_COLOR\_CHAR\_LIST**: `string`[]
-
-A default character set to use for the ASCII art.
-Optimized for richer color output.
-
-#### Defined in
-
-[options.mts:37](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L37)
-
-## Type Aliases
+## Configuration Type Aliases
 
 ### ASCIIMode
 
@@ -300,9 +171,11 @@ The fill style mode used to paint the canvas.
 
 #### Defined in
 
-[options.mts:42](https://github.com/sister-software/asciify/blob/836ead9/options.mts#L42)
+[configuration.mts:26](https://github.com/sister-software/asciify/blob/9750ae3/configuration.mts#L26)
 
 ___
+
+## Other Type Aliases
 
 ### Canvas2dContextLike
 
@@ -318,7 +191,7 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[utils.mts:28](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L28)
+[utils.mts:28](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L28)
 
 ___
 
@@ -336,4 +209,14 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[utils.mts:19](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L19)
+[utils.mts:19](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L19)
+
+___
+
+### CharacterCoords
+
+Ƭ **CharacterCoords**: `Map`<`number`, [`number`, `number`]\>
+
+#### Defined in
+
+[utils.mts:217](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L217)

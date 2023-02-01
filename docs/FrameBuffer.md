@@ -1,74 +1,65 @@
-# Class: IndexLookupTable
-
-A precomputed lookup table to help us traverse the pixel buffer.
-
-Each character cell is represented by six values:
-```ts
-[x1, y1, red1, green1, blue1, alpha1, xN, yN, redN, greenN, blueN, alphaN...]
-```
-
-The length of this array is equal to the area of the row and column counts.
+# Class: FrameBuffer
 
 ## Hierarchy
 
-- `Uint32Array`
+- `Uint8ClampedArray`
 
-  ↳ **`IndexLookupTable`**
+  ↳ **`FrameBuffer`**
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](../wiki/IndexLookupTable#constructor)
+- [constructor](../wiki/FrameBuffer#constructor)
 
 ### Properties
 
-- [BYTES\_PER\_ELEMENT](../wiki/IndexLookupTable#bytes_per_element)
-- [[toStringTag]](../wiki/IndexLookupTable#%5Btostringtag%5D)
-- [buffer](../wiki/IndexLookupTable#buffer)
-- [byteLength](../wiki/IndexLookupTable#bytelength)
-- [byteOffset](../wiki/IndexLookupTable#byteoffset)
-- [length](../wiki/IndexLookupTable#length)
-- [BYTES\_PER\_ELEMENT](../wiki/IndexLookupTable#bytes_per_element-1)
+- [BYTES\_PER\_ELEMENT](../wiki/FrameBuffer#bytes_per_element)
+- [[toStringTag]](../wiki/FrameBuffer#%5Btostringtag%5D)
+- [buffer](../wiki/FrameBuffer#buffer)
+- [byteLength](../wiki/FrameBuffer#bytelength)
+- [byteOffset](../wiki/FrameBuffer#byteoffset)
+- [length](../wiki/FrameBuffer#length)
+- [BYTES\_PER\_ELEMENT](../wiki/FrameBuffer#bytes_per_element-1)
 
 ### Methods
 
-- [[iterator]](../wiki/IndexLookupTable#%5Biterator%5D)
-- [at](../wiki/IndexLookupTable#at)
-- [copyWithin](../wiki/IndexLookupTable#copywithin)
-- [entries](../wiki/IndexLookupTable#entries)
-- [every](../wiki/IndexLookupTable#every)
-- [fill](../wiki/IndexLookupTable#fill)
-- [filter](../wiki/IndexLookupTable#filter)
-- [find](../wiki/IndexLookupTable#find)
-- [findIndex](../wiki/IndexLookupTable#findindex)
-- [forEach](../wiki/IndexLookupTable#foreach)
-- [includes](../wiki/IndexLookupTable#includes)
-- [indexOf](../wiki/IndexLookupTable#indexof)
-- [join](../wiki/IndexLookupTable#join)
-- [keys](../wiki/IndexLookupTable#keys)
-- [lastIndexOf](../wiki/IndexLookupTable#lastindexof)
-- [map](../wiki/IndexLookupTable#map)
-- [reduce](../wiki/IndexLookupTable#reduce)
-- [reduceRight](../wiki/IndexLookupTable#reduceright)
-- [reverse](../wiki/IndexLookupTable#reverse)
-- [set](../wiki/IndexLookupTable#set)
-- [slice](../wiki/IndexLookupTable#slice)
-- [some](../wiki/IndexLookupTable#some)
-- [sort](../wiki/IndexLookupTable#sort)
-- [subarray](../wiki/IndexLookupTable#subarray)
-- [toLocaleString](../wiki/IndexLookupTable#tolocalestring)
-- [toString](../wiki/IndexLookupTable#tostring)
-- [valueOf](../wiki/IndexLookupTable#valueof)
-- [values](../wiki/IndexLookupTable#values)
-- [from](../wiki/IndexLookupTable#from)
-- [of](../wiki/IndexLookupTable#of)
+- [[iterator]](../wiki/FrameBuffer#%5Biterator%5D)
+- [at](../wiki/FrameBuffer#at)
+- [copyWithin](../wiki/FrameBuffer#copywithin)
+- [entries](../wiki/FrameBuffer#entries)
+- [every](../wiki/FrameBuffer#every)
+- [fill](../wiki/FrameBuffer#fill)
+- [filter](../wiki/FrameBuffer#filter)
+- [find](../wiki/FrameBuffer#find)
+- [findIndex](../wiki/FrameBuffer#findindex)
+- [forEach](../wiki/FrameBuffer#foreach)
+- [includes](../wiki/FrameBuffer#includes)
+- [indexOf](../wiki/FrameBuffer#indexof)
+- [join](../wiki/FrameBuffer#join)
+- [keys](../wiki/FrameBuffer#keys)
+- [lastIndexOf](../wiki/FrameBuffer#lastindexof)
+- [map](../wiki/FrameBuffer#map)
+- [reduce](../wiki/FrameBuffer#reduce)
+- [reduceRight](../wiki/FrameBuffer#reduceright)
+- [reverse](../wiki/FrameBuffer#reverse)
+- [set](../wiki/FrameBuffer#set)
+- [slice](../wiki/FrameBuffer#slice)
+- [some](../wiki/FrameBuffer#some)
+- [sort](../wiki/FrameBuffer#sort)
+- [subarray](../wiki/FrameBuffer#subarray)
+- [toLocaleString](../wiki/FrameBuffer#tolocalestring)
+- [toString](../wiki/FrameBuffer#tostring)
+- [valueOf](../wiki/FrameBuffer#valueof)
+- [values](../wiki/FrameBuffer#values)
+- [from](../wiki/FrameBuffer#from)
+- [of](../wiki/FrameBuffer#of)
 
 ## Constructors
 
 ### constructor
 
-• **new IndexLookupTable**(`rowCount`, `columnCount`)
+• **new FrameBuffer**(`rowCount`, `columnCount`)
 
 #### Parameters
 
@@ -79,11 +70,11 @@ The length of this array is equal to the area of the row and column counts.
 
 #### Overrides
 
-Uint32Array.constructor
+Uint8ClampedArray.constructor
 
 #### Defined in
 
-[utils.mts:154](https://github.com/sister-software/asciify/blob/836ead9/utils.mts#L154)
+[readers.mts:15](https://github.com/sister-software/asciify/blob/9750ae3/readers.mts#L15)
 
 ## Properties
 
@@ -95,25 +86,25 @@ The size in bytes of each element in the array.
 
 #### Inherited from
 
-Uint32Array.BYTES\_PER\_ELEMENT
+Uint8ClampedArray.BYTES\_PER\_ELEMENT
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3542
+node_modules/typescript/lib/lib.es5.d.ts:2415
 
 ___
 
 ### [toStringTag]
 
-• `Readonly` **[toStringTag]**: ``"Uint32Array"``
+• `Readonly` **[toStringTag]**: ``"Uint8ClampedArray"``
 
 #### Inherited from
 
-Uint32Array.\_\_@toStringTag@1579
+Uint8ClampedArray.\_\_@toStringTag@1577
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:302
+node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:286
 
 ___
 
@@ -125,11 +116,11 @@ The ArrayBuffer instance referenced by the array.
 
 #### Inherited from
 
-Uint32Array.buffer
+Uint8ClampedArray.buffer
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3547
+node_modules/typescript/lib/lib.es5.d.ts:2420
 
 ___
 
@@ -141,11 +132,11 @@ The length in bytes of the array.
 
 #### Inherited from
 
-Uint32Array.byteLength
+Uint8ClampedArray.byteLength
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3552
+node_modules/typescript/lib/lib.es5.d.ts:2425
 
 ___
 
@@ -157,11 +148,11 @@ The offset in bytes of the array.
 
 #### Inherited from
 
-Uint32Array.byteOffset
+Uint8ClampedArray.byteOffset
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3557
+node_modules/typescript/lib/lib.es5.d.ts:2430
 
 ___
 
@@ -173,11 +164,11 @@ The length of the array.
 
 #### Inherited from
 
-Uint32Array.length
+Uint8ClampedArray.length
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3655
+node_modules/typescript/lib/lib.es5.d.ts:2529
 
 ___
 
@@ -189,11 +180,11 @@ The size in bytes of each element in the array.
 
 #### Inherited from
 
-Uint32Array.BYTES\_PER\_ELEMENT
+Uint8ClampedArray.BYTES\_PER\_ELEMENT
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3790
+node_modules/typescript/lib/lib.es5.d.ts:2664
 
 ## Methods
 
@@ -207,11 +198,11 @@ node_modules/typescript/lib/lib.es5.d.ts:3790
 
 #### Inherited from
 
-Uint32Array.\_\_@iterator@243
+Uint8ClampedArray.\_\_@iterator@243
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.iterable.d.ts:417
+node_modules/typescript/lib/lib.es2015.iterable.d.ts:300
 
 ___
 
@@ -233,17 +224,17 @@ Returns the item located at the specified index.
 
 #### Inherited from
 
-Uint32Array.at
+Uint8ClampedArray.at
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2022.array.d.ts:90
+node_modules/typescript/lib/lib.es2022.array.d.ts:58
 
 ___
 
 ### copyWithin
 
-▸ **copyWithin**(`target`, `start`, `end?`): [`IndexLookupTable`](../wiki/IndexLookupTable)
+▸ **copyWithin**(`target`, `start`, `end?`): [`FrameBuffer`](../wiki/FrameBuffer)
 
 Returns the this object after copying a section of the array identified by start and end
 to the same array starting at position target
@@ -258,15 +249,15 @@ to the same array starting at position target
 
 #### Returns
 
-[`IndexLookupTable`](../wiki/IndexLookupTable)
+[`FrameBuffer`](../wiki/FrameBuffer)
 
 #### Inherited from
 
-Uint32Array.copyWithin
+Uint8ClampedArray.copyWithin
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3568
+node_modules/typescript/lib/lib.es5.d.ts:2441
 
 ___
 
@@ -282,11 +273,11 @@ Returns an array of key, value pairs for every entry in the array
 
 #### Inherited from
 
-Uint32Array.entries
+Uint8ClampedArray.entries
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.iterable.d.ts:421
+node_modules/typescript/lib/lib.es2015.iterable.d.ts:304
 
 ___
 
@@ -300,7 +291,7 @@ Determines whether all the members of an array satisfy the specified test.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint32Array`) => `unknown` | A function that accepts up to three arguments. The every method calls the predicate function for each element in the array until the predicate returns a value which is coercible to the Boolean value false, or until the end of the array. |
+| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint8ClampedArray`) => `unknown` | A function that accepts up to three arguments. The every method calls the predicate function for each element in the array until the predicate returns a value which is coercible to the Boolean value false, or until the end of the array. |
 | `thisArg?` | `any` | An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value. |
 
 #### Returns
@@ -309,17 +300,17 @@ Determines whether all the members of an array satisfy the specified test.
 
 #### Inherited from
 
-Uint32Array.every
+Uint8ClampedArray.every
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3578
+node_modules/typescript/lib/lib.es5.d.ts:2451
 
 ___
 
 ### fill
 
-▸ **fill**(`value`, `start?`, `end?`): [`IndexLookupTable`](../wiki/IndexLookupTable)
+▸ **fill**(`value`, `start?`, `end?`): [`FrameBuffer`](../wiki/FrameBuffer)
 
 Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
 
@@ -333,21 +324,21 @@ Changes all array elements from `start` to `end` index to a static `value` and r
 
 #### Returns
 
-[`IndexLookupTable`](../wiki/IndexLookupTable)
+[`FrameBuffer`](../wiki/FrameBuffer)
 
 #### Inherited from
 
-Uint32Array.fill
+Uint8ClampedArray.fill
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3588
+node_modules/typescript/lib/lib.es5.d.ts:2461
 
 ___
 
 ### filter
 
-▸ **filter**(`predicate`, `thisArg?`): `Uint32Array`
+▸ **filter**(`predicate`, `thisArg?`): `Uint8ClampedArray`
 
 Returns the elements of an array that meet the condition specified in a callback function.
 
@@ -355,20 +346,20 @@ Returns the elements of an array that meet the condition specified in a callback
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint32Array`) => `any` | A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array. |
+| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint8ClampedArray`) => `any` | A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array. |
 | `thisArg?` | `any` | An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value. |
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.filter
+Uint8ClampedArray.filter
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3597
+node_modules/typescript/lib/lib.es5.d.ts:2470
 
 ___
 
@@ -383,7 +374,7 @@ otherwise.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `predicate` | (`value`: `number`, `index`: `number`, `obj`: `Uint32Array`) => `boolean` | find calls predicate once for each element of the array, in ascending order, until it finds one where predicate returns true. If such an element is found, find immediately returns that element value. Otherwise, find returns undefined. |
+| `predicate` | (`value`: `number`, `index`: `number`, `obj`: `Uint8ClampedArray`) => `boolean` | find calls predicate once for each element of the array, in ascending order, until it finds one where predicate returns true. If such an element is found, find immediately returns that element value. Otherwise, find returns undefined. |
 | `thisArg?` | `any` | If provided, it will be used as the this value for each invocation of predicate. If it is not provided, undefined is used instead. |
 
 #### Returns
@@ -392,11 +383,11 @@ otherwise.
 
 #### Inherited from
 
-Uint32Array.find
+Uint8ClampedArray.find
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3608
+node_modules/typescript/lib/lib.es5.d.ts:2481
 
 ___
 
@@ -411,7 +402,7 @@ otherwise.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `predicate` | (`value`: `number`, `index`: `number`, `obj`: `Uint32Array`) => `boolean` | find calls predicate once for each element of the array, in ascending order, until it finds one where predicate returns true. If such an element is found, findIndex immediately returns that element index. Otherwise, findIndex returns -1. |
+| `predicate` | (`value`: `number`, `index`: `number`, `obj`: `Uint8ClampedArray`) => `boolean` | find calls predicate once for each element of the array, in ascending order, until it finds one where predicate returns true. If such an element is found, findIndex immediately returns that element index. Otherwise, findIndex returns -1. |
 | `thisArg?` | `any` | If provided, it will be used as the this value for each invocation of predicate. If it is not provided, undefined is used instead. |
 
 #### Returns
@@ -420,11 +411,11 @@ otherwise.
 
 #### Inherited from
 
-Uint32Array.findIndex
+Uint8ClampedArray.findIndex
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3619
+node_modules/typescript/lib/lib.es5.d.ts:2492
 
 ___
 
@@ -438,7 +429,7 @@ Performs the specified action for each element in an array.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`value`: `number`, `index`: `number`, `array`: `Uint32Array`) => `void` | A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`value`: `number`, `index`: `number`, `array`: `Uint8ClampedArray`) => `void` | A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array. |
 | `thisArg?` | `any` | An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value. |
 
 #### Returns
@@ -447,11 +438,11 @@ Performs the specified action for each element in an array.
 
 #### Inherited from
 
-Uint32Array.forEach
+Uint8ClampedArray.forEach
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3628
+node_modules/typescript/lib/lib.es5.d.ts:2501
 
 ___
 
@@ -474,11 +465,11 @@ Determines whether an array includes a certain element, returning true or false 
 
 #### Inherited from
 
-Uint32Array.includes
+Uint8ClampedArray.includes
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2016.array.include.d.ts:99
+node_modules/typescript/lib/lib.es2016.array.include.d.ts:63
 
 ___
 
@@ -501,11 +492,11 @@ Returns the index of the first occurrence of a value in an array.
 
 #### Inherited from
 
-Uint32Array.indexOf
+Uint8ClampedArray.indexOf
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3635
+node_modules/typescript/lib/lib.es5.d.ts:2509
 
 ___
 
@@ -527,11 +518,11 @@ Adds all the elements of an array separated by the specified separator string.
 
 #### Inherited from
 
-Uint32Array.join
+Uint8ClampedArray.join
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3642
+node_modules/typescript/lib/lib.es5.d.ts:2516
 
 ___
 
@@ -547,11 +538,11 @@ Returns an list of keys in the array
 
 #### Inherited from
 
-Uint32Array.keys
+Uint8ClampedArray.keys
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.iterable.d.ts:425
+node_modules/typescript/lib/lib.es2015.iterable.d.ts:309
 
 ___
 
@@ -574,17 +565,17 @@ Returns the index of the last occurrence of a value in an array.
 
 #### Inherited from
 
-Uint32Array.lastIndexOf
+Uint8ClampedArray.lastIndexOf
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3650
+node_modules/typescript/lib/lib.es5.d.ts:2524
 
 ___
 
 ### map
 
-▸ **map**(`callbackfn`, `thisArg?`): `Uint32Array`
+▸ **map**(`callbackfn`, `thisArg?`): `Uint8ClampedArray`
 
 Calls a defined callback function on each element of an array, and returns an array that
 contains the results.
@@ -593,20 +584,20 @@ contains the results.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`value`: `number`, `index`: `number`, `array`: `Uint32Array`) => `number` | A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`value`: `number`, `index`: `number`, `array`: `Uint8ClampedArray`) => `number` | A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array. |
 | `thisArg?` | `any` | An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value. |
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.map
+Uint8ClampedArray.map
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3665
+node_modules/typescript/lib/lib.es5.d.ts:2539
 
 ___
 
@@ -622,7 +613,7 @@ call to the callback function.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `number` | A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `number` | A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array. |
 
 #### Returns
 
@@ -630,11 +621,11 @@ call to the callback function.
 
 #### Inherited from
 
-Uint32Array.reduce
+Uint8ClampedArray.reduce
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3677
+node_modules/typescript/lib/lib.es5.d.ts:2551
 
 ▸ **reduce**(`callbackfn`, `initialValue`): `number`
 
@@ -642,7 +633,7 @@ node_modules/typescript/lib/lib.es5.d.ts:3677
 
 | Name | Type |
 | :------ | :------ |
-| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `number` |
+| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `number` |
 | `initialValue` | `number` |
 
 #### Returns
@@ -651,11 +642,11 @@ node_modules/typescript/lib/lib.es5.d.ts:3677
 
 #### Inherited from
 
-Uint32Array.reduce
+Uint8ClampedArray.reduce
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3678
+node_modules/typescript/lib/lib.es5.d.ts:2552
 
 ▸ **reduce**<`U`\>(`callbackfn`, `initialValue`): `U`
 
@@ -673,7 +664,7 @@ call to the callback function.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`previousValue`: `U`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `U` | A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`previousValue`: `U`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `U` | A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array. |
 | `initialValue` | `U` | If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value. |
 
 #### Returns
@@ -682,11 +673,11 @@ call to the callback function.
 
 #### Inherited from
 
-Uint32Array.reduce
+Uint8ClampedArray.reduce
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3690
+node_modules/typescript/lib/lib.es5.d.ts:2564
 
 ___
 
@@ -702,7 +693,7 @@ argument in the next call to the callback function.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `number` | A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `number` | A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. |
 
 #### Returns
 
@@ -710,11 +701,11 @@ argument in the next call to the callback function.
 
 #### Inherited from
 
-Uint32Array.reduceRight
+Uint8ClampedArray.reduceRight
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3702
+node_modules/typescript/lib/lib.es5.d.ts:2576
 
 ▸ **reduceRight**(`callbackfn`, `initialValue`): `number`
 
@@ -722,7 +713,7 @@ node_modules/typescript/lib/lib.es5.d.ts:3702
 
 | Name | Type |
 | :------ | :------ |
-| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `number` |
+| `callbackfn` | (`previousValue`: `number`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `number` |
 | `initialValue` | `number` |
 
 #### Returns
@@ -731,11 +722,11 @@ node_modules/typescript/lib/lib.es5.d.ts:3702
 
 #### Inherited from
 
-Uint32Array.reduceRight
+Uint8ClampedArray.reduceRight
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3703
+node_modules/typescript/lib/lib.es5.d.ts:2577
 
 ▸ **reduceRight**<`U`\>(`callbackfn`, `initialValue`): `U`
 
@@ -753,7 +744,7 @@ argument in the next call to the callback function.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `callbackfn` | (`previousValue`: `U`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint32Array`) => `U` | A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. |
+| `callbackfn` | (`previousValue`: `U`, `currentValue`: `number`, `currentIndex`: `number`, `array`: `Uint8ClampedArray`) => `U` | A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array. |
 | `initialValue` | `U` | If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value. |
 
 #### Returns
@@ -762,31 +753,31 @@ argument in the next call to the callback function.
 
 #### Inherited from
 
-Uint32Array.reduceRight
+Uint8ClampedArray.reduceRight
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3715
+node_modules/typescript/lib/lib.es5.d.ts:2589
 
 ___
 
 ### reverse
 
-▸ **reverse**(): `Uint32Array`
+▸ **reverse**(): `Uint8ClampedArray`
 
 Reverses the elements in an Array.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.reverse
+Uint8ClampedArray.reverse
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3720
+node_modules/typescript/lib/lib.es5.d.ts:2594
 
 ___
 
@@ -809,17 +800,17 @@ Sets a value or an array of values.
 
 #### Inherited from
 
-Uint32Array.set
+Uint8ClampedArray.set
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3727
+node_modules/typescript/lib/lib.es5.d.ts:2601
 
 ___
 
 ### slice
 
-▸ **slice**(`start?`, `end?`): `Uint32Array`
+▸ **slice**(`start?`, `end?`): `Uint8ClampedArray`
 
 Returns a section of an array.
 
@@ -832,15 +823,15 @@ Returns a section of an array.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.slice
+Uint8ClampedArray.slice
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3734
+node_modules/typescript/lib/lib.es5.d.ts:2608
 
 ___
 
@@ -854,7 +845,7 @@ Determines whether the specified callback function returns true for any element 
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint32Array`) => `unknown` | A function that accepts up to three arguments. The some method calls the predicate function for each element in the array until the predicate returns a value which is coercible to the Boolean value true, or until the end of the array. |
+| `predicate` | (`value`: `number`, `index`: `number`, `array`: `Uint8ClampedArray`) => `unknown` | A function that accepts up to three arguments. The some method calls the predicate function for each element in the array until the predicate returns a value which is coercible to the Boolean value true, or until the end of the array. |
 | `thisArg?` | `any` | An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value. |
 
 #### Returns
@@ -863,17 +854,17 @@ Determines whether the specified callback function returns true for any element 
 
 #### Inherited from
 
-Uint32Array.some
+Uint8ClampedArray.some
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3744
+node_modules/typescript/lib/lib.es5.d.ts:2618
 
 ___
 
 ### sort
 
-▸ **sort**(`compareFn?`): [`IndexLookupTable`](../wiki/IndexLookupTable)
+▸ **sort**(`compareFn?`): [`FrameBuffer`](../wiki/FrameBuffer)
 
 Sorts an array.
 
@@ -885,23 +876,23 @@ Sorts an array.
 
 #### Returns
 
-[`IndexLookupTable`](../wiki/IndexLookupTable)
+[`FrameBuffer`](../wiki/FrameBuffer)
 
 #### Inherited from
 
-Uint32Array.sort
+Uint8ClampedArray.sort
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3755
+node_modules/typescript/lib/lib.es5.d.ts:2629
 
 ___
 
 ### subarray
 
-▸ **subarray**(`begin?`, `end?`): `Uint32Array`
+▸ **subarray**(`begin?`, `end?`): `Uint8ClampedArray`
 
-Gets a new Uint32Array view of the ArrayBuffer store for this array, referencing the elements
+Gets a new Uint8ClampedArray view of the ArrayBuffer store for this array, referencing the elements
 at begin, inclusive, up to end, exclusive.
 
 #### Parameters
@@ -913,15 +904,15 @@ at begin, inclusive, up to end, exclusive.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.subarray
+Uint8ClampedArray.subarray
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3763
+node_modules/typescript/lib/lib.es5.d.ts:2637
 
 ___
 
@@ -937,11 +928,11 @@ Converts a number to a string by using the current locale.
 
 #### Inherited from
 
-Uint32Array.toLocaleString
+Uint8ClampedArray.toLocaleString
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3768
+node_modules/typescript/lib/lib.es5.d.ts:2642
 
 ___
 
@@ -957,31 +948,31 @@ Returns a string representation of an array.
 
 #### Inherited from
 
-Uint32Array.toString
+Uint8ClampedArray.toString
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3773
+node_modules/typescript/lib/lib.es5.d.ts:2647
 
 ___
 
 ### valueOf
 
-▸ **valueOf**(): `Uint32Array`
+▸ **valueOf**(): `Uint8ClampedArray`
 
 Returns the primitive value of the specified object.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.valueOf
+Uint8ClampedArray.valueOf
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3776
+node_modules/typescript/lib/lib.es5.d.ts:2650
 
 ___
 
@@ -997,17 +988,17 @@ Returns an list of values in the array
 
 #### Inherited from
 
-Uint32Array.values
+Uint8ClampedArray.values
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.iterable.d.ts:429
+node_modules/typescript/lib/lib.es2015.iterable.d.ts:314
 
 ___
 
 ### from
 
-▸ `Static` **from**(`arrayLike`): `Uint32Array`
+▸ `Static` **from**(`arrayLike`): `Uint8ClampedArray`
 
 Creates an array from an array-like or iterable object.
 
@@ -1019,17 +1010,17 @@ Creates an array from an array-like or iterable object.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.from
+Uint8ClampedArray.from
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3802
+node_modules/typescript/lib/lib.es5.d.ts:2676
 
-▸ `Static` **from**<`T`\>(`arrayLike`, `mapfn`, `thisArg?`): `Uint32Array`
+▸ `Static` **from**<`T`\>(`arrayLike`, `mapfn`, `thisArg?`): `Uint8ClampedArray`
 
 Creates an array from an array-like or iterable object.
 
@@ -1049,17 +1040,17 @@ Creates an array from an array-like or iterable object.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.from
+Uint8ClampedArray.from
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3810
+node_modules/typescript/lib/lib.es5.d.ts:2684
 
-▸ `Static` **from**(`arrayLike`, `mapfn?`, `thisArg?`): `Uint32Array`
+▸ `Static` **from**(`arrayLike`, `mapfn?`, `thisArg?`): `Uint8ClampedArray`
 
 Creates an array from an array-like or iterable object.
 
@@ -1073,21 +1064,21 @@ Creates an array from an array-like or iterable object.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.from
+Uint8ClampedArray.from
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2015.iterable.d.ts:441
+node_modules/typescript/lib/lib.es2015.iterable.d.ts:327
 
 ___
 
 ### of
 
-▸ `Static` **of**(`...items`): `Uint32Array`
+▸ `Static` **of**(`...items`): `Uint8ClampedArray`
 
 Returns a new array from a set of elements.
 
@@ -1099,12 +1090,12 @@ Returns a new array from a set of elements.
 
 #### Returns
 
-`Uint32Array`
+`Uint8ClampedArray`
 
 #### Inherited from
 
-Uint32Array.of
+Uint8ClampedArray.of
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:3796
+node_modules/typescript/lib/lib.es5.d.ts:2670
