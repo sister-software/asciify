@@ -9,22 +9,22 @@
  * @author Teffen Ellis
  */
 
-import { FrameBuffer, readFromImage } from './readers.mjs'
 import {
   Canvas2dContextLike,
   CanvasLike,
-  CharacterCoords,
   createCanvasLike,
   isCanvasLike,
   isWebGLRenderer,
-  LookupTable,
-  LuminanceCharacterCodeMap,
   pluck2dContext,
-  TextureCache,
-} from './utils.mjs'
+} from './utils/canvas.mjs'
+import { CharacterCoords, LookupTable } from './utils/LookupTable.mjs'
+import { LuminanceCharacterCodeMap } from './utils/LuminanceCharacterCodeMap.mjs'
+import { FrameBuffer, readFromImage } from './utils/readers.mjs'
+import { calculateTextureMetrics, TextureCache, TextureMetrics } from './utils/TextureCache.mjs'
 
 import * as THREE from 'three'
-import { AsciifyOptions, createDefaultOptions } from './configuration.mjs'
+import { AsciifyOptions } from './options/common.mjs'
+import { createDefaultOptions } from './options/mod.mjs'
 
 /**
  * Converts images, videos, and 3D renders into ASCII art.
@@ -93,16 +93,11 @@ export class Asciify {
    * @see {@linkcode Asciify.setOptions}
    * @see {@linkcode AsciifyOptions}
    */
-  public options!: AsciifyOptions
+  public options: AsciifyOptions = {} as AsciifyOptions
 
   //#endregion
 
   //#region Protected Properties
-
-  /**
-   * The function used to draw the ASCII art to the canvas.
-   * @ignore */
-  protected _drawFn!: DrawFn
 
   /**
    * Computed character size in pixels.
@@ -110,7 +105,13 @@ export class Asciify {
   protected _characterSize!: number
 
   protected _luminanceCodeMap!: LuminanceCharacterCodeMap
+  protected _textureMetrics!: TextureMetrics
   protected _textureCache!: TextureCache
+
+  /**
+   * @ignore
+   */
+  protected _luminanceCache!: Uint8Array
 
   /**
    * The lookup table is used to map the RGBA values of each pixel to a character.
@@ -127,7 +128,7 @@ export class Asciify {
    * @see {@linkcode FrameBuffer}
    * @internal
    */
-  protected _frameBuffer!: FrameBuffer
+  protected _frameBuffer!: Uint8ClampedArray
 
   /**
    * @internal
@@ -140,8 +141,6 @@ export class Asciify {
    * @ignore
    */
   protected _scratchCtx!: Canvas2dContextLike
-
-  protected _threeRenderer!: THREE.WebGLRenderTarget
 
   //#endregion
 
@@ -162,7 +161,6 @@ export class Asciify {
 
       this.canvas = outputCanvas
       this.ctx = this.canvas.getContext('2d', {
-        alpha: false,
         desynchronized: true,
       }) as CanvasRenderingContext2D
     } else {
@@ -185,8 +183,7 @@ export class Asciify {
      */
     luminance: number
   ) {
-    const characterCode = this._luminanceCodeMap.get(luminance)!
-    return String.fromCharCode(characterCode)
+    return this._luminanceCodeMap.get(luminance)!
   }
 
   /**
@@ -208,29 +205,39 @@ export class Asciify {
    */
   public setSize(
     /** The width of the ASCII art canvas. */
-    nextWidth: number,
+    nextWidth?: number,
     /** The height of the ASCII art canvas. */
-    nextHeight: number,
-    /** An optional source canvas to pass to {@linkcode Asciify.resize} */
-    imageSource: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget = this._scratchCtx.canvas
+    nextHeight?: number,
+    /** An optional source canvas to pass to {@linkcode Asciify.applySizeTo} */
+    imageSource?: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget
   ): void {
     const { pixelRatio } = this.options
+
+    // First, trigger a resize event on the canvas to make sure it's dimensions are updated.
+    if (typeof nextWidth !== 'undefined') {
+      this.canvas.width = Math.floor(nextWidth * pixelRatio)
+    }
+
+    if (typeof nextHeight !== 'undefined') {
+      this.canvas.height = Math.floor(nextHeight * pixelRatio)
+    }
+
     if (this.canvas instanceof HTMLCanvasElement) {
-      // First, trigger a resize event on the canvas to make sure it's dimensions are updated.
-      this.canvas.width = nextWidth
-      this.canvas.height = nextHeight
       const dipRect = this.canvas.getBoundingClientRect()
 
       // Then, update the canvas dimensions to match the device pixel ratio.
       this.canvas.width = Math.floor(pixelRatio * dipRect.right) - Math.floor(pixelRatio * dipRect.left)
       this.canvas.height = Math.floor(pixelRatio * dipRect.bottom) - Math.floor(pixelRatio * dipRect.top)
-    } else {
-      this.canvas.width = Math.floor(nextWidth * pixelRatio)
-      this.canvas.height = Math.floor(nextHeight * pixelRatio)
     }
 
     this._updateContextStyles()
-    this.resize(imageSource)
+
+    // We always update the internal scratch canvas out of convenience for the user.
+    this.applySizeTo(this._scratchCtx.canvas)
+
+    if (imageSource) {
+      this.applySizeTo(imageSource)
+    }
   }
 
   /**
@@ -244,11 +251,9 @@ export class Asciify {
    * @see {@linkcode Asciify.setSize}
    * @see {@linkcode Asciify.setOptions}
    */
-  public resize(
-    imageSource: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget = this._scratchCtx.canvas
-  ): void {
+  public applySizeTo(imageSource: CanvasLike | THREE.WebGLRenderer | THREE.WebGLRenderTarget): void {
     if (isWebGLRenderer(imageSource)) {
-      imageSource.setSize(this.columnCount, this.rowCount)
+      imageSource.setSize(this.columnCount, this.rowCount, false)
     } else {
       imageSource.width = this.columnCount
       imageSource.height = this.rowCount
@@ -260,12 +265,11 @@ export class Asciify {
    * Useful for changing the asciify instance on the fly.
    */
   public setOptions(nextOptions: Partial<AsciifyOptions> = {}): void {
-    this.options = createDefaultOptions(nextOptions)
+    this.options = createDefaultOptions({ ...this.options, ...nextOptions })
 
     const {
       // -- Options --
       characterSet,
-      mode,
       fontSize,
       fontFamily,
       characterSpacingRatio,
@@ -275,35 +279,25 @@ export class Asciify {
       debug,
     } = this.options
 
-    switch (mode) {
-      case 'color':
-        this._drawFn = this._drawColor
-        break
-
-      case 'grayscale':
-        this._drawFn = this._drawGrayscale
-        break
-      case 'block':
-        this._drawFn = this._drawBlock
-    }
-
     this._luminanceCodeMap = new LuminanceCharacterCodeMap(characterSet, contrastRatio)
+    this._textureMetrics = calculateTextureMetrics(fontSize, pixelRatio)
+
     this._textureCache = new TextureCache(
       this._luminanceCodeMap,
-      fontSize,
+      this._textureMetrics,
       fontFamily,
-      pixelRatio,
       backgroundColor,
       debug
     )
+
     this._characterSize = fontSize * characterSpacingRatio
 
     this._scratchCtx = pluck2dContext(this.options.scratchCanvas, {
       willReadFrequently: true,
+      alpha: true,
     })
 
-    this._updateContextStyles()
-    this.resize(this._scratchCtx.canvas)
+    this.setSize()
   }
 
   /**
@@ -318,10 +312,13 @@ export class Asciify {
      * The image to read pixels from.
      * This will be resized to match the next given `canvas` argument.
      */
-    imageSource: ImageBitmapSource
+    imageSource: CanvasImageSource
   ): Promise<FrameBuffer> {
+    this.clearFrameBuffers()
+    this.clearCanvas()
+
     const rgbaBuffer = await readFromImage(imageSource, this._scratchCtx)
-    this.rasterize(rgbaBuffer, true)
+    this.rasterize(rgbaBuffer)
 
     return rgbaBuffer
   }
@@ -341,8 +338,26 @@ export class Asciify {
      * The WebGL context to read from. Defaults to the context of the renderer.
      * You should provide this if you'd like to cache the context once and reuse it.
      */
-    ctx = renderer.getContext()
+    ctx = renderer.getContext(),
+    /**
+     * Whether the canvas should be cleared before rasterizing the next frame.
+     * This option is useful when composing multiple render sources onto the same canvas.
+     */
+    clearCanvas?: boolean,
+    /**
+     * Whether the frame buffer should be reset.
+     * This option is useful if you're handling frame buffer management yourself.
+     */
+    resetFrameBuffers?: boolean
   ): void {
+    if (clearCanvas) {
+      this.clearCanvas()
+    }
+
+    if (resetFrameBuffers) {
+      this.clearFrameBuffers()
+    }
+
     ctx.readPixels(
       0,
       0,
@@ -353,12 +368,7 @@ export class Asciify {
       this._scratchFrameBuffer
     )
 
-    this.rasterize(
-      this._scratchFrameBuffer,
-      false,
-      this._lookupTable.pixelIndexFlippedY,
-      this._lookupTable.coordsFlipped
-    )
+    this.rasterize(this._scratchFrameBuffer, this._lookupTable.pixelIndexFlippedY, this._lookupTable.coordsFlipped)
   }
 
   /**
@@ -375,11 +385,6 @@ export class Asciify {
      * A buffer containing the RGBA values of the image.
      */
     nextFrameBuffer: FrameBuffer,
-
-    /**
-     * Whether to persist the canvas. Useful when composing multiple images.
-     */
-    resetFramebuffer = false,
     /**
      * An optional lookup table to use for the next frame.
      */
@@ -388,9 +393,9 @@ export class Asciify {
      */
     coords: CharacterCoords = this._lookupTable.coords
   ): void {
-    if (resetFramebuffer) {
-      this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
-    }
+    const textureWidth = this._textureMetrics.width
+    const textureHeight = this._textureMetrics.height
+    const colorize = this.options.colorize
 
     for (let cursorIndex = 0; cursorIndex < pixelIndex.length; cursorIndex += 4) {
       const redIndex = pixelIndex[cursorIndex]
@@ -415,15 +420,62 @@ export class Asciify {
 
       // Approximate of luminance. See https://en.wikipedia.org/wiki/Relative_luminance
       // This gives us a number between 0 and 255.
-      const luminance = (red * 299 + green * 587 + blue * 114) >> 10
-      // Now, we need to find the character texture that best matches the luminance...
-      const sourceTexture = this._textureCache.get(luminance)!
+      // const luminance = (red * 299 + green * 587 + blue * 114) >> 10
+      const luminance = (red + red + red + blue + green + green + green + green) >> 3
 
-      const coord = coords.get(cursorIndex)!
-      this._drawFn(coord[0], coord[1], red, green, blue, luminance, sourceTexture)
+      if (this._luminanceCache[cursorIndex] === luminance) {
+        continue
+      }
+
+      this._luminanceCache[cursorIndex] = luminance
+
+      const [x, y] = coords.get(cursorIndex)!
+      // this.ctx.fillRect(coord[0], coord[1], this._textureMetrics.width, this._textureMetrics.height)
+      // Now, we need to find the character texture that best matches the luminance...
+      const texture = this._textureCache[luminance]!
+
+      if (colorize) {
+        this.ctx.globalCompositeOperation = 'source-over'
+        // this.ctx.fillStyle = '#' + ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
+        this.ctx.fillStyle = 'rgba(' + red + ',' + green + ',' + blue + ', 1)'
+      }
+      this.ctx.fillRect(x, y, textureWidth, textureHeight)
+      this.ctx.globalCompositeOperation = 'xor'
+
+      // We include the dirty rectangle to avoid clearing the entire canvas.
+      this.ctx.drawImage(texture.canvas, 0, 0, textureWidth, textureHeight, x, y, textureWidth, textureHeight)
     }
 
     this._frameBuffer.set(nextFrameBuffer)
+  }
+
+  /**
+   * Clears the frame buffers.
+   * Asciify will automatically handle this for you in most cases.
+   */
+  public clearFrameBuffers(): void {
+    this._luminanceCache = new Uint8Array(this.columnCount * this.rowCount)
+
+    this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+    this._scratchFrameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+  }
+
+  /**
+   * Clears the canvas.
+   * Asciify will automatically handle this for you in most cases.
+   */
+  public clearCanvas(): void {
+    const { backgroundColor } = this.options
+    this.ctx.globalCompositeOperation = 'source-over'
+
+    this.ctx.fillStyle = backgroundColor
+    this._scratchCtx.fillStyle = backgroundColor
+
+    this._scratchCtx.fillRect(0, 0, this._scratchCtx.canvas.width, this._scratchCtx.canvas.height)
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+    this.ctx.fillStyle = 'white'
+    this.ctx.save()
   }
 
   //#endregion
@@ -432,11 +484,9 @@ export class Asciify {
 
   /** @ignore */
   protected _updateContextStyles(): void {
-    const { fontSize, fontFamily, pixelRatio, backgroundColor } = this.options
-    this.ctx.font = `${fontSize * pixelRatio}px ${fontFamily}`
+    const { fontSize, fontFamily, pixelRatio } = this.options
 
-    this.ctx.fillStyle = backgroundColor
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    this.ctx.font = `${fontSize * pixelRatio}px ${fontFamily}`
 
     // The canvas is split into a grid of cells.
     // The width and height of each cell is determined by the font size and device pixel ratio.
@@ -451,85 +501,9 @@ export class Asciify {
     this._offsetY = (trueRowCount - this.rowCount) * this._characterSize
 
     this._lookupTable = new LookupTable(this.rowCount, this.columnCount, this._characterSize, pixelRatio)
-    this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
-    this._scratchFrameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
+
+    this.clearFrameBuffers()
+    this.clearCanvas()
   }
-
-  /**
-   * Draws a single ASCII character to the canvas in the given color.
-   * @internal
-   */
-  protected _drawColor: DrawFn = (x, y, red, green, blue, _luminance, sourceTexture) => {
-    const data = new Uint8ClampedArray(sourceTexture.data, 0, sourceTexture.data.length)
-
-    // The & 0xff operation is used to extract the least significant 8 bits of the color values,
-    // which correspond to the red, green, and blue color channels.
-    // The & 0xff operation ensures that the resulting color values are within the range of 0 - 255,
-    // which is the range of valid RGB values.
-    for (let i = 0; i < data.length; i += 4) {
-      data[i] = ((data[i] * (red & 255)) / 255) & 255
-      data[i + 1] = ((data[i + 1] * (green & 255)) / 255) & 255
-      data[i + 2] = ((data[i + 2] * (blue & 255)) / 255) & 255
-    }
-
-    this.ctx.putImageData(
-      new ImageData(data, sourceTexture.width, sourceTexture.height, globalImageDataSettings),
-      x + this._offsetX,
-      y + this._offsetY,
-      0,
-      0,
-      sourceTexture.width,
-      sourceTexture.height
-    )
-  }
-
-  /**
-   * Draws a single ASCII character to the canvas in grayscale.
-   * @internal
-   */
-  protected _drawGrayscale: DrawFn = (x, y, _red, _green, _blue, luminance, sourceTexture) => {
-    const data = new Uint8ClampedArray(sourceTexture.data, 0, sourceTexture.data.length)
-
-    this.ctx.putImageData(
-      new ImageData(data, sourceTexture.width, sourceTexture.height, globalImageDataSettings),
-      x + this._offsetX,
-      y + this._offsetY,
-      0,
-      0,
-      sourceTexture.width,
-      sourceTexture.height
-    )
-  }
-
-  /**
-   * Draws a single block shape to the canvas.
-   * @internal
-   */
-  protected _drawBlock: DrawFn = (x, y, red, green, blue) => {
-    this.ctx.fillStyle = 'rgb(' + red + ' ' + green + ' ' + blue + ')'
-
-    this.ctx.fillRect(x, y, this.options.fontSize, this.options.fontSize)
-  }
-
   //#endregion
 }
-
-/**
- * Signature for a draw function.
- *
- * @internal
- * @ignore
- */
-export type DrawFn = (
-  this: Asciify,
-  x: number,
-  y: number,
-  red: number,
-  green: number,
-  blue: number,
-  luminance: number,
-  sourceTexture: ImageData
-) => void
-
-/** @ignore */
-const globalImageDataSettings: Readonly<ImageDataSettings> = { colorSpace: 'srgb' }

@@ -9,7 +9,7 @@
  * @author Teffen Ellis
  */
 
-import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './utils.mjs'
+import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './canvas.mjs'
 
 export class FrameBuffer extends Uint8ClampedArray {
   constructor(rowCount: number, columnCount: number) {
@@ -53,7 +53,7 @@ export async function readFromImage(
    * The image to read pixels from.
    * This will be resized to match the next given `canvas` argument.
    */
-  sourceImage: ImageBitmapSource,
+  sourceImage: CanvasImageSource,
   /**
    * The 2D context to read from.
    *
@@ -73,8 +73,9 @@ export async function readFromImage(
     resizeQuality: 'high',
   })
 
-  ctx.drawImage(bitmap, 0, 0, resizeWidth, resizeHeight)
+  ctx.drawImage(bitmap, 0, 0, resizeWidth, resizeHeight, 0, 0, resizeWidth, resizeHeight)
 
+  bitmap.close()
   return readFromCanvas(ctx)
 }
 

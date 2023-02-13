@@ -10,6 +10,5 @@
  */
 
 export * from './Asciify.mjs'
-export * from './configuration.mjs'
-export * from './readers.mjs'
-export * from './utils.mjs'
+export * from './options/mod.mjs'
+export * from './utils/mod.mjs'

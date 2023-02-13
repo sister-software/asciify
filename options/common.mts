@@ -9,21 +9,7 @@
  * @author Teffen Ellis
  */
 
-import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './utils.mjs'
-
-/**
- * A default character set to use for the ASCII art.
- * This looks good with both black and white and color output.
- *
- * @category Configuration
- */
-export const DEFAULT_CHAR_SET = `..,'":;-~=+*#&%@`.split('')
-
-/**
- * The fill style mode used to paint the canvas.
- * @category Configuration
- */
-export type ASCIIMode = 'grayscale' | 'color' | 'block'
+import { Canvas2dContextLike, CanvasLike } from '../utils/canvas.mjs'
 
 /**
  * The options used to configure the ASCII art.
@@ -35,11 +21,11 @@ export interface AsciifyOptions {
    * Characters should be in order of "brightness",
    * with the first character being the least bright and the last being the most bright.
    *
-   * @default DEFAULT_CHAR_SET
-   * @see {@linkcode DEFAULT_CHAR_SET}
-   * #see {@linkcode AsciifyOptions.contrastRatio}
+   * @default {CharacterPresets.ascii}
+   * @see {@linkcode Presets}
+   * @see {@linkcode AsciifyOptions.contrastRatio}
    */
-  characterSet: string[]
+  characterSet: string | string[]
 
   /**
    * The font family to use for the ASCII art.
@@ -71,17 +57,11 @@ export interface AsciifyOptions {
   characterSpacingRatio: number
 
   /**
-   * The mode to use for the ASCII art.
+   * Whether to use color in the ASCII art.
    *
-   * Can be one of the following:
-   *
-   * - `'color'` Color
-   * - `'grayscale'` Black and white
-   * - `'block'` Color block characters
-   *
-   * @default 'color'
+   * @default true
    */
-  mode: ASCIIMode
+  colorize: boolean
 
   /**
    * The background color of the character set.
@@ -90,7 +70,7 @@ export interface AsciifyOptions {
    * Note that this will only apply to the background of the ASCII characters.
    * The source image pixel data ultimately determines which character is used.
    *
-   * @default black
+   * @default '#000000'
    */
   backgroundColor: string
 
@@ -133,37 +113,20 @@ export interface AsciifyOptions {
   debug: boolean
 }
 
+export const DEFAULT_PIXEL_RATIO = typeof devicePixelRatio !== 'undefined' ? devicePixelRatio : 1
+export const DEFAULT_FONT_SIZE = 12
+export const DEFAULT_CONTRAST_RATIO = 3
+export const DEFAULT_CHARACTER_SET = `..,'":;-~=+*#&%@`
+
 /**
- * The default options for the ASCII art.
- * @internal
- * @ignore
+ * Type utility that allows number properties to be strings. Useful for accepting form inputs.
  */
-export function createDefaultOptions(options: Partial<AsciifyOptions>): AsciifyOptions {
-  const mode = options.mode ?? 'color'
-  const characterSpacingRatio = options.characterSpacingRatio ?? 1
-  const characterSet = options.characterSet ?? DEFAULT_CHAR_SET
-  const fontSize = options.fontSize ?? 10
-  const fontFamily = options.fontFamily ?? 'monospace'
-  const backgroundColor = options.backgroundColor ?? 'black'
-  const pixelRatio = typeof devicePixelRatio !== 'undefined' ? devicePixelRatio : 1
-  const flipY = options.flipY ?? true
-  const contrastRatio = options.contrastRatio ?? 3
-  const debug = options.debug ?? false
-  const scratchCanvas = options.scratchCanvas ?? createCanvasLike('offscreen')
+export type WithStringlyNumbers<T> = {
+  [P in keyof T]: T[P] extends number ? T[P] | string : T[P]
+}
 
-  const defaultOptions: AsciifyOptions = {
-    characterSet,
-    fontSize,
-    fontFamily,
-    backgroundColor,
-    pixelRatio,
-    mode,
-    flipY,
-    contrastRatio,
-    characterSpacingRatio: characterSpacingRatio - (mode === 'block' ? 0.5 : 0),
-    debug,
-    scratchCanvas,
-  }
+export function normalizeNumericOption(min: number, value: string | number, max: number): number {
+  const normalizedValue = typeof value === 'string' ? parseInt(value, 10) : value
 
-  return defaultOptions
+  return Math.max(Math.min(normalizedValue, max), min)
 }
