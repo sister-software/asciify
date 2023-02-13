@@ -7,7 +7,7 @@
  * @category Utility
  * @internal
  */
-export class LuminanceCharacterCodeMap extends Map<
+export class LuminanceCharacterMap extends Map<
   /** The luminance of the pixel. 0 to 255. */
   number,
   /** The character code of the character to render. */

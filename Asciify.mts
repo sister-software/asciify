@@ -14,11 +14,12 @@ import {
   CanvasLike,
   createCanvasLike,
   isCanvasLike,
+  isHTMLCanvasElement,
   isWebGLRenderer,
   pluck2dContext,
 } from './utils/canvas.mjs'
 import { CharacterCoords, LookupTable } from './utils/LookupTable.mjs'
-import { LuminanceCharacterCodeMap } from './utils/LuminanceCharacterCodeMap.mjs'
+import { LuminanceCharacterMap } from './utils/LuminanceCharacterMap.mjs'
 import { FrameBuffer, readFromImage } from './utils/readers.mjs'
 import { calculateTextureMetrics, TextureCache, TextureMetrics } from './utils/TextureCache.mjs'
 
@@ -104,14 +105,9 @@ export class Asciify {
    * @ignore */
   protected _characterSize!: number
 
-  protected _luminanceCodeMap!: LuminanceCharacterCodeMap
+  protected _luminanceCodeMap!: LuminanceCharacterMap
   protected _textureMetrics!: TextureMetrics
   protected _textureCache!: TextureCache
-
-  /**
-   * @ignore
-   */
-  protected _luminanceCache!: Uint8Array
 
   /**
    * The lookup table is used to map the RGBA values of each pixel to a character.
@@ -222,7 +218,7 @@ export class Asciify {
       this.canvas.height = Math.floor(nextHeight * pixelRatio)
     }
 
-    if (this.canvas instanceof HTMLCanvasElement) {
+    if (isHTMLCanvasElement(this.canvas)) {
       const dipRect = this.canvas.getBoundingClientRect()
 
       // Then, update the canvas dimensions to match the device pixel ratio.
@@ -275,20 +271,13 @@ export class Asciify {
       characterSpacingRatio,
       pixelRatio,
       contrastRatio,
-      backgroundColor,
       debug,
     } = this.options
 
-    this._luminanceCodeMap = new LuminanceCharacterCodeMap(characterSet, contrastRatio)
+    this._luminanceCodeMap = new LuminanceCharacterMap(characterSet, contrastRatio)
     this._textureMetrics = calculateTextureMetrics(fontSize, pixelRatio)
 
-    this._textureCache = new TextureCache(
-      this._luminanceCodeMap,
-      this._textureMetrics,
-      fontFamily,
-      backgroundColor,
-      debug
-    )
+    this._textureCache = new TextureCache(this._luminanceCodeMap, this._textureMetrics, fontFamily, debug)
 
     this._characterSize = fontSize * characterSpacingRatio
 
@@ -401,49 +390,36 @@ export class Asciify {
       const redIndex = pixelIndex[cursorIndex]
       const greenIndex = pixelIndex[cursorIndex + 1]
       const blueIndex = pixelIndex[cursorIndex + 2]
-      const alphaIndex = pixelIndex[cursorIndex + 3]
 
       const red = nextFrameBuffer[redIndex]
       const green = nextFrameBuffer[greenIndex]
       const blue = nextFrameBuffer[blueIndex]
-      const alpha = nextFrameBuffer[alphaIndex]
 
-      const cellIsUnchanged =
+      if (
         this._frameBuffer[redIndex] === red &&
         this._frameBuffer[greenIndex] === green &&
-        this._frameBuffer[blueIndex] === blue &&
-        this._frameBuffer[alphaIndex] === alpha
-
-      if (cellIsUnchanged) {
+        this._frameBuffer[blueIndex] === blue
+      ) {
         continue
       }
 
       // Approximate of luminance. See https://en.wikipedia.org/wiki/Relative_luminance
       // This gives us a number between 0 and 255.
-      // const luminance = (red * 299 + green * 587 + blue * 114) >> 10
       const luminance = (red + red + red + blue + green + green + green + green) >> 3
 
-      if (this._luminanceCache[cursorIndex] === luminance) {
-        continue
-      }
-
-      this._luminanceCache[cursorIndex] = luminance
-
       const [x, y] = coords.get(cursorIndex)!
-      // this.ctx.fillRect(coord[0], coord[1], this._textureMetrics.width, this._textureMetrics.height)
-      // Now, we need to find the character texture that best matches the luminance...
       const texture = this._textureCache[luminance]!
 
       if (colorize) {
-        this.ctx.globalCompositeOperation = 'source-over'
-        // this.ctx.fillStyle = '#' + ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
-        this.ctx.fillStyle = 'rgba(' + red + ',' + green + ',' + blue + ', 1)'
+        this.ctx.fillStyle = 'rgb(' + red + ',' + green + ',' + blue + ')'
       }
+
+      this.ctx.globalCompositeOperation = 'source-over'
       this.ctx.fillRect(x, y, textureWidth, textureHeight)
       this.ctx.globalCompositeOperation = 'xor'
 
       // We include the dirty rectangle to avoid clearing the entire canvas.
-      this.ctx.drawImage(texture.canvas, 0, 0, textureWidth, textureHeight, x, y, textureWidth, textureHeight)
+      this.ctx.drawImage(texture, 0, 0, textureWidth, textureHeight, x, y, textureWidth, textureHeight)
     }
 
     this._frameBuffer.set(nextFrameBuffer)
@@ -454,8 +430,6 @@ export class Asciify {
    * Asciify will automatically handle this for you in most cases.
    */
   public clearFrameBuffers(): void {
-    this._luminanceCache = new Uint8Array(this.columnCount * this.rowCount)
-
     this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
     this._scratchFrameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
   }
@@ -473,6 +447,16 @@ export class Asciify {
 
     this._scratchCtx.fillRect(0, 0, this._scratchCtx.canvas.width, this._scratchCtx.canvas.height)
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+    if (isHTMLCanvasElement(this.canvas)) {
+      // We apply a background color to the canvas element itself for a slight performance boost.
+      this.canvas.style.background = backgroundColor
+      // All containment rules are applied to the element to further improve performance.
+      this.canvas.style.contain = 'strict'
+      // Applying a null transform on the canvas forces the browser to use the GPU for rendering.
+      this.canvas.style.willChange = 'transform'
+      this.canvas.style.transform = 'translate3d(0, 0, 0)'
+    }
 
     this.ctx.fillStyle = 'white'
     this.ctx.save()

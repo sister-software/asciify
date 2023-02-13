@@ -93,3 +93,12 @@ export function pluck2dContext(
 
   return canvasLike as CanvasRenderingContext2D
 }
+
+/**
+ * Tests if a canvas-like object is an elemental canvas.
+ * Note that this only works in the same browser frame as the canvas was created.
+ * @ignore
+ */
+export function isHTMLCanvasElement(canvasLike: CanvasLike): canvasLike is HTMLCanvasElement {
+  return canvasLike instanceof HTMLCanvasElement
+}

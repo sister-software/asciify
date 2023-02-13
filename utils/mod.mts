@@ -1,5 +1,5 @@
 export * from './canvas.mjs'
 export * from './LookupTable.mjs'
-export * from './LuminanceCharacterCodeMap.mjs'
+export * from './LuminanceCharacterMap.mjs'
 export * from './readers.mjs'
 export * from './TextureCache.mjs'
