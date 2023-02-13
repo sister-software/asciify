@@ -6,8 +6,10 @@
 [![deno module](https://shield.deno.dev/x/asciify)](https://deno.land/x/asciify)
 ![npm](https://img.shields.io/npm/dm/@sister.software/asciify)
 
-- [**Three.js Demo**](https://asciify.sister.software/demo/3d/)
-- [**Image Demo**](https://asciify.sister.software/demo/image/)
+- Demos 🙌✨
+  - [**Three.js Spiral Shader**](https://asciify.sister.software/demo/sprial/)
+  - [**Bouncing Ball Animation**](https://asciify.sister.software/demo/3d/)
+  - [**Image Upload**](https://asciify.sister.software/demo/image/)
 - [API Documentation](https://github.com/sister-software/asciify/wiki)
 - [Source Code](https://github.com/sister-software/asciify)
 
@@ -23,7 +25,7 @@ weighing in at less than 3.5kb minified and gzipped, Asciify is a single file wi
 
 ### 🤸‍♀️ Flexible
 
-Asciify can rasterize images, videos, and 3D scenes. Anything that can be rendered to a canvas can be converted to ASCII art.
+Asciify can rasterize images, videos, and 3D scenes. Anything that can be rendered to a canvas can be converted to ASCII art. Asciify also supports custom fonts and character sets, so you can use it to create text art for any purpose!
 
 ## Installation
 

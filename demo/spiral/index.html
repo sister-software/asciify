@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <title>Asciify Three.js Spiral Demo</title>
+    <link rel="stylesheet" href="../common/styles.css" />
+
+    <script src="../common/polyfills.js"></script>
+
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "@sister.software/asciify": "https://esm.sh/@sister.software/asciify@2.0.2",
+          "dat.gui": "https://esm.sh/dat.gui@0.7.9",
+          "three": "https://esm.sh/three@0.149.0",
+          "stats-js": "https://esm.sh/stats-js@1.0.1",
+          "three/addons/": "https://esm.sh/three@0.149.0/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module" src="./main.mjs"></script>
+  </head>
+  <body>
+    <canvas id="demo" style="width: 100%; height: 100%"></canvas>
+  </body>
+</html>

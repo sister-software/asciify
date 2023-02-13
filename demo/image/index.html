@@ -2,52 +2,86 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Asciify Three.js Demo</title>
-    <script>
-      if (typeof OffscreenCanvas === 'undefined') {
-        window.OffscreenCanvas = class OffscreenCanvas {
-          constructor(width, height) {
-            return document.createElement('canvas')
-          }
-        }
-      }
-    </script>
+    <link rel="stylesheet" href="../common/styles.css" />
 
-    <!-- Import maps polyfill -->
-    <!-- Remove this when import maps will be widely supported -->
-    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script src="../common/polyfills.js"></script>
+
+    <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
     <style>
-      * {
-        box-sizing: border-box;
+      body {
+        background-color: #1a1a1a;
+        font-family: 'Courier New', Courier, monospace;
       }
-      html {
-        min-height: 100%;
+      main {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-rows: 60% auto;
+        height: 100vh;
       }
 
-      @media (prefers-color-scheme: dark) {
-        body {
-          /* height: -webkit-fill-available; */
-          background-color: #000;
-          color: #fff;
+      @media (min-width: 768px) {
+        main {
+          grid-template-columns: 60% auto;
+        }
+      }
+      .dg .close-button {
+        display: none;
+      }
+
+      #canvas-container {
+        position: relative;
+      }
+
+      #image-previewer {
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        height: 100%;
+        width: 50%;
+        max-width: 100%;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      #image-previewer-source {
+        position: absolute;
+        object-position: left;
+        inset: 0;
+        z-index: 2;
+        height: 100%;
+        width: 100%;
+      }
+
+      #resize-handle {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 0.75rem;
+        cursor: col-resize;
+        z-index: 3;
+        background-image: linear-gradient(90deg, grey 0%, grey 25%, lightgrey 25%, lightgrey 75%, grey 75%, grey);
+      }
+
+      html.debug #image-previewer {
+        display: block;
+      }
+
+      @media (max-width: 767px) {
+        #image-previewer {
+          display: none !important;
         }
       }
 
-      body {
-        height: 100vmax;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-          'Open Sans', 'Helvetica Neue', sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-
-      canvas#demo {
-        outline: 1px dashed red;
-        outline-offset: -2px;
-        cursor: crosshair;
-        image-orientation: from-image;
+      canvas {
+        outline: 1px dashed blueviolet;
+        outline-offset: 2px;
       }
     </style>
 
@@ -59,85 +93,59 @@
         }
       }
     </script>
-
-    <script type="module">
-      import { Asciify } from '@sister.software/asciify'
-      import { GUI } from 'dat.gui'
-
-      const startTime = Date.now()
-      const canvas = document.getElementById('demo')
-
-      const asciiOptions = {
-        fontSize: 10,
-        characterSpacingRatio: 1,
-        contrastRatio: 3,
-        mode: 'color',
-        backgroundColor: '#000000',
-        debug: false,
-      }
-      const asciify = new Asciify(canvas, asciiOptions)
-
-      const filePicker = document.getElementById('file-picker')
-      let fileRef = null
-      let timeoutRef = -1
-
-      filePicker.addEventListener('change', async (e) => {
-        const file = e.target.files[0]
-        fileRef = new File([file], file.name, { type: file.type })
-
-        await asciify.rasterizeImage(file)
-        filePicker.value = ''
-      })
-
-      // Expose asciify to the window for debugging
-      window.asciify = asciify
-
-      asciify.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight)
-
-      const onOptionChange = async () => {
-        clearTimeout(timeoutRef)
-        asciify.setOptions(asciiOptions)
-
-        timeoutRef = setTimeout(() => {
-          if (fileRef) {
-            asciify.rasterizeImage(fileRef)
-          }
-        }, 100)
-      }
-
-      const gui = new GUI({ name: 'Asciify Three.js Demo' })
-      const asciiFolder = gui.addFolder('Options')
-      asciiFolder.open()
-      asciiFolder.add(asciiOptions, 'fontSize').min(5).max(30).step(1).onChange(onOptionChange)
-      asciiFolder.add(asciiOptions, 'characterSpacingRatio').min(0.8).max(3).step(0.1).onChange(onOptionChange)
-      asciiFolder.add(asciiOptions, 'contrastRatio').min(0).max(5).step(1).onChange(onOptionChange)
-      asciiFolder.add(asciiOptions, 'mode', ['color', 'grayscale', 'block']).onChange(onOptionChange)
-      asciiFolder.addColor(asciiOptions, 'backgroundColor').onChange(onOptionChange)
-      asciiFolder.add(asciiOptions, 'debug').onChange(onOptionChange)
-
-      const onWindowResize = () => {
-        cancelAnimationFrame(timeoutRef)
-        asciify.setSize(window.innerWidth, window.innerHeight, renderer)
-
-        animate()
-      }
-
-      window.addEventListener('resize', onWindowResize)
-    </script>
+    <script type="module" src="./main.mjs"></script>
   </head>
   <body>
-    <section>
-      <h1>Asciify Image Demo</h1>
+    <main>
+      <section id="canvas-container">
+        <div id="image-previewer">
+          <img id="image-previewer-source" />
+          <div id="resize-handle"></div>
+        </div>
+      </section>
+      <section id="form-container">
+        <form>
+          <fieldset>
+            <legend>Select an image...</legend>
+            <label for="file-picker">Image Source</label>
+            <input type="file" id="file-picker" accept="image/*" />
+          </fieldset>
 
-      <form>
-        <fieldset>
-          <legend>Select an image...</legend>
-          <label for="file-picker">Image Source</label>
-          <input type="file" accept="image/*" id="file-picker" />
-        </fieldset>
-      </form>
-    </section>
+          <fieldset id="options-fieldset">
+            <legend>Options</legend>
+          </fieldset>
+        </form>
+      </section>
+    </main>
 
-    <canvas id="demo" style="width: 100%"></canvas>
+    <script>
+      const imagePreviewer = document.getElementById('image-previewer')
+      const resizeHandle = document.getElementById('resize-handle')
+
+      let isResizing = false
+      let startX = 0
+      let startWidth = 0
+
+      function onResizeStart(e) {
+        isResizing = true
+        startX = e.clientX
+        startWidth = parseInt(document.defaultView.getComputedStyle(imagePreviewer).width, 10)
+      }
+
+      function onResizeMove(e) {
+        if (!isResizing) return
+        const newWidth = startWidth + (e.clientX - startX)
+        imagePreviewer.style.width = `${newWidth}px`
+      }
+
+      function onResizeEnd() {
+        isResizing = false
+      }
+
+      resizeHandle.addEventListener('mousedown', onResizeStart)
+
+      document.documentElement.addEventListener('mousemove', onResizeMove, { passive: true })
+      document.documentElement.addEventListener('mouseup', onResizeEnd)
+    </script>
   </body>
 </html>
