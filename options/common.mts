@@ -10,6 +10,8 @@
  */
 
 import { Canvas2dContextLike, CanvasLike } from '../utils/canvas.mjs'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { OptionPreset } from './presets.mjs'
 
 /**
  * The options used to configure the ASCII art.
@@ -22,7 +24,7 @@ export interface AsciifyOptions {
    * with the first character being the least bright and the last being the most bright.
    *
    * @default {CharacterPresets.ascii}
-   * @see {@linkcode Presets}
+   * @see {@linkcode OptionPreset}
    * @see {@linkcode AsciifyOptions.contrastRatio}
    */
   characterSet: string | string[]
