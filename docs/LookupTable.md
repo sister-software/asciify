@@ -55,7 +55,7 @@ The length of this array is equal to the area of the row and column counts.
 
 #### Defined in
 
-[utils.mts:255](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L255)
+[utils/LookupTable.mts:42](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L42)
 
 ## Properties
 
@@ -65,7 +65,7 @@ The length of this array is equal to the area of the row and column counts.
 
 #### Defined in
 
-[utils.mts:255](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L255)
+[utils/LookupTable.mts:42](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L42)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-[utils.mts:252](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L252)
+[utils/LookupTable.mts:39](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L39)
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-[utils.mts:253](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L253)
+[utils/LookupTable.mts:40](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L40)
 
 ___
 
@@ -97,7 +97,7 @@ The lookup table used to map the RGBA buffer to the ASCII art canvas.
 
 #### Defined in
 
-[utils.mts:246](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L246)
+[utils/LookupTable.mts:33](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L33)
 
 ___
 
@@ -110,7 +110,7 @@ This is the same as [`pixelIndex`](../wiki/LookupTable#pixelindex), but with the
 
 #### Defined in
 
-[utils.mts:251](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L251)
+[utils/LookupTable.mts:38](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L38)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[utils.mts:255](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L255)
+[utils/LookupTable.mts:42](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L42)
 
 ## Accessors
 
@@ -134,4 +134,4 @@ ___
 
 #### Defined in
 
-[utils.mts:298](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L298)
+[utils/LookupTable.mts:85](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L85)

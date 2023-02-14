@@ -1,57 +1,53 @@
-# Class: LuminanceCharacterCodeMap
+# Class: LuminanceCharacterMap
 
 Given an array of 255 or less ASCII characters representing the brightness of each pixel,
 returns something like a radix-sorted array of 255 characters that are evenly spaced.
 
 This helps us avoid expensive operations like Math.floor() when rendering the ASCII art.
 
-**`See`**
-
-[`TypedOptimization::TryBuildCharacterCodeRadix`](https://github.com/v8/v8/blob/b584c57/src/compiler/typed-optimization.cc#L471)
-
 ## Hierarchy
 
-- `Map`<`number`, `number`\>
+- `Map`<`number`, `string`\>
 
-  ↳ **`LuminanceCharacterCodeMap`**
+  ↳ **`LuminanceCharacterMap`**
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](../wiki/LuminanceCharacterCodeMap#constructor)
+- [constructor](../wiki/LuminanceCharacterMap#constructor)
 
 ### Properties
 
-- [[toStringTag]](../wiki/LuminanceCharacterCodeMap#%5Btostringtag%5D)
-- [characterSet](../wiki/LuminanceCharacterCodeMap#characterset)
-- [size](../wiki/LuminanceCharacterCodeMap#size)
-- [[species]](../wiki/LuminanceCharacterCodeMap#%5Bspecies%5D)
+- [[toStringTag]](../wiki/LuminanceCharacterMap#%5Btostringtag%5D)
+- [characterSet](../wiki/LuminanceCharacterMap#characterset)
+- [size](../wiki/LuminanceCharacterMap#size)
+- [[species]](../wiki/LuminanceCharacterMap#%5Bspecies%5D)
 
 ### Methods
 
-- [[iterator]](../wiki/LuminanceCharacterCodeMap#%5Biterator%5D)
-- [clear](../wiki/LuminanceCharacterCodeMap#clear)
-- [delete](../wiki/LuminanceCharacterCodeMap#delete)
-- [entries](../wiki/LuminanceCharacterCodeMap#entries)
-- [forEach](../wiki/LuminanceCharacterCodeMap#foreach)
-- [get](../wiki/LuminanceCharacterCodeMap#get)
-- [has](../wiki/LuminanceCharacterCodeMap#has)
-- [keys](../wiki/LuminanceCharacterCodeMap#keys)
-- [set](../wiki/LuminanceCharacterCodeMap#set)
-- [values](../wiki/LuminanceCharacterCodeMap#values)
+- [[iterator]](../wiki/LuminanceCharacterMap#%5Biterator%5D)
+- [clear](../wiki/LuminanceCharacterMap#clear)
+- [delete](../wiki/LuminanceCharacterMap#delete)
+- [entries](../wiki/LuminanceCharacterMap#entries)
+- [forEach](../wiki/LuminanceCharacterMap#foreach)
+- [get](../wiki/LuminanceCharacterMap#get)
+- [has](../wiki/LuminanceCharacterMap#has)
+- [keys](../wiki/LuminanceCharacterMap#keys)
+- [set](../wiki/LuminanceCharacterMap#set)
+- [values](../wiki/LuminanceCharacterMap#values)
 
 ## Constructors
 
 ### constructor
 
-• **new LuminanceCharacterCodeMap**(`characterSet`, `contrastRatio`)
+• **new LuminanceCharacterMap**(`characterSet`, `contrastRatio`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `characterSet` | `string`[] |
+| `characterSet` | `string` \| `string`[] |
 | `contrastRatio` | `number` |
 
 #### Overrides
@@ -60,12 +56,12 @@ Map&lt;
   /** The luminance of the pixel. 0 to 255. */
   number,
   /** The character code of the character to render. */
-  number
+  string
 \&gt;.constructor
 
 #### Defined in
 
-[utils.mts:113](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L113)
+[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LuminanceCharacterMap.mts#L16)
 
 ## Properties
 
@@ -85,11 +81,11 @@ ___
 
 ### characterSet
 
-• `Readonly` **characterSet**: `string`[]
+• `Readonly` **characterSet**: `string` \| `string`[]
 
 #### Defined in
 
-[utils.mts:113](https://github.com/sister-software/asciify/blob/9750ae3/utils.mts#L113)
+[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LuminanceCharacterMap.mts#L16)
 
 ___
 
@@ -113,7 +109,7 @@ ___
 
 #### Inherited from
 
-Map.\_\_@species@1674
+Map.\_\_@species@1733
 
 #### Defined in
 
@@ -123,13 +119,13 @@ node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts:317
 
 ### [iterator]
 
-▸ **[iterator]**(): `IterableIterator`<[`number`, `number`]\>
+▸ **[iterator]**(): `IterableIterator`<[`number`, `string`]\>
 
 Returns an iterable of entries in the map.
 
 #### Returns
 
-`IterableIterator`<[`number`, `number`]\>
+`IterableIterator`<[`number`, `string`]\>
 
 #### Inherited from
 
@@ -187,13 +183,13 @@ ___
 
 ### entries
 
-▸ **entries**(): `IterableIterator`<[`number`, `number`]\>
+▸ **entries**(): `IterableIterator`<[`number`, `string`]\>
 
 Returns an iterable of key, value pairs for every entry in the map.
 
 #### Returns
 
-`IterableIterator`<[`number`, `number`]\>
+`IterableIterator`<[`number`, `string`]\>
 
 #### Inherited from
 
@@ -215,7 +211,7 @@ Executes a provided function once per each key/value pair in the Map, in inserti
 
 | Name | Type |
 | :------ | :------ |
-| `callbackfn` | (`value`: `number`, `key`: `number`, `map`: `Map`<`number`, `number`\>) => `void` |
+| `callbackfn` | (`value`: `string`, `key`: `number`, `map`: `Map`<`number`, `string`\>) => `void` |
 | `thisArg?` | `any` |
 
 #### Returns
@@ -234,7 +230,7 @@ ___
 
 ### get
 
-▸ **get**(`key`): `undefined` \| `number`
+▸ **get**(`key`): `undefined` \| `string`
 
 Returns a specified element from the Map object. If the value that is associated to the provided key is an object, then you will get a reference to that object and any change made to that object will effectively modify it inside the Map.
 
@@ -246,7 +242,7 @@ Returns a specified element from the Map object. If the value that is associated
 
 #### Returns
 
-`undefined` \| `number`
+`undefined` \| `string`
 
 Returns the element associated with the specified key. If no element is associated with the specified key, undefined is returned.
 
@@ -308,7 +304,7 @@ ___
 
 ### set
 
-▸ **set**(`key`, `value`): [`LuminanceCharacterCodeMap`](../wiki/LuminanceCharacterCodeMap)
+▸ **set**(`key`, `value`): [`LuminanceCharacterMap`](../wiki/LuminanceCharacterMap)
 
 Adds a new element with a specified key and value to the Map. If an element with the same key already exists, the element will be updated.
 
@@ -317,11 +313,11 @@ Adds a new element with a specified key and value to the Map. If an element with
 | Name | Type |
 | :------ | :------ |
 | `key` | `number` |
-| `value` | `number` |
+| `value` | `string` |
 
 #### Returns
 
-[`LuminanceCharacterCodeMap`](../wiki/LuminanceCharacterCodeMap)
+[`LuminanceCharacterMap`](../wiki/LuminanceCharacterMap)
 
 #### Inherited from
 
@@ -335,13 +331,13 @@ ___
 
 ### values
 
-▸ **values**(): `IterableIterator`<`number`\>
+▸ **values**(): `IterableIterator`<`string`\>
 
 Returns an iterable of values in the map
 
 #### Returns
 
-`IterableIterator`<`number`\>
+`IterableIterator`<`string`\>
 
 #### Inherited from
 

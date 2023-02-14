@@ -74,7 +74,7 @@ Uint8ClampedArray.constructor
 
 #### Defined in
 
-[readers.mts:15](https://github.com/sister-software/asciify/blob/9750ae3/readers.mts#L15)
+[utils/readers.mts:15](https://github.com/sister-software/asciify/blob/f11c4e8/utils/readers.mts#L15)
 
 ## Properties
 
