@@ -100,6 +100,7 @@ export function readFromVideo(
   /**
    * A canvas to use for reading the video.
    * You should provide this parameter if you'd like to cache the canvas.
+   * @optional
    */
   canvas: CanvasLike = createCanvasLike()
   /**

@@ -102,7 +102,8 @@ export class Asciify {
 
   /**
    * Computed character size in pixels.
-   * @ignore */
+   * @internal
+   */
   protected _characterSize!: number
 
   protected _luminanceCodeMap!: LuminanceCharacterMap
@@ -144,10 +145,14 @@ export class Asciify {
     /**
      * The canvas where the ASCII art will be rendered to.
      * This can either be a canvas element or a canvas's 2D context.
+     *
+     * @optional
      */
     outputCanvas: CanvasLike | Canvas2dContextLike = createCanvasLike('canvas'),
     /**
      * Options to use when rendering the ASCII art.
+     *
+     * @optional
      * @see {@linkcode AsciifyOptions} for more information.
      */
     options: Partial<AsciifyOptions> = {}
@@ -326,16 +331,22 @@ export class Asciify {
     /**
      * The WebGL context to read from. Defaults to the context of the renderer.
      * You should provide this if you'd like to cache the context once and reuse it.
+     *
+     * @optional
      */
     ctx = renderer.getContext(),
     /**
      * Whether the canvas should be cleared before rasterizing the next frame.
      * This option is useful when composing multiple render sources onto the same canvas.
+     *
+     * @optional
      */
     clearCanvas?: boolean,
     /**
      * Whether the frame buffer should be reset.
      * This option is useful if you're handling frame buffer management yourself.
+     *
+     * @optional
      */
     resetFrameBuffers?: boolean
   ): void {
@@ -375,10 +386,13 @@ export class Asciify {
      */
     nextFrameBuffer: FrameBuffer,
     /**
-     * An optional lookup table to use for the next frame.
+     * Lookup table to use for the next frame.
+     * @optional
      */
     pixelIndex: Uint32Array = this._lookupTable.pixelIndex,
     /**
+     * Character coord map to use for the next frame.
+     * @optional
      */
     coords: CharacterCoords = this._lookupTable.coords
   ): void {

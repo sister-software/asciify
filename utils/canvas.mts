@@ -52,6 +52,7 @@ export function createCanvasLike(
   /**
    * Force a specific canvas-like object to be created.
    * @default 'canvas' in the browser, 'offscreen' in Node.js and Workers
+   * @optional
    */
   preferred?: 'canvas' | 'offscreen'
 ): CanvasLike {
