@@ -5,6 +5,7 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@sister.software/asciify)](https://www.npmjs.com/package/@sister.software/asciify)
 [![deno module](https://shield.deno.dev/x/asciify)](https://deno.land/x/asciify)
 ![npm](https://img.shields.io/npm/dm/@sister.software/asciify)
+![GitHub](https://img.shields.io/github/license/sister-software/asciify)
 
 - Demos 🙌✨
   - [**Three.js Spiral Shader**](https://asciify.sister.software/demo/sprial/)
@@ -21,11 +22,13 @@ Asciify rasterizes directly to a canvas element, so it's much faster than other 
 
 ### 🔍 Small
 
-weighing in at less than 3.5kb minified and gzipped, Asciify is a single file with no dependencies.
+Weighing in at less than 7kb when minified and gzipped, Asciify is small enough to be added to your project without worrying about bloat. Additionally, Asciify has zero dependencies, so it's easy to integrate with your existing codebase.
 
 ### 🤸‍♀️ Flexible
 
 Asciify can rasterize images, videos, and 3D scenes. Anything that can be rendered to a canvas can be converted to ASCII art. Asciify also supports custom fonts and character sets, so you can use it to create text art for any purpose!
+
+Asciify is also written in TypeScript and includes type definitions with full documentation.
 
 ## Installation
 
