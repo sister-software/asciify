@@ -8,7 +8,7 @@
 ![GitHub](https://img.shields.io/github/license/sister-software/asciify)
 
 - Demos 🙌✨
-  - [**Three.js Spiral Shader**](https://asciify.sister.software/demo/sprial/)
+  - [**Three.js Spiral Shader**](https://asciify.sister.software/demo/spiral/)
   - [**Bouncing Ball Animation**](https://asciify.sister.software/demo/3d/)
   - [**Image Upload**](https://asciify.sister.software/demo/image/)
 - [API Documentation](https://github.com/sister-software/asciify/wiki)
