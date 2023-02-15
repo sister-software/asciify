@@ -61,7 +61,7 @@ Map&lt;
 
 #### Defined in
 
-[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LuminanceCharacterMap.mts#L16)
+[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/86cb63b/utils/LuminanceCharacterMap.mts#L16)
 
 ## Properties
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LuminanceCharacterMap.mts#L16)
+[utils/LuminanceCharacterMap.mts:16](https://github.com/sister-software/asciify/blob/86cb63b/utils/LuminanceCharacterMap.mts#L16)
 
 ___
 

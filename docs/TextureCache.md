@@ -92,7 +92,7 @@ Array&lt;CanvasLike \| ImageBitmap\&gt;.constructor
 
 #### Defined in
 
-[utils/TextureCache.mts:27](https://github.com/sister-software/asciify/blob/f11c4e8/utils/TextureCache.mts#L27)
+[utils/TextureCache.mts:27](https://github.com/sister-software/asciify/blob/86cb63b/utils/TextureCache.mts#L27)
 
 ## Properties
 
@@ -104,7 +104,7 @@ A promise that resolves when all of the bitmaps have been initialized.
 
 #### Defined in
 
-[utils/TextureCache.mts:25](https://github.com/sister-software/asciify/blob/f11c4e8/utils/TextureCache.mts#L25)
+[utils/TextureCache.mts:25](https://github.com/sister-software/asciify/blob/86cb63b/utils/TextureCache.mts#L25)
 
 ___
 

@@ -35,7 +35,7 @@ The source image pixel data ultimately determines which character is used.
 
 #### Defined in
 
-[options/common.mts:77](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L77)
+[options/common.mts:77](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L77)
 
 ___
 
@@ -56,7 +56,7 @@ with the first character being the least bright and the last being the most brig
 
 #### Defined in
 
-[options/common.mts:30](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L30)
+[options/common.mts:30](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L30)
 
 ___
 
@@ -79,7 +79,7 @@ and when paired with small font sizes, will result in the characters being illeg
 
 #### Defined in
 
-[options/common.mts:59](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L59)
+[options/common.mts:59](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L59)
 
 ___
 
@@ -95,7 +95,7 @@ true
 
 #### Defined in
 
-[options/common.mts:66](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L66)
+[options/common.mts:66](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L66)
 
 ___
 
@@ -114,7 +114,7 @@ A higher value will result in empty space being used more often and faster rende
 
 #### Defined in
 
-[options/common.mts:94](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L94)
+[options/common.mts:94](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L94)
 
 ___
 
@@ -130,7 +130,7 @@ true
 
 #### Defined in
 
-[options/common.mts:107](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L107)
+[options/common.mts:107](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L107)
 
 ___
 
@@ -146,7 +146,7 @@ The font family to use for the ASCII art.
 
 #### Defined in
 
-[options/common.mts:36](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L36)
+[options/common.mts:36](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L36)
 
 ___
 
@@ -165,7 +165,7 @@ Make sure to use a known font size, otherwise Safari will choose an approximate 
 
 #### Defined in
 
-[options/common.mts:45](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L45)
+[options/common.mts:45](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L45)
 
 ___
 
@@ -185,7 +185,7 @@ The device pixel ratio to use for the ASCII art.
 
 #### Defined in
 
-[options/common.mts:84](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L84)
+[options/common.mts:84](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L84)
 
 ___
 
@@ -198,4 +198,4 @@ Asciify will automatically cache a canvas internally if not provided.
 
 #### Defined in
 
-[options/common.mts:100](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L100)
+[options/common.mts:100](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L100)

@@ -100,7 +100,7 @@ This function is useful when you want to rasterize an existing canvas to ASCII a
 
 #### Defined in
 
-[utils/readers.mts:28](https://github.com/sister-software/asciify/blob/f11c4e8/utils/readers.mts#L28)
+[utils/readers.mts:28](https://github.com/sister-software/asciify/blob/86cb63b/utils/readers.mts#L28)
 
 ___
 
@@ -129,7 +129,7 @@ This function is useful when you want to rasterize an image to ASCII art.
 
 #### Defined in
 
-[utils/readers.mts:51](https://github.com/sister-software/asciify/blob/f11c4e8/utils/readers.mts#L51)
+[utils/readers.mts:51](https://github.com/sister-software/asciify/blob/86cb63b/utils/readers.mts#L51)
 
 ___
 
@@ -160,7 +160,7 @@ A Uint8ClampedArray containing the RGBA pixel buffer
 
 #### Defined in
 
-[utils/readers.mts:91](https://github.com/sister-software/asciify/blob/f11c4e8/utils/readers.mts#L91)
+[utils/readers.mts:91](https://github.com/sister-software/asciify/blob/86cb63b/utils/readers.mts#L91)
 
 ___
 
@@ -185,7 +185,7 @@ ___
 
 #### Defined in
 
-[utils/TextureCache.mts:117](https://github.com/sister-software/asciify/blob/f11c4e8/utils/TextureCache.mts#L117)
+[utils/TextureCache.mts:117](https://github.com/sister-software/asciify/blob/86cb63b/utils/TextureCache.mts#L117)
 
 ___
 
@@ -207,7 +207,7 @@ ___
 
 #### Defined in
 
-[options/common.mts:130](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L130)
+[options/common.mts:130](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L130)
 
 ## Configuration Variables
 
@@ -264,7 +264,7 @@ A collection of ready-made character presets.
 
 #### Defined in
 
-[options/presets.mts:14](https://github.com/sister-software/asciify/blob/f11c4e8/options/presets.mts#L14)
+[options/presets.mts:14](https://github.com/sister-software/asciify/blob/86cb63b/options/presets.mts#L14)
 
 ___
 
@@ -276,7 +276,7 @@ ___
 
 #### Defined in
 
-[options/common.mts:121](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L121)
+[options/common.mts:121](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L121)
 
 ___
 
@@ -286,7 +286,7 @@ ___
 
 #### Defined in
 
-[options/common.mts:120](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L120)
+[options/common.mts:120](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L120)
 
 ___
 
@@ -296,7 +296,7 @@ ___
 
 #### Defined in
 
-[options/common.mts:119](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L119)
+[options/common.mts:119](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L119)
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-[options/common.mts:118](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L118)
+[options/common.mts:118](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L118)
 
 ## Type Aliases
 
@@ -324,7 +324,7 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[utils/canvas.mts:28](https://github.com/sister-software/asciify/blob/f11c4e8/utils/canvas.mts#L28)
+[utils/canvas.mts:28](https://github.com/sister-software/asciify/blob/86cb63b/utils/canvas.mts#L28)
 
 ___
 
@@ -342,7 +342,7 @@ Safari tends to produce slight visual artifacts when using offscreen canvases.
 
 #### Defined in
 
-[utils/canvas.mts:19](https://github.com/sister-software/asciify/blob/f11c4e8/utils/canvas.mts#L19)
+[utils/canvas.mts:19](https://github.com/sister-software/asciify/blob/86cb63b/utils/canvas.mts#L19)
 
 ___
 
@@ -352,7 +352,7 @@ ___
 
 #### Defined in
 
-[utils/LookupTable.mts:1](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L1)
+[utils/LookupTable.mts:1](https://github.com/sister-software/asciify/blob/86cb63b/utils/LookupTable.mts#L1)
 
 ___
 
@@ -362,7 +362,7 @@ ___
 
 #### Defined in
 
-[utils/LookupTable.mts:3](https://github.com/sister-software/asciify/blob/f11c4e8/utils/LookupTable.mts#L3)
+[utils/LookupTable.mts:3](https://github.com/sister-software/asciify/blob/86cb63b/utils/LookupTable.mts#L3)
 
 ___
 
@@ -380,4 +380,4 @@ Type utility that allows number properties to be strings. Useful for accepting f
 
 #### Defined in
 
-[options/common.mts:126](https://github.com/sister-software/asciify/blob/f11c4e8/options/common.mts#L126)
+[options/common.mts:126](https://github.com/sister-software/asciify/blob/86cb63b/options/common.mts#L126)

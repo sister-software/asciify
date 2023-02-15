@@ -63,7 +63,7 @@ asciify.rasterize(image)
 
 #### Defined in
 
-[Asciify.mts:144](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L144)
+[Asciify.mts:144](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L144)
 
 ## Properties
 
@@ -84,7 +84,7 @@ You can use this canvas to render the ASCII art to the screen.
 
 #### Defined in
 
-[Asciify.mts:56](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L56)
+[Asciify.mts:56](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L56)
 
 ___
 
@@ -97,7 +97,7 @@ This corresponds to the width of the source material.
 
 #### Defined in
 
-[Asciify.mts:79](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L79)
+[Asciify.mts:79](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L79)
 
 ___
 
@@ -109,7 +109,7 @@ The canvas context where ASCII art is rasterized to.
 
 #### Defined in
 
-[Asciify.mts:73](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L73)
+[Asciify.mts:73](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L73)
 
 ___
 
@@ -126,7 +126,7 @@ The options used to initialize the Asciify instance.
 
 #### Defined in
 
-[Asciify.mts:97](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L97)
+[Asciify.mts:97](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L97)
 
 ___
 
@@ -143,7 +143,7 @@ This corresponds to the height of the source material.
 
 #### Defined in
 
-[Asciify.mts:85](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L85)
+[Asciify.mts:85](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L85)
 
 ## Accessors
 
@@ -163,7 +163,7 @@ A type-friendly getter for the canvas element.
 
 #### Defined in
 
-[Asciify.mts:62](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L62)
+[Asciify.mts:62](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L62)
 
 ## Other Methods
 
@@ -195,7 +195,7 @@ when the source canvas is resized, or when the asciify instance options are chan
 
 #### Defined in
 
-[Asciify.mts:255](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L255)
+[Asciify.mts:255](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L255)
 
 ___
 
@@ -212,7 +212,7 @@ Asciify will automatically handle this for you in most cases.
 
 #### Defined in
 
-[Asciify.mts:455](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L455)
+[Asciify.mts:455](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L455)
 
 ___
 
@@ -229,7 +229,7 @@ Asciify will automatically handle this for you in most cases.
 
 #### Defined in
 
-[Asciify.mts:446](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L446)
+[Asciify.mts:446](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L446)
 
 ___
 
@@ -251,7 +251,7 @@ Returns the character that best matches the given brightness.
 
 #### Defined in
 
-[Asciify.mts:181](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L181)
+[Asciify.mts:181](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L181)
 
 ___
 
@@ -274,7 +274,7 @@ Useful for changing the asciify instance on the fly.
 
 #### Defined in
 
-[Asciify.mts:268](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L268)
+[Asciify.mts:268](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L268)
 
 ___
 
@@ -312,7 +312,7 @@ renderer.setSize(asciify.columnCount, asciify.rowCount)
 
 #### Defined in
 
-[Asciify.mts:207](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L207)
+[Asciify.mts:207](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L207)
 
 ___
 
@@ -345,7 +345,7 @@ This method may be used directly when performance is critical.
 
 #### Defined in
 
-[Asciify.mts:383](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L383)
+[Asciify.mts:383](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L383)
 
 ___
 
@@ -372,7 +372,7 @@ Rasterizes the given image to the ASCII art canvas.
 
 #### Defined in
 
-[Asciify.mts:304](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L304)
+[Asciify.mts:304](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L304)
 
 ___
 
@@ -401,4 +401,4 @@ Rasterizes the given Three.js renderer to the ASCII art canvas.
 
 #### Defined in
 
-[Asciify.mts:326](https://github.com/sister-software/asciify/blob/f11c4e8/Asciify.mts#L326)
+[Asciify.mts:326](https://github.com/sister-software/asciify/blob/86cb63b/Asciify.mts#L326)
