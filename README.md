@@ -22,7 +22,7 @@ Asciify rasterizes directly to a canvas element, so it's much faster than other 
 
 ### 🔍 Small
 
-Weighing in at less than 7kb when minified and gzipped, Asciify is small enough to be added to your project without worrying about bloat. Additionally, Asciify has zero dependencies, so it's easy to integrate with your existing codebase.
+Weighing in at less than 7kb when minified and gzipped, Asciify is small enough to be added to your project without worrying about bloat. And Asciify has zero dependencies, so it's easy to integrate with your existing codebase.
 
 ### 🤸‍♀️ Flexible
 
@@ -55,7 +55,12 @@ import { Asciify, readFromThreeJS } from '@sister.software/asciify'
 const canvas = document.createElement('canvas')
 const asciify = new Asciify(canvas)
 
-const renderer = new THREE.WebGLRenderer()
+const renderer = new THREE.WebGLRenderer({
+  powerPreference: 'high-performance',
+  precision: 'lowp',
+})
+
+const rendererContext = renderer.getContext()
 
 asciify.setSize(window.innerWidth, window.innerHeight)
 // Set the size of the 3D renderer so that each pixel of ASCII art
@@ -67,11 +72,11 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 renderer.render(scene, camera)
 
-// Extract the rendered pixels from the canvas...
-const rgbaBuffer = readFromThreeJS(renderer)
-// ...and convert them to ASCII art!
-asciify.rasterize(rgbaBuffer)
+// Rasterize the scene into ASCII art!
+asciify.rasterizeWebGLRenderer(renderer, rendererContext)
 ```
+
+Check out our [examples](https://github.com/sister-software/asciify/tree/main/demo) for more info on how Asciify can be used!
 
 ## Alternatives
 
