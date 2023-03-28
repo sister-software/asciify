@@ -9,7 +9,7 @@
  * @author Teffen Ellis
  */
 
-import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './canvas.mjs'
+import { Canvas2dContextLike, CanvasLike, createCanvasLike } from './canvas.mts'
 
 export class FrameBuffer extends Uint8ClampedArray {
   constructor(rowCount: number, columnCount: number) {

@@ -1,4 +1,4 @@
-import { createCanvasLike } from '../utils/canvas.mjs'
+import { createCanvasLike } from '../utils/canvas.mts'
 import {
   AsciifyOptions,
   DEFAULT_CHARACTER_SET,
@@ -7,7 +7,7 @@ import {
   DEFAULT_PIXEL_RATIO,
   normalizeNumericOption,
   WithStringlyNumbers,
-} from './common.mjs'
+} from './common.mts'
 
 /**
  * The default options for the ASCII art.

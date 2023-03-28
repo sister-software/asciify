@@ -9,6 +9,6 @@
  * @author Teffen Ellis
  */
 
-export * from './Asciify.mjs'
-export * from './options/mod.mjs'
-export * from './utils/mod.mjs'
+export * from './Asciify.mts'
+export * from './options/mod.mts'
+export * from './utils/mod.mts'

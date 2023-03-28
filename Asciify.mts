@@ -17,15 +17,15 @@ import {
   isHTMLCanvasElement,
   isWebGLRenderer,
   pluck2dContext,
-} from './utils/canvas.mjs'
-import { CharacterCoords, LookupTable } from './utils/LookupTable.mjs'
-import { LuminanceCharacterMap } from './utils/LuminanceCharacterMap.mjs'
-import { FrameBuffer, readFromImage } from './utils/readers.mjs'
-import { calculateTextureMetrics, TextureCache, TextureMetrics } from './utils/TextureCache.mjs'
+} from './utils/canvas.mts'
+import { CharacterCoords, LookupTable } from './utils/LookupTable.mts'
+import { LuminanceCharacterMap } from './utils/LuminanceCharacterMap.mts'
+import { FrameBuffer, readFromImage } from './utils/readers.mts'
+import { calculateTextureMetrics, TextureCache, TextureMetrics } from './utils/TextureCache.mts'
 
 import * as THREE from 'three'
-import { AsciifyOptions } from './options/common.mjs'
-import { createDefaultOptions } from './options/mod.mjs'
+import { AsciifyOptions } from './options/common.mts'
+import { createDefaultOptions } from './options/mod.mts'
 
 /**
  * Converts images, videos, and 3D renders into ASCII art.

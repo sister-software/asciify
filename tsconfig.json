@@ -12,8 +12,10 @@
     "sourceMap": true,
     "target": "ES2022",
     "module": "ES2022",
+    "allowImportingTsExtensions": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "emitDeclarationOnly": true,
+    "moduleResolution": "bundler",
     "declaration": true,
     "baseUrl": ".",
     "strict": true,
@@ -22,5 +24,9 @@
   },
   "include": [
     "mod.mts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
   ]
 }

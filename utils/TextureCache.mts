@@ -1,5 +1,5 @@
-import { CanvasLike, createCanvasLike, pluck2dContext } from './canvas.mjs'
-import { LuminanceCharacterMap } from './LuminanceCharacterMap.mjs'
+import { CanvasLike, createCanvasLike, pluck2dContext } from './canvas.mts'
+import { LuminanceCharacterMap } from './LuminanceCharacterMap.mts'
 
 const whitespacePattern = /\s/
 const supportsCreateImageBitmap = typeof createImageBitmap !== 'undefined'

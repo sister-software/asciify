@@ -9,9 +9,9 @@
  * @author Teffen Ellis
  */
 
-import { Canvas2dContextLike, CanvasLike } from '../utils/canvas.mjs'
+import { Canvas2dContextLike, CanvasLike } from '../utils/canvas.mts'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { OptionPreset } from './presets.mjs'
+import type { OptionPreset } from './presets.mts'
 
 /**
  * The options used to configure the ASCII art.

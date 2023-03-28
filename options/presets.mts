@@ -1,4 +1,4 @@
-import { AsciifyOptions, DEFAULT_CHARACTER_SET } from './common.mjs'
+import { AsciifyOptions, DEFAULT_CHARACTER_SET } from './common.mts'
 
 /**
  * @ignore
