@@ -1,4 +1,4 @@
-const isLocal = window.location.hostname === 'localhost'
+const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 
 const asciifyModuleID = isLocal ? '/dist/mod.mjs' : '@sister.software/asciify'
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
