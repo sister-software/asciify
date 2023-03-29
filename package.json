@@ -3,12 +3,12 @@
   "version": "3.1.0",
   "description": "Converts images, videos, and 3D renders into ASCII art.",
   "repository": "git@github.com:sister-software/asciify.git",
+  "packageManager": "yarn@3.3.1",
   "bugs": {
     "url": "https://github.com/sister-software/asciify/issues"
   },
   "author": "Teffen Ellis <teffen@sister.software>",
   "license": "MIT",
-  "private": false,
   "main": "./dist/mod.mjs",
   "module": "./dist/mod.mjs",
   "types": "./dist/mod.d.mts",
@@ -45,13 +45,14 @@
   "type": "module",
   "scripts": {
     "build": "node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm ./build.mts",
+    "release": "yarn run build && yarn run release-it",
     "docs": "typedoc",
     "demo": "http-server ./ -p 8081"
   },
   "devDependencies": {
-    "@sister.software/ts-path-transformer": "^1.0.3",
-    "@sister.software/eslint-config": "^2.0.0",
-    "@sister.software/prettier-config": "^2.0.0",
+    "@sister.software/eslint-config": "^2.0.1",
+    "@sister.software/prettier-config": "^2.0.1",
+    "@sister.software/ts-path-transformer": "^1.1.4",
     "@types/node": "^18.15.11",
     "@types/stats": "^0.16.30",
     "@types/three": "^0.148.1",
@@ -65,6 +66,7 @@
     "http-server": "^14.1.1",
     "prettier": "^2.8.7",
     "prettier-plugin-organize-imports": "^3.2.2",
+    "release-it": "^15.9.3",
     "stats-js": "^1.0.1",
     "three": "^0.148.0",
     "ts-node": "^10.9.1",

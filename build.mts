@@ -5,7 +5,12 @@
  * See LICENSE file in the project root for full license information.
  */
 
-import { cleanDir, readParsedTSConfig, TSPathTransformer } from '@sister.software/ts-path-transformer'
+import {
+  cleanDir,
+  createDefaultPrettierFormatter,
+  readParsedTSConfig,
+  TSPathTransformer,
+} from '@sister.software/ts-path-transformer'
 import * as path from 'node:path'
 import ts from 'typescript'
 
@@ -22,11 +27,15 @@ const compilerOptions: ts.CompilerOptions = {
   ...tsConfig.options,
   emitDeclarationOnly: false,
 }
+const formatter = await createDefaultPrettierFormatter()
 
-const transformer = new TSPathTransformer({
-  '.d.mts': /\.d\.mts$/gi,
-  '.mjs': /\.m?tsx?$/gi,
-})
+const transformer = new TSPathTransformer(
+  {
+    '.d.mts': /\.d\.mts$/gi,
+    '.mjs': /\.m?tsx?$/gi,
+  },
+  formatter
+)
 
 if (watching) {
   const watchHost = ts.createWatchCompilerHost(
