@@ -356,7 +356,7 @@ __metadata:
   dependencies:
     "@sister.software/eslint-config": ^2.0.1
     "@sister.software/prettier-config": ^2.0.1
-    "@sister.software/ts-path-transformer": ^1.1.4
+    "@sister.software/ts-path-transformer": ^1.2.0
     "@types/node": ^18.15.11
     "@types/stats": ^0.16.30
     "@types/three": ^0.148.1
@@ -411,9 +411,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sister.software/ts-path-transformer@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "@sister.software/ts-path-transformer@npm:1.1.4"
+"@sister.software/ts-path-transformer@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@sister.software/ts-path-transformer@npm:1.2.0"
   dependencies:
     "@sister.software/prettier-config": ^2.0.1
     prettier: ^2.8
@@ -424,7 +424,7 @@ __metadata:
       optional: true
     prettier:
       optional: true
-  checksum: f656ea017e7dc518e48ea548523a6a63093b7f4aa792de9a869ec0e1c797674f67e84903e27e4eff38818a5523aad2b2b276007b280f57cd0bfa5d11d906a4be
+  checksum: 35ca4fc445e7799071686c2b28531cb6c1a43b54b751ed83e9b3cc3426924b37d5103a3208ae8ce0c2154785083ec7f2f10357ea18cb3be20f2faed1e2da76b7
   languageName: node
   linkType: hard
 

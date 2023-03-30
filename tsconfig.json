@@ -1,6 +1,4 @@
 {
-  // This file is not used in compilation. It is here just for a nice editor experience.
-
   "compilerOptions": {
     "allowJs": true,
     "jsx": "react",
@@ -20,7 +18,6 @@
     "baseUrl": ".",
     "strict": true,
     "skipLibCheck": true,
-
   },
   "include": [
     "mod.mts"

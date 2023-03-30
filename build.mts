@@ -5,59 +5,48 @@
  * See LICENSE file in the project root for full license information.
  */
 
-import {
-  cleanDir,
-  createDefaultPrettierFormatter,
-  readParsedTSConfig,
-  TSPathTransformer,
-} from '@sister.software/ts-path-transformer'
 import * as path from 'node:path'
-import ts from 'typescript'
+import { fileURLToPath } from 'node:url'
 
-const watching = process.argv.includes('--watch')
+import {
+  SimpleProgramConfig,
+  TSPathTransformer,
+  cleanTSBuildDirectory,
+  createDefaultPrettierFormatter,
+  createSimpleTSProgram,
+  createSimpleTSProgramWithWatcher,
+  readParsedTSConfig,
+} from '@sister.software/ts-path-transformer'
 
-const __dirname = new URL('.', import.meta.url).pathname
-const buildDir = path.join(__dirname, 'dist')
+// ESM modules don't have __dirname, so we have to use import.meta.url...
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-await cleanDir(buildDir)
-
-const tsConfig = readParsedTSConfig(path.join(__dirname, 'tsconfig.json'))
-
-const compilerOptions: ts.CompilerOptions = {
-  ...tsConfig.options,
-  emitDeclarationOnly: false,
-}
-const formatter = await createDefaultPrettierFormatter()
-
-const transformer = new TSPathTransformer(
-  {
+const programConfig: SimpleProgramConfig = {
+  // Load the tsconfig.json file...
+  // This function is just a wrapper around TypeScript's `ts.readConfigFile` function...
+  tsConfig: readParsedTSConfig(path.join(__dirname, 'tsconfig.json')),
+  // Create a transformer that...
+  transformer: new TSPathTransformer({
+    //...Keeps declarations as '.d.mts' files:
     '.d.mts': /\.d\.mts$/gi,
+    //...And rewrites '.mts' files to '.mjs' files:
     '.mjs': /\.m?tsx?$/gi,
-  },
-  formatter
-)
+  }),
+  // Just for fun, we'll also format the output files with Prettier...
+  formatter: await createDefaultPrettierFormatter(),
+}
 
-if (watching) {
-  const watchHost = ts.createWatchCompilerHost(
-    tsConfig.fileNames,
-    compilerOptions,
-    ts.sys,
-    ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-    (diagnostic) => console.error(diagnostic.messageText),
-    (diagnostic) => console.error(diagnostic.messageText)
-  )
+// Clear out any previous builds...
+await cleanTSBuildDirectory(programConfig.tsConfig)
 
-  watchHost.afterProgramCreate = (program) => {
-    program.emit(undefined, transformer.writeFileCallback, undefined, undefined, transformer.asCustomTransformers())
-  }
+const watch = process.argv.includes('--watch')
 
-  ts.createWatchProgram(watchHost)
+if (watch) {
+  // Create a program that watches for changes and re-emits the files...
+  createSimpleTSProgramWithWatcher(programConfig)
 } else {
-  const program = ts.createProgram({
-    host: ts.createCompilerHost(tsConfig.options, true),
-    options: compilerOptions,
-    rootNames: tsConfig.fileNames,
-  })
+  // Or, create a program that emits the files once...
+  const program = createSimpleTSProgram(programConfig)
 
-  program.emit(undefined, transformer.writeFileCallback, undefined, undefined, transformer.asCustomTransformers())
+  program.emitWithTransformer()
 }
