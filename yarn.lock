@@ -356,7 +356,7 @@ __metadata:
   dependencies:
     "@sister.software/eslint-config": ^2.0.1
     "@sister.software/prettier-config": ^2.0.1
-    "@sister.software/typescript-esm-packager": 1.2.4
+    "@sister.software/typescript-esm-packager": ^1.2.10
     "@types/node": ^18.15.11
     "@types/stats": ^0.16.30
     "@types/three": ^0.148.1
@@ -411,9 +411,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sister.software/typescript-esm-packager@npm:1.2.4":
-  version: 1.2.4
-  resolution: "@sister.software/typescript-esm-packager@npm:1.2.4"
+"@sister.software/typescript-esm-packager@npm:^1.2.10":
+  version: 1.2.10
+  resolution: "@sister.software/typescript-esm-packager@npm:1.2.10"
   dependencies:
     "@sister.software/prettier-config": ^2.0.1
     prettier: ^2.8
@@ -427,7 +427,7 @@ __metadata:
       optional: true
     prettier-plugin-organize-imports:
       optional: true
-  checksum: a61fb6c5f9fe4a0fffdc78d9800c86295210eb464dbd2f92739a2d006c5265df882f2b648ede4fcdc8e8c91a7f5847e0f5e801452d6166105fc2381114a6cba5
+  checksum: b82b58488834b8c800100f7d3ee83ec9bbf9b61bd8f6f7b31dfcd76974f4359f7801b7e6263ebcaa10a056a4d960d18fe019d2097d662dd9691d39ebf6ab5e52
   languageName: node
   linkType: hard
 

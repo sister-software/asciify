@@ -26,10 +26,7 @@ const programConfig: SimpleProgramConfig = {
   // This function is just a wrapper around TypeScript's `ts.readConfigFile` function...
   tsConfig: readParsedTSConfig(path.join(__dirname, 'tsconfig.json')),
   // Create a transformer that...
-  transformer: new TSPathTransformer({
-    //...And rewrites '.mts' files to '.mjs' files:
-    '.mjs': /\.m?tsx?$/gi,
-  }),
+  transformer: new TSPathTransformer(),
   // Just for fun, we'll also format the output files with Prettier...
   writeFileCallback: await createPrettierWriteFileCallback(),
 }
