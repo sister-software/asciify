@@ -356,7 +356,7 @@ __metadata:
   dependencies:
     "@sister.software/eslint-config": ^2.0.1
     "@sister.software/prettier-config": ^2.0.1
-    "@sister.software/ts-path-transformer": ^1.2.0
+    "@sister.software/typescript-esm-packager": 1.2.4
     "@types/node": ^18.15.11
     "@types/stats": ^0.16.30
     "@types/three": ^0.148.1
@@ -411,12 +411,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sister.software/ts-path-transformer@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@sister.software/ts-path-transformer@npm:1.2.0"
+"@sister.software/typescript-esm-packager@npm:1.2.4":
+  version: 1.2.4
+  resolution: "@sister.software/typescript-esm-packager@npm:1.2.4"
   dependencies:
     "@sister.software/prettier-config": ^2.0.1
     prettier: ^2.8
+    prettier-plugin-organize-imports: ^3.2.2
   peerDependencies:
     typescript: ">=5"
   dependenciesMeta:
@@ -424,7 +425,9 @@ __metadata:
       optional: true
     prettier:
       optional: true
-  checksum: 35ca4fc445e7799071686c2b28531cb6c1a43b54b751ed83e9b3cc3426924b37d5103a3208ae8ce0c2154785083ec7f2f10357ea18cb3be20f2faed1e2da76b7
+    prettier-plugin-organize-imports:
+      optional: true
+  checksum: a61fb6c5f9fe4a0fffdc78d9800c86295210eb464dbd2f92739a2d006c5265df882f2b648ede4fcdc8e8c91a7f5847e0f5e801452d6166105fc2381114a6cba5
   languageName: node
   linkType: hard
 

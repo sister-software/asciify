@@ -12,11 +12,11 @@ import {
   SimpleProgramConfig,
   TSPathTransformer,
   cleanTSBuildDirectory,
-  createDefaultPrettierFormatter,
+  createPrettierWriteFileCallback,
   createSimpleTSProgram,
   createSimpleTSProgramWithWatcher,
   readParsedTSConfig,
-} from '@sister.software/ts-path-transformer'
+} from '@sister.software/typescript-esm-packager'
 
 // ESM modules don't have __dirname, so we have to use import.meta.url...
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -27,13 +27,11 @@ const programConfig: SimpleProgramConfig = {
   tsConfig: readParsedTSConfig(path.join(__dirname, 'tsconfig.json')),
   // Create a transformer that...
   transformer: new TSPathTransformer({
-    //...Keeps declarations as '.d.mts' files:
-    '.d.mts': /\.d\.mts$/gi,
     //...And rewrites '.mts' files to '.mjs' files:
     '.mjs': /\.m?tsx?$/gi,
   }),
   // Just for fun, we'll also format the output files with Prettier...
-  formatter: await createDefaultPrettierFormatter(),
+  writeFileCallback: await createPrettierWriteFileCallback(),
 }
 
 // Clear out any previous builds...
