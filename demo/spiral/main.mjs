@@ -125,21 +125,14 @@ async function initialize() {
 
   scene.add(vortexMesh)
 
-  const threeCanvas = new OffscreenCanvas(1, 1)
-  const rendererContext = threeCanvas.getContext('webgl2', {
-    powerPreference: 'high-performance',
-    willReadFrequently: true,
-    desynchronized: true,
-  })
-
   const renderer = new THREE.WebGLRenderer({
-    canvas: threeCanvas,
-    context: rendererContext,
     stencil: false,
     precision: 'highp',
     depth: false,
     powerPreference: 'high-performance',
   })
+
+  const rendererContext = renderer.getContext()
 
   const asciiOptions = createDefaultOptions()
   const canvas = document.getElementById('demo')
