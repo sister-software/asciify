@@ -11,7 +11,7 @@ export type PixelIndex = Uint32Array
  * @remarks
  *
  * By precalculating a frequent traversal through a pixel buffer,
- * we can avoid expensive and repetitive calculations while during rasterization.
+ * we can avoid expensive and repetitive calculations during rasterization.
  *
  * The pixel index contains groups of four values that represent the RGBA values of a pixel:
  *
