@@ -136,6 +136,39 @@ export function pluck2dContext(
 }
 
 /**
+ * Returns the texture backing the currently bound framebuffer's first colour attachment.
+ *
+ * @remarks
+ *   This is how a render target's underlying `WebGLTexture` is recovered without reaching into a host library's
+ *   internals. The usual trick for Three.js is `renderer.properties.get(target.texture).__webglTexture`, which works
+ *   but depends on a private field that has no compatibility promise attached to it. Asking WebGL instead is entirely
+ *   public API: bind the render target through whatever means the host provides, then ask the framebuffer what is
+ *   attached to it. The answer is the same object, and it keeps working across host versions. Returns `null` when
+ *   nothing is bound, when the attachment is a renderbuffer rather than a texture (multisampled targets, typically), or
+ *   when the query is unsupported.
+ * @ignore
+ * @internal
+ */
+export function getFramebufferTexture(gl: WebGL2RenderingContext): WebGLTexture | null {
+	// The default framebuffer has no queryable attachments — there is no texture to find.
+	if (gl.getParameter(gl.FRAMEBUFFER_BINDING) === null) return null
+
+	const attachmentType = gl.getFramebufferAttachmentParameter(
+		gl.FRAMEBUFFER,
+		gl.COLOR_ATTACHMENT0,
+		gl.FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE
+	)
+
+	if (attachmentType !== gl.TEXTURE) return null
+
+	return gl.getFramebufferAttachmentParameter(
+		gl.FRAMEBUFFER,
+		gl.COLOR_ATTACHMENT0,
+		gl.FRAMEBUFFER_ATTACHMENT_OBJECT_NAME
+	) as WebGLTexture | null
+}
+
+/**
  * Resolves any CSS color string to normalized RGBA components.
  *
  * @remarks
