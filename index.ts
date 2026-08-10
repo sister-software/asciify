@@ -9,5 +9,8 @@
  */
 
 export * from "./Asciify.ts"
+export * from "./Asciify2D.ts"
+export * from "./AsciifyBase.ts"
+export * from "./AsciifyWebGL.ts"
 export * from "./options/index.ts"
 export * from "./utils/index.ts"

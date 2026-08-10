@@ -136,6 +136,31 @@ export function pluck2dContext(
 }
 
 /**
+ * Resolves any CSS color string to normalized RGBA components.
+ *
+ * @remarks
+ *   The browser already has a complete CSS color parser, so we borrow it: fill one pixel and read it back. That accepts
+ *   named colors, `hsl()`, `color()`, and anything else the platform grows, which a hand-rolled parser would not.
+ * @ignore
+ * @internal
+ */
+export function parseCssColor(color: string): [red: number, green: number, blue: number, alpha: number] {
+	const canvas = createCanvasLike()
+	canvas.width = 1
+	canvas.height = 1
+
+	const context = pluck2dContext(canvas, { alpha: true, willReadFrequently: true })
+
+	context.clearRect(0, 0, 1, 1)
+	context.fillStyle = color
+	context.fillRect(0, 0, 1, 1)
+
+	const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+
+	return [red! / 255, green! / 255, blue! / 255, alpha! / 255]
+}
+
+/**
  * Tests if a canvas-like object is an elemental canvas. Note that this only works in the same browser frame as the
  * canvas was created.
  *
