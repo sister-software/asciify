@@ -11,7 +11,11 @@ const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { Asciify, createDefaultOptions } = await import(asciifyModuleID)
+const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+
+// `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
+// `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
+const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
 
 async function initialize() {
 	const canvasContainer = document.getElementById("canvas-container")
@@ -29,7 +33,7 @@ async function initialize() {
 		// fontSize: 17,
 	})
 
-	const asciify = new Asciify(canvas, asciiOptions)
+	const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
 
 	const filePicker = document.getElementById("file-picker")
 	let sourceRef = null

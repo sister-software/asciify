@@ -16,7 +16,11 @@ const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { Asciify, createDefaultOptions } = await import(asciifyModuleID)
+const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+
+// `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
+// `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
+const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 4000)
 camera.position.y = 800
@@ -75,7 +79,7 @@ const rendererContext = renderer.getContext()
 camera.lookAt(sphere.position)
 
 const asciiOptions = createDefaultOptions()
-const asciify = new Asciify(canvas, asciiOptions)
+const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
 
 // Expose asciify to the window for debugging
 globalThis.asciify = asciify

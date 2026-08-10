@@ -5,6 +5,6 @@
 		"rewriteRelativeImportExtensions": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["index.ts", "Asciify*.ts", "options/**/*.ts", "utils/**/*.ts"],
+	"include": ["index.ts", "Asciify*.ts", "createAsciify.ts", "options/**/*.ts", "utils/**/*.ts"],
 	"exclude": ["./out/**/*", "./node_modules/**/*"]
 }

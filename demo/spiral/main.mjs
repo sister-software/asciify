@@ -15,7 +15,11 @@ const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { Asciify, createDefaultOptions } = await import(asciifyModuleID)
+const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+
+// `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
+// `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
+const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
 
 /**
  * Identity function for GLSL template literals.
@@ -144,7 +148,7 @@ async function initialize() {
 
 	const asciiOptions = createDefaultOptions()
 	const canvas = document.getElementById("demo")
-	const asciify = new Asciify(canvas, asciiOptions)
+	const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
 
 	// Expose asciify to the window for debugging
 	globalThis.asciify = asciify
