@@ -1,151 +1,151 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Asciify Three.js Demo</title>
-    <link rel="stylesheet" href="../common/styles.css" />
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Asciify Three.js Demo</title>
+		<link rel="stylesheet" href="../common/styles.css" />
 
-    <script src="../common/polyfills.js"></script>
+		<script src="../common/polyfills.js"></script>
 
-    <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+		<script async src="https://ga.jspm.io/npm:es-module-shims@2.6.2/dist/es-module-shims.js"></script>
 
-    <style>
-      body {
-        background-color: #1a1a1a;
-        font-family: 'Courier New', Courier, monospace;
-      }
-      main {
-        position: absolute;
-        inset: 0;
-        display: grid;
-        grid-template-rows: 60% auto;
-        height: 100vh;
-      }
+		<style>
+			body {
+				background-color: #1a1a1a;
+				font-family: "Courier New", Courier, monospace;
+			}
+			main {
+				position: absolute;
+				inset: 0;
+				display: grid;
+				grid-template-rows: 60% auto;
+				height: 100vh;
+			}
 
-      @media (min-width: 768px) {
-        main {
-          grid-template-columns: 60% auto;
-        }
-      }
-      .dg .close-button {
-        display: none;
-      }
+			@media (min-width: 768px) {
+				main {
+					grid-template-columns: 60% auto;
+				}
+			}
+			.dg .close-button {
+				display: none;
+			}
 
-      #canvas-container {
-        position: relative;
-      }
+			#canvas-container {
+				position: relative;
+			}
 
-      #image-previewer {
-        display: none;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        height: 100%;
-        width: 50%;
-        max-width: 100%;
-        overflow: hidden;
-        z-index: 1;
-      }
+			#image-previewer {
+				display: none;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				height: 100%;
+				width: 50%;
+				max-width: 100%;
+				overflow: hidden;
+				z-index: 1;
+			}
 
-      #image-previewer-source {
-        position: absolute;
-        object-position: left;
-        inset: 0;
-        z-index: 2;
-        height: 100%;
-        width: 100%;
-      }
+			#image-previewer-source {
+				position: absolute;
+				object-position: left;
+				inset: 0;
+				z-index: 2;
+				height: 100%;
+				width: 100%;
+			}
 
-      #resize-handle {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        width: 0.75rem;
-        cursor: col-resize;
-        z-index: 3;
-        background-image: linear-gradient(90deg, grey 0%, grey 25%, lightgrey 25%, lightgrey 75%, grey 75%, grey);
-      }
+			#resize-handle {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				right: 0;
+				width: 0.75rem;
+				cursor: col-resize;
+				z-index: 3;
+				background-image: linear-gradient(90deg, grey 0%, grey 25%, lightgrey 25%, lightgrey 75%, grey 75%, grey);
+			}
 
-      html.debug #image-previewer {
-        display: block;
-      }
+			html.debug #image-previewer {
+				display: block;
+			}
 
-      @media (max-width: 767px) {
-        #image-previewer {
-          display: none !important;
-        }
-      }
+			@media (max-width: 767px) {
+				#image-previewer {
+					display: none !important;
+				}
+			}
 
-      canvas {
-        outline: 1px dashed blueviolet;
-        outline-offset: 2px;
-      }
-    </style>
+			canvas {
+				outline: 1px dashed blueviolet;
+				outline-offset: 2px;
+			}
+		</style>
 
-    <script type="importmap">
-      {
-        "imports": {
-          "@sister.software/asciify": "https://esm.sh/@sister.software/asciify@3.1.1",
-          "dat.gui": "https://esm.sh/dat.gui@0.7.9"
-        }
-      }
-    </script>
-    <script type="module" src="./main.mjs"></script>
-  </head>
-  <body>
-    <main>
-      <section id="canvas-container">
-        <div id="image-previewer">
-          <img id="image-previewer-source" />
-          <div id="resize-handle"></div>
-        </div>
-      </section>
-      <section id="form-container">
-        <form>
-          <fieldset>
-            <legend>Select an image...</legend>
-            <label for="file-picker">Image Source</label>
-            <input type="file" id="file-picker" accept="image/*" />
-          </fieldset>
+		<script type="importmap">
+			{
+				"imports": {
+					"@sister.software/asciify": "https://esm.sh/@sister.software/asciify@3.1.4",
+					"dat.gui": "https://esm.sh/dat.gui@0.7.9"
+				}
+			}
+		</script>
+		<script type="module" src="./main.mjs"></script>
+	</head>
+	<body>
+		<main>
+			<section id="canvas-container">
+				<div id="image-previewer">
+					<img id="image-previewer-source" />
+					<div id="resize-handle"></div>
+				</div>
+			</section>
+			<section id="form-container">
+				<form>
+					<fieldset>
+						<legend>Select an image...</legend>
+						<label for="file-picker">Image Source</label>
+						<input type="file" id="file-picker" accept="image/*" />
+					</fieldset>
 
-          <fieldset id="options-fieldset">
-            <legend>Options</legend>
-          </fieldset>
-        </form>
-      </section>
-    </main>
+					<fieldset id="options-fieldset">
+						<legend>Options</legend>
+					</fieldset>
+				</form>
+			</section>
+		</main>
 
-    <script>
-      const imagePreviewer = document.getElementById('image-previewer')
-      const resizeHandle = document.getElementById('resize-handle')
+		<script>
+			const imagePreviewer = document.getElementById("image-previewer")
+			const resizeHandle = document.getElementById("resize-handle")
 
-      let isResizing = false
-      let startX = 0
-      let startWidth = 0
+			let isResizing = false
+			let startX = 0
+			let startWidth = 0
 
-      function onResizeStart(e) {
-        isResizing = true
-        startX = e.clientX
-        startWidth = parseInt(document.defaultView.getComputedStyle(imagePreviewer).width, 10)
-      }
+			function onResizeStart(e) {
+				isResizing = true
+				startX = e.clientX
+				startWidth = parseInt(document.defaultView.getComputedStyle(imagePreviewer).width, 10)
+			}
 
-      function onResizeMove(e) {
-        if (!isResizing) return
-        const newWidth = startWidth + (e.clientX - startX)
-        imagePreviewer.style.width = `${newWidth}px`
-      }
+			function onResizeMove(e) {
+				if (!isResizing) return
+				const newWidth = startWidth + (e.clientX - startX)
+				imagePreviewer.style.width = `${newWidth}px`
+			}
 
-      function onResizeEnd() {
-        isResizing = false
-      }
+			function onResizeEnd() {
+				isResizing = false
+			}
 
-      resizeHandle.addEventListener('mousedown', onResizeStart)
+			resizeHandle.addEventListener("mousedown", onResizeStart)
 
-      document.documentElement.addEventListener('mousemove', onResizeMove, { passive: true })
-      document.documentElement.addEventListener('mouseup', onResizeEnd)
-    </script>
-  </body>
+			document.documentElement.addEventListener("mousemove", onResizeMove, { passive: true })
+			document.documentElement.addEventListener("mouseup", onResizeEnd)
+		</script>
+	</body>
 </html>

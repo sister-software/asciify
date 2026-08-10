@@ -11,8 +11,9 @@
   - [**Three.js Spiral Shader**](https://asciify.sister.software/demo/spiral/)
   - [**Bouncing Ball Animation**](https://asciify.sister.software/demo/3d/)
   - [**Image Upload**](https://asciify.sister.software/demo/image/)
-- [API Documentation](https://github.com/sister-software/asciify/wiki)
 - [Source Code](https://github.com/sister-software/asciify)
+
+The API is documented inline — every export carries TSDoc, so your editor is the reference.
 
 ## Why use Asciify?
 
@@ -43,21 +44,21 @@ npm install --save @sister.software/asciify
 ### Deno
 
 ```ts
-import { Asciify } from 'https://deno.land/x/asciify/mod.ts'
+import { Asciify } from "https://deno.land/x/asciify/index.ts"
 ```
 
 ## Usage
 
 ```ts
-import { Asciify, readFromThreeJS } from '@sister.software/asciify'
+import { Asciify, readFromThreeJS } from "@sister.software/asciify"
 
 // Create an Asciify instance and attach it to a canvas...
-const canvas = document.createElement('canvas')
+const canvas = document.createElement("canvas")
 const asciify = new Asciify(canvas)
 
 const renderer = new THREE.WebGLRenderer({
-  powerPreference: 'high-performance',
-  precision: 'lowp',
+	powerPreference: "high-performance",
+	precision: "lowp",
 })
 
 const rendererContext = renderer.getContext()
@@ -65,7 +66,7 @@ const rendererContext = renderer.getContext()
 asciify.setSize(window.innerWidth, window.innerHeight)
 // Set the size of the 3D renderer so that each pixel of ASCII art
 // corresponds to a single pixel in the 3D scene...
-renderer.setSize(rasterizer.columnCount, rasterizer.rowCount)
+renderer.setSize(asciify.columnCount, asciify.rowCount)
 
 // Render a 3D scene...
 const scene = new THREE.Scene()

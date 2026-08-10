@@ -1,110 +1,121 @@
-import { AsciifyGUI } from '../common/gui.mjs'
+/**
+ * @copyright Sister Software
+ * @license MIT
+ * @author Teffen Ellis, et al.
+ */
 
-const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-const asciifyModuleID = isLocal ? '/dist/mod.mjs' : '@sister.software/asciify'
+import { AsciifyGUI } from "../common/gui.mjs"
+
+const isLocal = ["localhost", "127.0.0.1"].includes(globalThis.location.hostname)
+const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
+
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
 const { Asciify, createDefaultOptions } = await import(asciifyModuleID)
 
 async function initialize() {
-  const canvasContainer = document.getElementById('canvas-container')
-  const imagePreviewerSource = document.getElementById('image-previewer-source')
-  const canvas = document.createElement('canvas')
+	const canvasContainer = document.getElementById("canvas-container")
+	const imagePreviewerSource = document.getElementById("image-previewer-source")
+	const canvas = document.createElement("canvas")
 
-  canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
-  canvas.style.height = '100%'
-  canvas.style.width = '100%'
-  canvasContainer.appendChild(canvas)
+	canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
+	canvas.style.height = "100%"
+	canvas.style.width = "100%"
+	canvasContainer.appendChild(canvas)
 
-  const asciiOptions = createDefaultOptions({
-    // backgroundColor: '#00ff00',
-    // pixelRatio: 1,
-    // fontSize: 17,
-  })
-  const asciify = new Asciify(canvas, asciiOptions)
+	const asciiOptions = createDefaultOptions({
+		// backgroundColor: '#00ff00',
+		// pixelRatio: 1,
+		// fontSize: 17,
+	})
 
-  const filePicker = document.getElementById('file-picker')
-  let sourceRef = null
-  let imageElementRef = null
-  let timeoutRef = -1
+	const asciify = new Asciify(canvas, asciiOptions)
 
-  function decodeImageFromFile(fileOrURL) {
-    return new Promise((resolve, reject) => {
-      // We use an image element to take advantage of the browser's built-in image
-      // decoding and and orientation handling.
-      const imageElement = new Image()
-      imageElement.onerror = reject
+	const filePicker = document.getElementById("file-picker")
+	let sourceRef = null
+	let imageElementRef = null
+	let timeoutRef = -1
 
-      imageElement.onload = () => {
-        console.debug('Image loaded, rasterizing...')
-        resolve(imageElement)
-      }
+	function decodeImageFromFile(fileOrURL) {
+		return new Promise((resolve, reject) => {
+			// We use an image element to take advantage of the browser's built-in image
+			// decoding and and orientation handling.
+			const imageElement = new Image()
+			imageElement.onerror = reject
 
-      const normalizedURL = fileOrURL instanceof URL ? fileOrURL : URL.createObjectURL(fileOrURL)
-      imageElement.src = normalizedURL
-      imagePreviewerSource.src = normalizedURL
-    })
-  }
+			imageElement.onload = () => {
+				console.debug("Image loaded, rasterizing...")
 
-  // Expose asciify to the window for debugging
-  window.asciify = asciify
-  asciify.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight)
-  imagePreviewerSource.style.width = `${canvas.parentElement.clientWidth}px`
+				resolve(imageElement)
+			}
 
-  async function updateDemo(nextSourceRef) {
-    sourceRef = nextSourceRef
-    imageElementRef = await decodeImageFromFile(sourceRef)
+			const normalizedURL = fileOrURL instanceof URL ? fileOrURL : URL.createObjectURL(fileOrURL)
+			imageElement.src = normalizedURL
+			imagePreviewerSource.src = normalizedURL
+		})
+	}
 
-    await asciify.rasterizeImage(imageElementRef)
-  }
+	// Expose asciify to the window for debugging
+	globalThis.asciify = asciify
+	asciify.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight)
+	imagePreviewerSource.style.width = `${canvas.parentElement.clientWidth}px`
 
-  const onOptionChange = () => {
-    clearTimeout(timeoutRef)
-    asciify.setOptions(asciiOptions)
+	async function updateDemo(nextSourceRef) {
+		sourceRef = nextSourceRef
+		imageElementRef = await decodeImageFromFile(sourceRef)
 
-    timeoutRef = setTimeout(() => {
-      if (imageElementRef) {
-        asciify.rasterizeImage(imageElementRef)
-      }
-    }, 100)
-  }
+		await asciify.rasterizeImage(imageElementRef)
+	}
 
-  const gui = new AsciifyGUI(asciiOptions, onOptionChange)
-  gui.domElement.classList.add('top', 'right')
-  document.getElementById('options-fieldset').appendChild(gui.domElement)
+	const onOptionChange = () => {
+		clearTimeout(timeoutRef)
+		asciify.setOptions(asciiOptions)
 
-  const onWindowResize = async () => {
-    // Check for upward overscrolling...
-    if (window.document.documentElement.clientHeight !== window.innerHeight) return
-    // Check for downward overscrolling...
-    if (window.pageYOffset !== 0) return
+		timeoutRef = setTimeout(() => {
+			if (imageElementRef) {
+				asciify.rasterizeImage(imageElementRef)
+			}
+		}, 100)
+	}
 
-    clearTimeout(timeoutRef)
-    canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
+	const gui = new AsciifyGUI(asciiOptions, onOptionChange)
+	gui.domElement.classList.add("top", "right")
+	document.getElementById("options-fieldset").appendChild(gui.domElement)
 
-    asciify.setSize(canvasContainer.clientHeight, canvasContainer.clientWidth)
+	const onWindowResize = async () => {
+		// Check for upward overscrolling...
+		if (globalThis.document.documentElement.clientHeight !== window.innerHeight) return
 
-    if (sourceRef) {
-      updateDemo(sourceRef)
-    }
-  }
+		// Check for downward overscrolling...
+		if (window.pageYOffset !== 0) return
 
-  window.addEventListener('resize', onWindowResize)
+		clearTimeout(timeoutRef)
+		canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
 
-  filePicker.addEventListener('change', async (e) => {
-    const file = e.target.files[0]
+		asciify.setSize(canvasContainer.clientHeight, canvasContainer.clientWidth)
 
-    console.log('CHANGE')
-    await updateDemo(new File([file], file.name, { type: file.type }))
+		if (sourceRef) {
+			updateDemo(sourceRef)
+		}
+	}
 
-    filePicker.value = ''
-  })
+	window.addEventListener("resize", onWindowResize)
 
-  await updateDemo(new URL('/demo/common/test-pattern.svg', window.location.origin))
+	filePicker.addEventListener("change", async (e) => {
+		const file = e.target.files[0]
+
+		console.log("CHANGE")
+
+		await updateDemo(new File([file], file.name, { type: file.type }))
+
+		filePicker.value = ""
+	})
+
+	await updateDemo(new URL("/demo/common/test-pattern.svg", globalThis.location.origin))
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialize)
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", initialize)
 } else {
-  initialize()
+	initialize()
 }

@@ -1,13 +1,21 @@
-const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+/**
+ * @copyright Sister Software
+ * @license MIT
+ * @author Teffen Ellis, et al.
+ */
 
-const asciifyModuleID = isLocal ? '/dist/mod.mjs' : '@sister.software/asciify'
+import Stats from "stats-js"
+import * as THREE from "three"
+
+import { AsciifyGUI } from "../common/gui.mjs"
+
+const isLocal = ["localhost", "127.0.0.1"].includes(globalThis.location.hostname)
+
+const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
+
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
+
 const { Asciify, createDefaultOptions } = await import(asciifyModuleID)
-
-import Stats from 'stats-js'
-import { AsciifyGUI } from '../common/gui.mjs'
-
-import * as THREE from 'three'
 
 /**
  * Identity function for GLSL template literals.
@@ -103,101 +111,102 @@ void main() {
 }`
 
 async function initialize() {
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
-  const scene = new THREE.Scene()
+	const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+	const scene = new THREE.Scene()
 
-  const vortexGeo = new THREE.PlaneGeometry(2, 2)
+	const vortexGeo = new THREE.PlaneGeometry(2, 2)
 
-  const uniforms = {
-    time: { value: 1.0 },
-    scrollProgress: {
-      value: 0,
-    },
-  }
+	const uniforms = {
+		time: { value: 1 },
+		scrollProgress: {
+			value: 0,
+		},
+	}
 
-  const vortexMat = new THREE.ShaderMaterial({
-    uniforms,
-    vertexShader,
-    fragmentShader,
-  })
+	const vortexMat = new THREE.ShaderMaterial({
+		uniforms,
+		vertexShader,
+		fragmentShader,
+	})
 
-  const vortexMesh = new THREE.Mesh(vortexGeo, vortexMat)
+	const vortexMesh = new THREE.Mesh(vortexGeo, vortexMat)
 
-  scene.add(vortexMesh)
+	scene.add(vortexMesh)
 
-  const renderer = new THREE.WebGLRenderer({
-    stencil: false,
-    precision: 'highp',
-    depth: false,
-    powerPreference: 'high-performance',
-  })
+	const renderer = new THREE.WebGLRenderer({
+		stencil: false,
+		precision: "highp",
+		depth: false,
+		powerPreference: "high-performance",
+	})
 
-  const rendererContext = renderer.getContext()
+	const rendererContext = renderer.getContext()
 
-  const asciiOptions = createDefaultOptions()
-  const canvas = document.getElementById('demo')
-  const asciify = new Asciify(canvas, asciiOptions)
+	const asciiOptions = createDefaultOptions()
+	const canvas = document.getElementById("demo")
+	const asciify = new Asciify(canvas, asciiOptions)
 
-  // Expose asciify to the window for debugging
-  window.asciify = asciify
-  // document.body.appendChild(renderer.domElement)
+	// Expose asciify to the window for debugging
+	globalThis.asciify = asciify
+	// document.body.appendChild(renderer.domElement)
 
-  asciify.setSize(window.innerWidth, window.innerHeight, renderer)
+	asciify.setSize(window.innerWidth, window.innerHeight, renderer)
 
-  camera.aspect = canvas.clientWidth / canvas.clientHeight
+	camera.aspect = canvas.clientWidth / canvas.clientHeight
 
-  const onOptionChange = () => {
-    cancelAnimationFrame(animationFrame)
-    asciify.setOptions(asciiOptions)
-    asciify.applySizeTo(renderer)
+	const onOptionChange = () => {
+		cancelAnimationFrame(animationFrame)
+		asciify.setOptions(asciiOptions)
+		asciify.applySizeTo(renderer)
 
-    animate()
-  }
+		animate()
+	}
 
-  const gui = new AsciifyGUI(asciiOptions, onOptionChange)
-  gui.domElement.classList.add('fixed', 'top', 'right')
+	const gui = new AsciifyGUI(asciiOptions, onOptionChange)
+	gui.domElement.classList.add("fixed", "top", "right")
 
-  const onWindowResize = () => {
-    cancelAnimationFrame(animationFrame)
-    asciify.setSize(window.innerWidth, window.innerHeight, renderer)
+	const onWindowResize = () => {
+		cancelAnimationFrame(animationFrame)
+		asciify.setSize(window.innerWidth, window.innerHeight, renderer)
 
-    camera.aspect = window.innerWidth / window.innerHeight
-    camera.updateProjectionMatrix()
+		camera.aspect = window.innerWidth / window.innerHeight
+		camera.updateProjectionMatrix()
 
-    animate()
-  }
+		animate()
+	}
 
-  window.addEventListener('resize', onWindowResize)
+	window.addEventListener("resize", onWindowResize)
 
-  const stats = new Stats()
-  stats.dom.style.left = 'auto'
-  stats.dom.style.top = 'auto'
-  stats.dom.style.right = '0'
-  stats.dom.style.bottom = '0'
-  stats.showPanel(0)
-  document.body.appendChild(stats.dom)
+	const stats = new Stats()
+	stats.dom.style.left = "auto"
+	stats.dom.style.top = "auto"
+	stats.dom.style.right = "0"
+	stats.dom.style.bottom = "0"
+	stats.showPanel(0)
+	document.body.appendChild(stats.dom)
 
-  // Animation
-  let animationFrame = -1
-  const animate = (now) => {
-    stats.begin()
+	// Animation
+	let animationFrame = -1
 
-    vortexMat.uniforms.time.value = now
+	const animate = (now) => {
+		stats.begin()
 
-    renderer.render(scene, camera)
-    asciify.rasterizeWebGLRenderer(renderer, rendererContext)
-    stats.end()
+		vortexMat.uniforms.time.value = now
 
-    animationFrame = requestAnimationFrame(animate)
-  }
+		renderer.render(scene, camera)
+		asciify.rasterizeWebGLRenderer(renderer, rendererContext)
+		stats.end()
 
-  document.body.appendChild(gui.domElement)
+		animationFrame = requestAnimationFrame(animate)
+	}
 
-  animate(performance.now())
+	document.body.appendChild(gui.domElement)
+
+	animate(performance.now())
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initialize)
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", initialize)
 } else {
-  initialize()
+	initialize()
 }

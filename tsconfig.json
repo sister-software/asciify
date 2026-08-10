@@ -1,28 +1,10 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "jsx": "react",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "sourceMap": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "allowImportingTsExtensions": true,
-    "outDir": "./dist",
-    "moduleResolution": "bundler",
-    "declaration": true,
-    "baseUrl": ".",
-    "strict": true,
-    "skipLibCheck": true,
-  },
-  "include": [
-    "mod.mts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+	"extends": "@sister.software/tsconfig/web",
+	"compilerOptions": {
+		"emitDeclarationOnly": false,
+		"rewriteRelativeImportExtensions": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": ["index.ts", "Asciify.ts", "options/**/*.ts", "utils/**/*.ts"],
+	"exclude": ["./out/**/*", "./node_modules/**/*"]
 }

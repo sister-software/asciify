@@ -1,5 +1,0 @@
-build/header.js
-dist/**/*
-dist-worker/**/*
-dist-node/**/*
-node_modules/**/*
