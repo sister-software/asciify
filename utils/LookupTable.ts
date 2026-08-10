@@ -4,92 +4,63 @@
  * @author Teffen Ellis, et al.
  */
 
-export type CharacterCoords = Map<number, [number, number]>
-
-export type PixelIndex = Uint32Array
-
 /**
- * A precalculated lookup table to help us traverse the pixel buffer.
- *
- * ```ts
- * [red1, green1, blue1, alpha1, redN, greenN, blueN, alphaN...]
- * ```
+ * Precalculated canvas coordinates for every character cell in the grid.
  *
  * @remarks
- *
- *   By precalculating a frequent traversal through a pixel buffer, we can avoid expensive and repetitive calculations
- *   during rasterization. The pixel index contains groups of four values that represent the RGBA values of a pixel: -
- *   Red channel index - Green channel index - Blue channel index - Alpha channel index The length of this array is
- *   equal to the area of the row and column counts.
+ *   Cells are addressed by a flat index, `row * columnCount + column`, and the two arrays give the top-left corner of
+ *   that cell on the output canvas. Precomputing them keeps the rasterization loop free of multiplication and, more
+ *   importantly, free of per-cell allocation. Previous versions also carried an RGBA "pixel index" that mapped a cursor
+ *   position to a byte offset in the frame buffer. That table only ever contained `table[i] === i`, so the indirection
+ *   has been removed in favour of walking the buffer directly.
  * @category Utility
  * @internal
  */
-
 export class LookupTable {
 	/**
-	 * The lookup table used to map the RGBA buffer to the ASCII art canvas.
+	 * The canvas x coordinate of each cell, indexed by flat cell index.
 	 */
-	public readonly pixelIndex: PixelIndex
+	public readonly xs: Uint16Array
+
 	/**
-	 * The lookup table used to map the RGBA buffer to the ASCII art canvas. This is the same as {@linkcode pixelIndex},
-	 * but with the Y axis flipped for WebGL.
+	 * The canvas y coordinate of each cell, indexed by flat cell index.
 	 */
-	public readonly pixelIndexFlippedY: PixelIndex
-	public readonly coords: CharacterCoords
-	public readonly coordsFlipped: CharacterCoords
+	public readonly ys: Uint16Array
+
+	/**
+	 * The number of cells in the grid, i.e. `rowCount * columnCount`.
+	 */
+	public readonly cellCount: number
 
 	constructor(
 		public rowCount: number,
 		public columnCount: number,
-		characterHeight: number,
+		characterSize: number,
 		pixelRatio: number
 	) {
-		const lookupTables = [
-			new Uint32Array(rowCount * columnCount * 4),
-			// We need a second buffer for the flipped Y axis.
-			new Uint32Array(rowCount * columnCount * 4),
-		]
+		const cellCount = rowCount * columnCount
+		const step = characterSize * pixelRatio
 
-		const coordPairs: CharacterCoords[] = [new Map(), new Map()]
+		const xs = new Uint16Array(cellCount)
+		const ys = new Uint16Array(cellCount)
 
 		for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-			const y = rowIndex * characterHeight * pixelRatio
-
-			const flippedY = (rowCount - rowIndex - pixelRatio) * characterHeight * pixelRatio + characterHeight * pixelRatio
+			const y = rowIndex * step
 
 			for (let columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-				const x = (columnCount - columnIndex - 1) * characterHeight * pixelRatio
+				const cellIndex = rowIndex * columnCount + columnIndex
 
-				const xFlipped = columnIndex * characterHeight * pixelRatio
-
-				// Times 4 because each pixel is represented by 4 grouped values in the buffer.
-				const redIndex = (rowIndex * columnCount + columnIndex) * 4
-				const greenIndex = redIndex + 1
-				const blueIndex = redIndex + 2
-				const alphaIndex = redIndex + 3
-
-				for (const [tableIndex, lookupTable] of lookupTables.entries()) {
-					const xVal = tableIndex === 0 ? xFlipped : x
-					const yVal = tableIndex === 0 ? y : flippedY
-
-					lookupTable[redIndex] = redIndex
-					lookupTable[greenIndex] = greenIndex
-					lookupTable[blueIndex] = blueIndex
-					lookupTable[alphaIndex] = alphaIndex
-
-					coordPairs[tableIndex]!.set(redIndex, [xVal, yVal])
-				}
+				xs[cellIndex] = columnIndex * step
+				ys[cellIndex] = y
 			}
 		}
 
-		// Both pairs are allocated as literals above, so every index here is present.
-		this.pixelIndex = lookupTables[0]!
-		this.pixelIndexFlippedY = lookupTables[1]!
-		this.coords = coordPairs[0]!
-		this.coordsFlipped = coordPairs[1]!
+		this.xs = xs
+		this.ys = ys
+		this.cellCount = cellCount
 	}
 
-	get length() {
-		return this.coords.size
+	get length(): number {
+		return this.cellCount
 	}
 }

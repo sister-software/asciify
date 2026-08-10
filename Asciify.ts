@@ -21,7 +21,7 @@ import {
 	type SizableLike,
 	type WebGLRendererLike,
 } from "./utils/canvas.ts"
-import { type CharacterCoords, LookupTable } from "./utils/LookupTable.ts"
+import { LookupTable } from "./utils/LookupTable.ts"
 import { LuminanceCharacterMap } from "./utils/LuminanceCharacterMap.ts"
 import { FrameBuffer, readFromImage } from "./utils/readers.ts"
 import { calculateTextureMetrics, TextureCache, type TextureMetrics } from "./utils/TextureCache.ts"
@@ -116,21 +116,12 @@ export class Asciify {
 	protected _textureCache!: TextureCache
 
 	/**
-	 * The lookup table is used to map the RGBA values of each pixel to a character. The frame buffer is used to store the
-	 * RGBA values of the image.
+	 * Precalculated canvas coordinates for every character cell.
 	 *
 	 * @internal
 	 * @see {@linkcode LookupTable}
 	 */
 	protected _lookupTable!: LookupTable
-
-	/**
-	 * The frame buffer is used to store the RGBA values of the image.
-	 *
-	 * @internal
-	 * @see {@linkcode FrameBuffer}
-	 */
-	protected _frameBuffer!: Uint8ClampedArray
 
 	/**
 	 * @internal
@@ -144,6 +135,26 @@ export class Asciify {
 	 * @ignore
 	 */
 	protected _scratchCtx!: Canvas2dContextLike
+
+	/**
+	 * A full-size canvas holding the current frame's glyph coverage.
+	 *
+	 * @remarks
+	 *   Every character cell is stamped here in a single pass with no context state changes, then applied to the output
+	 *   in one `destination-in` composite.
+	 * @internal
+	 */
+	protected _maskCtx!: Canvas2dContextLike
+
+	/**
+	 * A `columnCount` x `rowCount` canvas holding the current frame's pixel data.
+	 *
+	 * @remarks
+	 *   Scaled up to the full canvas with smoothing disabled, one source pixel becomes one flat character cell — which
+	 *   replaces a `fillStyle` assignment and a `fillRect` per cell with a single `drawImage`.
+	 * @internal
+	 */
+	protected _colorCtx!: Canvas2dContextLike
 
 	//#endregion
 
@@ -304,6 +315,11 @@ export class Asciify {
 			alpha: true,
 		})
 
+		// Both of these are internal compositing surfaces. The mask must keep its alpha channel, and
+		// the colour surface is read back by `drawImage` rather than `getImageData`.
+		this._maskCtx = pluck2dContext(createCanvasLike(), { alpha: true })
+		this._colorCtx = pluck2dContext(createCanvasLike(), { alpha: true })
+
 		this.setSize()
 	}
 
@@ -380,7 +396,8 @@ export class Asciify {
 			this._scratchFrameBuffer
 		)
 
-		this.rasterize(this._scratchFrameBuffer, this._lookupTable.pixelIndexFlippedY, this._lookupTable.coordsFlipped)
+		// `readPixels` hands back rows bottom-to-top, so the rasterizer has to read them in reverse.
+		this.rasterize(this._scratchFrameBuffer, true)
 	}
 
 	/**
@@ -398,69 +415,90 @@ export class Asciify {
 		 */
 		nextFrameBuffer: FrameBuffer,
 		/**
-		 * Lookup table to use for the next frame.
+		 * Whether the buffer's rows run bottom-to-top, as `WebGLRenderingContext.readPixels` returns them.
 		 *
 		 * @optional
 		 */
-		pixelIndex: Uint32Array = this._lookupTable.pixelIndex,
-		/**
-		 * Character coord map to use for the next frame.
-		 *
-		 * @optional
-		 */
-		coords: CharacterCoords = this._lookupTable.coords
+		flipY = false
 	): void {
+		const { columnCount, rowCount, ctx } = this
+		const { xs, ys } = this._lookupTable
+		const textures = this._textureCache
+		const blank = this._textureCache.blank
 		const textureWidth = this._textureMetrics.width
 		const textureHeight = this._textureMetrics.height
-		const colorize = this.options.colorize
+		const canvasWidth = this.canvas.width
+		const canvasHeight = this.canvas.height
+		const maskCtx = this._maskCtx
 
-		// Every index below is guaranteed to be in bounds: the lookup table is sized to
-		// `rowCount * columnCount * 4` and traversed in groups of four, and the frame buffers are
-		// allocated from the same dimensions. The assertions keep the hot loop free of bounds checks.
-		for (let cursorIndex = 0; cursorIndex < pixelIndex.length; cursorIndex += 4) {
-			const redIndex = pixelIndex[cursorIndex]!
-			const greenIndex = pixelIndex[cursorIndex + 1]!
-			const blueIndex = pixelIndex[cursorIndex + 2]!
+		// -- Pass one: stamp every glyph into the mask. -----------------------------------------
+		// Nothing in this loop touches context state, which is the whole point: the previous
+		// implementation flipped `globalCompositeOperation` twice and assigned `fillStyle` once per
+		// cell, and those state changes dominated the frame.
+		maskCtx.clearRect(0, 0, canvasWidth, canvasHeight)
 
-			const red = nextFrameBuffer[redIndex]!
-			const green = nextFrameBuffer[greenIndex]!
-			const blue = nextFrameBuffer[blueIndex]!
+		for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+			// Screen rows always run top-to-bottom; only the row we read from the buffer flips.
+			const sourceRow = flipY ? rowCount - 1 - rowIndex : rowIndex
 
-			if (
-				this._frameBuffer[redIndex] === red &&
-				this._frameBuffer[greenIndex] === green &&
-				this._frameBuffer[blueIndex] === blue
-			) {
-				continue
+			let byteIndex = sourceRow * columnCount * 4
+			let cellIndex = rowIndex * columnCount
+
+			for (let columnIndex = 0; columnIndex < columnCount; columnIndex++, byteIndex += 4, cellIndex++) {
+				const red = nextFrameBuffer[byteIndex]!
+				const green = nextFrameBuffer[byteIndex + 1]!
+				const blue = nextFrameBuffer[byteIndex + 2]!
+
+				// Approximate of luminance. See https://en.wikipedia.org/wiki/Relative_luminance
+				// This gives us a number between 0 and 255.
+				const luminance = (red + red + red + blue + green + green + green + green) >> 3
+
+				// Whitespace contributes nothing to the mask, so skip the draw entirely.
+				if (blank[luminance]) continue
+
+				maskCtx.drawImage(textures[luminance]!, xs[cellIndex]!, ys[cellIndex]!, textureWidth, textureHeight)
 			}
-
-			// Approximate of luminance. See https://en.wikipedia.org/wiki/Relative_luminance
-			// This gives us a number between 0 and 255.
-			const luminance = (red + red + red + blue + green + green + green + green) >> 3
-
-			const [x, y] = coords.get(cursorIndex)!
-			const texture = this._textureCache[luminance]!
-
-			if (colorize) {
-				this.ctx.fillStyle = "rgb(" + red + "," + green + "," + blue + ")"
-			}
-
-			this.ctx.globalCompositeOperation = "source-over"
-			this.ctx.fillRect(x, y, textureWidth, textureHeight)
-			this.ctx.globalCompositeOperation = "xor"
-
-			// We include the dirty rectangle to avoid clearing the entire canvas.
-			this.ctx.drawImage(texture, 0, 0, textureWidth, textureHeight, x, y, textureWidth, textureHeight)
 		}
 
-		this._frameBuffer.set(nextFrameBuffer)
+		// -- Pass two: paint the colour, then punch the glyphs out of it. -----------------------
+		if (this.options.colorize) {
+			this._colorCtx.putImageData(new ImageData(nextFrameBuffer, columnCount, rowCount), 0, 0)
+
+			// `copy` replaces the canvas outright, so the previous frame needs no separate clear.
+			ctx.globalCompositeOperation = "copy"
+			// Nearest-neighbour, so one source pixel becomes one flat character cell.
+			ctx.imageSmoothingEnabled = false
+
+			if (flipY) {
+				ctx.setTransform(1, 0, 0, -1, 0, canvasHeight)
+			}
+
+			ctx.drawImage(this._colorCtx.canvas, 0, 0, columnCount, rowCount, 0, 0, canvasWidth, canvasHeight)
+
+			if (flipY) {
+				ctx.setTransform(1, 0, 0, 1, 0, 0)
+			}
+		} else {
+			ctx.globalCompositeOperation = "copy"
+			ctx.fillStyle = "white"
+			ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+		}
+
+		ctx.globalCompositeOperation = "destination-in"
+		ctx.drawImage(maskCtx.canvas, 0, 0)
+
+		// Finally, slide the background in underneath what survived.
+		ctx.globalCompositeOperation = "destination-over"
+		ctx.fillStyle = this.options.backgroundColor
+		ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+
+		ctx.globalCompositeOperation = "source-over"
 	}
 
 	/**
 	 * Clears the frame buffers. Asciify will automatically handle this for you in most cases.
 	 */
 	public clearFrameBuffers(): void {
-		this._frameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
 		this._scratchFrameBuffer = new FrameBuffer(this.columnCount, this.rowCount)
 	}
 
@@ -477,6 +515,8 @@ export class Asciify {
 		this._scratchCtx.fillRect(0, 0, this._scratchCtx.canvas.width, this._scratchCtx.canvas.height)
 
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+		this._maskCtx.clearRect(0, 0, this._maskCtx.canvas.width, this._maskCtx.canvas.height)
 
 		if (isHTMLCanvasElement(this.canvas)) {
 			// We apply a background color to the canvas element itself for a slight performance boost.
@@ -518,6 +558,14 @@ export class Asciify {
 		this._offsetY = (trueRowCount - this.rowCount) * this._characterSize
 
 		this._lookupTable = new LookupTable(this.rowCount, this.columnCount, this._characterSize, pixelRatio)
+
+		// The mask is composited 1:1 over the output, so it tracks the output's dimensions.
+		this._maskCtx.canvas.width = this.canvas.width
+		this._maskCtx.canvas.height = this.canvas.height
+
+		// The colour surface is one pixel per character cell, scaled up at composite time.
+		this._colorCtx.canvas.width = this.columnCount
+		this._colorCtx.canvas.height = this.rowCount
 
 		this.clearFrameBuffers()
 		this.clearCanvas()

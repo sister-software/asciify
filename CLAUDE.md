@@ -46,10 +46,20 @@ Entry point `index.ts` re-exports `Asciify.ts`, `options/index.ts`, and `utils/i
 The hot path is `Asciify.rasterize()`. Everything else exists to make that loop cheap, so changes there are performance-sensitive. The precomputed pieces:
 
 - **`LuminanceCharacterMap`** (`utils/`) — `Map<0..255, character>`. The character set is padded at the low end with `contrastRatio` spaces, then spread across all 256 luminance values, so luminance → character is a map lookup with no `Math.floor` at render time.
-- **`TextureCache`** (`utils/`) — an `Array` subclass indexed by luminance holding a pre-rendered sprite per luminance value. Each sprite is drawn white-on-transparent, then its **alpha channel is inverted** so the sprite can be composited with `globalCompositeOperation = 'xor'` over a filled color rect (that's how per-character colorization works without redrawing text). Sprites upgrade to `ImageBitmap` asynchronously when supported; `initializedBitmaps` resolves when done.
-- **`LookupTable`** (`utils/`) — precomputed RGBA byte offsets plus a `Map` from pixel index to `[x, y]` canvas coords. It builds two variants: normal, and Y-flipped for WebGL (`readPixels` returns bottom-up), used via `pixelIndexFlippedY` / `coordsFlipped`.
+- **`TextureCache`** (`utils/`) — an `Array` subclass indexed by luminance, holding a sprite that is **opaque where the glyph covers and transparent elsewhere**, so it works directly as a `destination-in` mask. Sprites are **deduplicated by character**: 256 luminance slots typically resolve to a dozen or so glyphs, and every slot sharing a character points at the same object. That dedup is worth ~1.4x, but only once the per-cell state changes are gone — on its own it measured as noise. `blank` flags the whitespace slots so the rasterizer can skip them entirely. Sprites upgrade to `ImageBitmap` asynchronously; `initializedBitmaps` resolves when done.
+- **`LookupTable`** (`utils/`) — two `Uint16Array`s giving each cell's `x`/`y` on the output canvas, indexed by `row * columnCount + column`.
 
-`rasterize()` walks the pixel index in steps of 4, skips pixels whose RGB is unchanged from the previous frame (`_frameBuffer` diff — this is why frame buffers must be cleared when the source changes), computes an integer luminance approximation with bit shifts, and blits the cached sprite into the character cell.
+`rasterize(buffer, flipY?)` runs two passes:
+
+1. **Mask.** Walk the buffer, compute an integer luminance with bit shifts, and stamp the glyph into a full-size mask canvas. **Nothing in this loop touches context state** — that is the entire point. The previous implementation flipped `globalCompositeOperation` twice and assigned a `fillStyle` string per cell, and those state changes dominated the frame.
+2. **Composite.** Paint the colour (one nearest-neighbour `drawImage` upscaling the `columnCount × rowCount` colour surface, so one source pixel becomes one flat cell), apply the mask with a single `destination-in`, then slide the background in underneath with `destination-over`.
+
+Measured against the old per-cell approach on a 160×90 grid at 3840×2160, all cells dirty: 25.4 → 11.5 ms/frame.
+
+Two consequences worth knowing:
+
+- **There is no frame-to-frame diff any more.** The old `_frameBuffer` comparison skipped unchanged cells; the mask is rebuilt wholesale each call instead. Reintroducing a skip needs a per-cell `clearRect` in the mask, which costs an op per dirty cell — measure before assuming it wins.
+- **`flipY` is a pure vertical flip**, which is what `readPixels` (bottom-up rows) actually calls for. The old `coordsFlipped` additionally mirrored horizontally and, at `pixelRatio: 1`, pushed row 0 off-canvas. Both were bugs, masked because every demo runs at `pixelRatio: 2` on roughly symmetric content.
 
 ### Sizing contract
 

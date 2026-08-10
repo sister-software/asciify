@@ -11,12 +11,65 @@ const whitespacePattern = /\s/
 const supportsCreateImageBitmap = typeof createImageBitmap !== "undefined"
 
 /**
- * A cache containing the pre-rendered image data of the character set.
+ * Renders a single character into its own canvas, opaque where the glyph covers and transparent everywhere else.
+ *
+ * @internal
+ */
+function drawGlyphTexture(
+	character: string,
+	textureMetrics: TextureMetrics,
+	fontFamily: string,
+	debug: boolean
+): CanvasLike {
+	const canvas = createCanvasLike()
+
+	const context = pluck2dContext(canvas, {
+		alpha: true,
+	})
+
+	canvas.width = textureMetrics.width
+	canvas.height = textureMetrics.height
+
+	context.font = `${textureMetrics.renderedFontSize}px ${fontFamily}`
+	context.fontKerning = "none"
+	context.textBaseline = "top"
+
+	context.clearRect(0, 0, canvas.width, canvas.height)
+
+	if (debug) {
+		// An outline makes the boundary of each character cell visible in the composited output.
+		context.strokeStyle = "white"
+		context.lineWidth = 1
+		context.strokeRect(0.5, 0.5, canvas.width - 1, canvas.height - 1)
+	}
+
+	if (!whitespacePattern.test(character)) {
+		// Some characters like emoji are in color but we want to render them in black and white.
+		context.filter = "grayscale(100%)"
+		context.fillStyle = "white"
+
+		const textMetrics = context.measureText(character)
+		const x = (canvas.width - textMetrics.width) / 2
+		const y = (canvas.height - textureMetrics.renderedFontSize) / 2
+
+		context.fillText(character, x, y)
+		context.filter = "none"
+	}
+
+	return canvas
+}
+
+/**
+ * A cache containing the pre-rendered image data of the character set, indexed by luminance.
  *
  * @remarks
- *   The texture cache allows us to avoid re-rendering the character set for each frame. And since there are a fixed
- *   amount of luminance values, we can pre-render the character set associated with each value. Additionally, the cache
- *   will automatically upgrade the canvas to a more performant
+ *   The texture cache lets us avoid re-rendering the character set for each frame. Since there are a fixed number of
+ *   luminance values, we pre-render the character associated with each one. Textures are **deduplicated by character**.
+ *   A luminance range of 256 values typically maps onto a character set of a dozen or so glyphs, so the cache holds one
+ *   texture per distinct character and points every luminance that resolves to that character at the same object. Fewer
+ *   distinct textures means far better texture cache locality while compositing, which measurably outweighs the
+ *   bookkeeping. Each texture is opaque where the glyph covers and transparent elsewhere, so it can be used directly as
+ *   a `destination-in` mask. Additionally, the cache will automatically upgrade the canvas to a more performant
  *   {@linkcode https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap ImageBitmap} if the browser supports it.
  * @internal
  */
@@ -26,6 +79,16 @@ export class TextureCache extends Array<CanvasLike | ImageBitmap> {
 	 */
 	public initializedBitmaps: Promise<void>
 
+	/**
+	 * Per-luminance flag, set when the character for that luminance is whitespace.
+	 *
+	 * @remarks
+	 *   Drawing a whitespace glyph contributes nothing to the mask, so the rasterizer skips those cells outright rather
+	 *   than paying for a `drawImage` that renders nothing. With the default contrast ratio this elides a meaningful
+	 *   slice of the luminance range, and considerably more of the cells on a dark source.
+	 */
+	public readonly blank: Uint8Array
+
 	constructor(
 		luminanceCharacterMap: LuminanceCharacterMap,
 		textureMetrics: TextureMetrics,
@@ -34,71 +97,46 @@ export class TextureCache extends Array<CanvasLike | ImageBitmap> {
 		bitmapsEnabled = supportsCreateImageBitmap
 	) {
 		super(luminanceCharacterMap.size)
-		const bitmapPromises: Promise<ImageBitmap>[] = []
+
+		const blank = new Uint8Array(luminanceCharacterMap.size)
+		// Which luminance slots resolve to each distinct character.
+		const slotsByCharacter = new Map<string, number[]>()
 
 		for (const [luminance, character] of luminanceCharacterMap.entries()) {
-			const canvas = createCanvasLike()
+			// In debug mode every cell draws an outline, so even whitespace has something to render.
+			if (!debug && whitespacePattern.test(character)) {
+				blank[luminance] = 1
 
-			const context = pluck2dContext(canvas, {
-				alpha: true,
-			})
-
-			canvas.width = textureMetrics.width
-			canvas.height = textureMetrics.height
-
-			context.font = `${textureMetrics.renderedFontSize * 1}px ${fontFamily}`
-			context.fillStyle = "black"
-			context.fontKerning = "none"
-			context.textBaseline = "top"
-
-			context.clearRect(0, 0, canvas.width, canvas.height)
-
-			if (debug) {
-				context.fillStyle = "white"
-				context.fillRect(0, 0, canvas.width, canvas.height)
-
-				context.fillStyle = "black"
-				// We use a circle to make it easier to see the edges of the individual characters.
-				context.beginPath()
-
-				context.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, 2 * Math.PI)
-
-				context.fill()
+				continue
 			}
 
-			if (!whitespacePattern.test(character)) {
-				// Some characters like emoji are in color but we want to render them in black and white.
-				context.filter = "grayscale(100%)"
-				context.fillStyle = "white"
+			let slots = slotsByCharacter.get(character)
 
-				const textMetrics = context.measureText(character)
-				const x = (canvas.width - textMetrics.width) / 2
-				const y = (canvas.height - textureMetrics.renderedFontSize) / 2
-
-				context.fillText(character, x, y)
-				context.filter = "none"
+			if (!slots) {
+				slots = []
+				slotsByCharacter.set(character, slots)
 			}
 
-			const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+			slots.push(luminance)
+		}
 
-			// We need to convert the image data so the transparency values are inverted...
-			// The buffer length is always a multiple of 4, so the alpha channel is always present.
-			for (let i = 0; i < imageData.data.length; i += 4) {
-				const a = imageData.data[i + 3]!
+		const bitmapPromises: Promise<ImageBitmap>[] = []
 
-				imageData.data[i + 3] = 255 - a
+		for (const [character, slots] of slotsByCharacter) {
+			const canvas = drawGlyphTexture(character, textureMetrics, fontFamily, debug)
+
+			for (const slot of slots) {
+				this[slot] = canvas
 			}
-
-			context.putImageData(imageData, 0, 0, 0, 0, canvas.width, canvas.height)
-
-			this[luminance] = canvas
 
 			if (bitmapsEnabled) {
 				bitmapPromises.push(
 					createImageBitmap(canvas, 0, 0, canvas.width, canvas.height, {
 						premultiplyAlpha: "premultiply",
 					}).then((imageBitmap) => {
-						this[luminance] = imageBitmap
+						for (const slot of slots) {
+							this[slot] = imageBitmap
+						}
 
 						return imageBitmap
 					})
@@ -106,6 +144,7 @@ export class TextureCache extends Array<CanvasLike | ImageBitmap> {
 			}
 		}
 
+		this.blank = blank
 		// Collapsed to `void` so callers await readiness without holding onto every bitmap.
 		this.initializedBitmaps = Promise.all(bitmapPromises).then(() => undefined)
 	}
