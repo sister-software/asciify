@@ -30,13 +30,16 @@ camera.position.z = 250
 const scene = new THREE.Scene()
 scene.background = new THREE.Color("#001a89")
 
-const pointLight1 = new THREE.PointLight(0xff_ff_ff, 0.5)
-pointLight1.position.set(50, 50, 50)
-scene.add(pointLight1)
+// Key and rim must be directional: a point source this close to the origin spends most of the bounce inside the
+// radius-200 sphere, and physical falloff zeroes it at scene scale regardless. The PI factor is the physical-units
+// equivalent of the legacy intensities.
+const keyLight = new THREE.DirectionalLight(0xff_ff_ff, 0.5 * Math.PI)
+keyLight.position.set(50, 50, 50)
+scene.add(keyLight)
 
-const pointLight2 = new THREE.PointLight(0xff_ff_ff, 0.25)
-pointLight2.position.set(-100, -200, -200)
-scene.add(pointLight2)
+const rimLight = new THREE.DirectionalLight(0xff_ff_ff, 0.25 * Math.PI)
+rimLight.position.set(-100, -200, -200)
+scene.add(rimLight)
 
 const hemiLight = new THREE.HemisphereLight(0xff_ff_ff, 0x22_22_22, 1)
 hemiLight.position.set(0, 100, 0)
