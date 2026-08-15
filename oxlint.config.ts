@@ -10,5 +10,5 @@ import { createOxlintConfig, DefaultIgnorePatterns } from "@sister.software/oxli
 export default createOxlintConfig({
 	copyrightHolder: "Sister Software",
 	spdxLicenseIdentifier: "MIT",
-	ignorePatterns: [...DefaultIgnorePatterns, "docs/**/*", "demo/common/polyfills.js"],
+	ignorePatterns: [...DefaultIgnorePatterns, "docs/**/*"],
 })

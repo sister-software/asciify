@@ -29,9 +29,13 @@ export class AsciifyGUI extends GUI {
 		})
 
 		this.add(asciiOptions, "characterSpacingRatio", 0, 3, 0.1).onChange(onOptionChange)
+
 		this.add(asciiOptions, "contrastRatio", 0, 5, 1).onChange(onOptionChange)
+
 		this.add(asciiOptions, "colorize").onChange(onOptionChange)
+
 		this.addColor(asciiOptions, "backgroundColor").onChange(onOptionChange)
+
 		this.add(asciiOptions, "pixelRatio", 1, 4, 1).onChange(onOptionChange)
 
 		this.add(asciiOptions, "debug").onChange((value) => {

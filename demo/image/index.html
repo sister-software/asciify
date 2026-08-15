@@ -6,8 +6,6 @@
 		<title>Asciify Image Demo</title>
 		<link rel="stylesheet" href="../common/styles.css" />
 
-		<script src="../common/polyfills.js"></script>
-
 		<script async src="https://ga.jspm.io/npm:es-module-shims@2.6.2/dist/es-module-shims.js"></script>
 
 		<style>
@@ -144,7 +142,9 @@
 
 			resizeHandle.addEventListener("mousedown", onResizeStart)
 
-			document.documentElement.addEventListener("mousemove", onResizeMove, { passive: true })
+			document.documentElement.addEventListener("mousemove", onResizeMove, {
+				passive: true,
+			})
 			document.documentElement.addEventListener("mouseup", onResizeEnd)
 		</script>
 	</body>
