@@ -15,8 +15,9 @@
  * Controls: arrow keys or WASD orbit, +/- zoom, q or Ctrl-C quits.
  */
 
-import { AsciifyTerminal } from "../../out/tui/index.js"
-import { createTerminalSession, parseDemoArguments } from "./common.mjs"
+import { AsciifyTerminal } from "#tui"
+
+import { createTerminalSession, parseDemoArguments, type ColorTuple } from "./common.ts"
 
 const { size: fixedSize, time: fixedTime } = parseDemoArguments()
 const asciify = new AsciifyTerminal(process.stdout)
@@ -27,11 +28,13 @@ let frameBuffer = new Uint8ClampedArray(0)
 // arrive there by different routes, matching Three's color handling: `Color.setHSL` interprets its arguments in the
 // *working* color space, so the sphere's `setHSL(0.9, 0.8, 0.8)` evaluates to linear RGB directly, while the ground's
 // CSS string `hsl(200, 30%, 65%)` is sRGB and must be decoded. Conflating the two shifts the sphere's hue visibly.
-const SPHERE_LINEAR = [0.96, 0.64, 0.832]
-const GROUND_LINEAR = [139, 175, 193].map(srgbToLinear)
-const SKY_COLOR = [0, 26, 137]
-const GRID_CENTER_COLOR = [0, 0, 255]
-const GRID_LINE_COLOR = [255, 0, 0]
+const SPHERE_LINEAR: ColorTuple = [0.96, 0.64, 0.832]
+
+const GROUND_LINEAR: ColorTuple = [139, 175, 193].map(srgbToLinear) as unknown as ColorTuple
+
+const SKY_COLOR: ColorTuple = [0, 26, 137]
+const GRID_CENTER_COLOR: ColorTuple = [0, 0, 255]
+const GRID_LINE_COLOR: ColorTuple = [255, 0, 0]
 
 // Scene constants, matching demo/3d: a radius-200 sphere over a 2000x2000 plane at y = -200 with a 20-division grid.
 const SPHERE_RADIUS = 200
@@ -61,10 +64,11 @@ const FOV_Y = (60 * Math.PI) / 180
 
 const resize = () => {
 	asciify.setSize(fixedSize?.columns, fixedSize?.rows)
+
 	frameBuffer = new Uint8ClampedArray(asciify.sourceWidth * asciify.sourceHeight * 4)
 }
 
-const onKey = (input) => {
+const onKey = (input: string) => {
 	// Arrow keys arrive as CSI sequences; WASD works where those don't survive the trip.
 	if (input.includes("[D") || input.includes("a")) {
 		camera.azimuth -= 0.12
@@ -100,19 +104,19 @@ const onKey = (input) => {
 const LIGHT_1 = normalize([50, 50, 50])
 const LIGHT_2 = normalize([-100, -200, -200])
 
-function normalize([x, y, z]) {
+function normalize([x, y, z]: ColorTuple): [number, number, number] {
 	const length = Math.hypot(x, y, z)
 
 	return [x / length, y / length, z / length]
 }
 
-function srgbToLinear(channel) {
+function srgbToLinear(channel: number): number {
 	const c = channel / 255
 
 	return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
 }
 
-function linearToSrgb(linear) {
+function linearToSrgb(linear: number): number {
 	const c = Math.min(1, linear)
 
 	return 255 * (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055)
@@ -123,9 +127,11 @@ function linearToSrgb(linear) {
  * (`intensity * PI` in physical units divides back out through the Lambert BRDF), so only the ambient and hemisphere
  * levels are approximate.
  */
-function shade(normal) {
+function shade(normal: ColorTuple) {
 	const hemisphere = 0.28 * (normal[1] * 0.5 + 0.5)
+
 	const diffuse1 = Math.max(0, normal[0] * LIGHT_1[0] + normal[1] * LIGHT_1[1] + normal[2] * LIGHT_1[2]) * 0.5
+
 	const diffuse2 = Math.max(0, normal[0] * LIGHT_2[0] + normal[1] * LIGHT_2[1] + normal[2] * LIGHT_2[2]) * 0.25
 
 	return 0.05 + hemisphere + diffuse1 + diffuse2
@@ -138,15 +144,18 @@ const SPECULAR_STRENGTH = srgbToLinear(0x11) * (30 * 0.5 + 1)
  * The white additive Blinn-Phong highlight, in linear space. Unlike the diffuse term this is independent of albedo —
  * which is visible on the pink sphere: the highlight lifts its dim green channel proportionally most.
  */
-function specular(normal, ray) {
+function specular(normal: ColorTuple, ray: ColorTuple) {
 	let total = 0
 
-	for (const [light, intensity] of [
+	const colorIntensityMapping: [ColorTuple, number][] = [
 		[LIGHT_1, 0.5],
 		[LIGHT_2, 0.25],
-	]) {
+	]
+
+	for (const [light, intensity] of colorIntensityMapping) {
 		// The half vector between the light and the viewer, who looks along the ray.
 		const half = normalize([light[0] - ray[0], light[1] - ray[1], light[2] - ray[2]])
+
 		const alignment = Math.max(0, normal[0] * half[0] + normal[1] * half[1] + normal[2] * half[2])
 
 		total += intensity * SPECULAR_STRENGTH * alignment ** 30
@@ -158,7 +167,7 @@ function specular(normal, ray) {
 /**
  * Renders one frame by raycasting every braille subpixel: sphere first, ground plane behind it, sky otherwise.
  */
-const render = (elapsed) => {
+const render = (elapsed: number) => {
 	const { sourceWidth, sourceHeight } = asciify
 
 	if (!sourceWidth || !sourceHeight) return
@@ -184,7 +193,7 @@ const render = (elapsed) => {
 	// because the derived up vector inherits the sign.
 	const right = normalize([-forward[2], 0, forward[0]])
 
-	const up = [
+	const up: ColorTuple = [
 		right[1] * forward[2] - right[2] * forward[1],
 		right[2] * forward[0] - right[0] * forward[2],
 		right[0] * forward[1] - right[1] * forward[0],
@@ -218,7 +227,9 @@ const render = (elapsed) => {
 			const toCenterZ = eyeZ
 
 			const b = toCenterX * ray[0] + toCenterY * ray[1] + toCenterZ * ray[2]
+
 			const c = toCenterX * toCenterX + toCenterY * toCenterY + toCenterZ * toCenterZ - SPHERE_RADIUS * SPHERE_RADIUS
+
 			const discriminant = b * b - c
 
 			let hitSphere = false
@@ -245,6 +256,7 @@ const render = (elapsed) => {
 					// the outside: one normal per facet...
 					const longitudeStep = (2 * Math.PI) / SEGMENTS_U
 					const latitudeStep = Math.PI / SEGMENTS_V
+
 					const longitude = (Math.floor(Math.atan2(objectZ, objectX) / longitudeStep) + 0.5) * longitudeStep
 
 					const latitude =
@@ -258,13 +270,15 @@ const render = (elapsed) => {
 					// ...and rotate the facet normal back into the world for lighting.
 					const retiltX = facetX * cosZ - facetY * sinZ
 					const retiltY = facetX * sinZ + facetY * cosZ
-					const worldNormal = [retiltX, retiltY * cosX - facetZ * sinX, retiltY * sinX + facetZ * cosX]
+
+					const worldNormal: ColorTuple = [retiltX, retiltY * cosX - facetZ * sinX, retiltY * sinX + facetZ * cosX]
+
 					const litShade = shade(worldNormal)
 					const highlight = specular(worldNormal, ray)
 
-					red = linearToSrgb(SPHERE_LINEAR[0] * litShade + highlight)
-					green = linearToSrgb(SPHERE_LINEAR[1] * litShade + highlight)
-					blue = linearToSrgb(SPHERE_LINEAR[2] * litShade + highlight)
+					red = linearToSrgb(SPHERE_LINEAR[0]! * litShade + highlight)
+					green = linearToSrgb(SPHERE_LINEAR[1]! * litShade + highlight)
+					blue = linearToSrgb(SPHERE_LINEAR[2]! * litShade + highlight)
 				}
 			}
 
@@ -277,19 +291,22 @@ const render = (elapsed) => {
 				if (Math.abs(groundX) <= GROUND_EXTENT && Math.abs(groundZ) <= GROUND_EXTENT) {
 					const litShade = shade([0, 1, 0])
 
-					red = linearToSrgb(GROUND_LINEAR[0] * litShade)
-					green = linearToSrgb(GROUND_LINEAR[1] * litShade)
-					blue = linearToSrgb(GROUND_LINEAR[2] * litShade)
+					red = linearToSrgb(GROUND_LINEAR[0]! * litShade)
+					green = linearToSrgb(GROUND_LINEAR[1]! * litShade)
+					blue = linearToSrgb(GROUND_LINEAR[2]! * litShade)
 
 					// The grid stays a gamma-space blend: GL alpha-blends against the already-encoded framebuffer.
 
 					// Grid lines thicken with distance so they stay visible at a subpixel scale.
 					const lineWidth = 2 + t * 0.004
+
 					const distanceToLineX = Math.abs(groundX - Math.round(groundX / GRID_STEP) * GRID_STEP)
+
 					const distanceToLineZ = Math.abs(groundZ - Math.round(groundZ / GRID_STEP) * GRID_STEP)
 
 					if (distanceToLineX < lineWidth || distanceToLineZ < lineWidth) {
 						const centerLine = Math.abs(groundX) < lineWidth || Math.abs(groundZ) < lineWidth
+
 						const [lineRed, lineGreen, lineBlue] = centerLine ? GRID_CENTER_COLOR : GRID_LINE_COLOR
 
 						red += (lineRed - red) * GRID_OPACITY

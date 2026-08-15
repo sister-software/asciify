@@ -12,8 +12,9 @@
  *   node demo/tui/ball.mjs
  */
 
-import { AsciifyTerminal } from "../../out/tui/index.js"
-import { createTerminalSession, parseDemoArguments } from "./common.mjs"
+import { AsciifyTerminal } from "#tui"
+
+import { createTerminalSession, parseDemoArguments, type ColorTuple } from "./common.ts"
 
 const { size: fixedSize } = parseDemoArguments()
 const asciify = new AsciifyTerminal(process.stdout)
@@ -25,10 +26,10 @@ const asciify = new AsciifyTerminal(process.stdout)
 let frameBuffer = new Uint8ClampedArray(0)
 let backgroundBuffer = new Uint8ClampedArray(0)
 
-const BACKGROUND = [168, 168, 168]
-const GRID_LINE = [148, 62, 188]
-const BALL_RED = [222, 56, 48]
-const BALL_WHITE = [250, 250, 250]
+const BACKGROUND: ColorTuple = [168, 168, 168]
+const GRID_LINE: ColorTuple = [148, 62, 188]
+const BALL_RED: ColorTuple = [222, 56, 48]
+const BALL_WHITE: ColorTuple = [250, 250, 250]
 
 /**
  * Ball state, in subpixels. Initialized on (re)size.
@@ -78,6 +79,7 @@ const resize = () => {
 	ball.velocityX = Math.max(0.5, sourceWidth * 0.004)
 	ball.velocityY = 0
 	ball.gravity = Math.max(0.02, sourceHeight * 0.0006)
+
 	// The bounce always returns the ball to roughly the same height, Amiga-style: no energy loss.
 	ball.bounceSpeed = Math.sqrt(2 * ball.gravity * (ball.floorY - ball.radius * 1.4))
 }
@@ -123,8 +125,11 @@ const paint = () => {
 	const shadowY = floorY
 
 	const shadowTop = Math.max(0, Math.floor(shadowY - shadowRadiusY))
+
 	const shadowBottom = Math.min(sourceHeight - 1, Math.ceil(shadowY + shadowRadiusY))
+
 	const shadowLeft = Math.max(0, Math.floor(shadowX - shadowRadiusX))
+
 	const shadowRight = Math.min(sourceWidth - 1, Math.ceil(shadowX + shadowRadiusX))
 
 	for (let y = shadowTop; y <= shadowBottom; y++) {
@@ -136,9 +141,9 @@ const paint = () => {
 
 			const byteIndex = (y * sourceWidth + x) * 4
 
-			frameBuffer[byteIndex] = frameBuffer[byteIndex] * 0.5
-			frameBuffer[byteIndex + 1] = frameBuffer[byteIndex + 1] * 0.5
-			frameBuffer[byteIndex + 2] = frameBuffer[byteIndex + 2] * 0.5
+			frameBuffer[byteIndex] = frameBuffer[byteIndex]! * 0.5
+			frameBuffer[byteIndex + 1] = frameBuffer[byteIndex + 1]! * 0.5
+			frameBuffer[byteIndex + 2] = frameBuffer[byteIndex + 2]! * 0.5
 		}
 	}
 
@@ -178,9 +183,9 @@ const paint = () => {
 
 			const byteIndex = (y * sourceWidth + x) * 4
 
-			frameBuffer[byteIndex] = red * shade
-			frameBuffer[byteIndex + 1] = green * shade
-			frameBuffer[byteIndex + 2] = blue * shade
+			frameBuffer[byteIndex] = red! * shade
+			frameBuffer[byteIndex + 1] = green! * shade
+			frameBuffer[byteIndex + 2] = blue! * shade
 		}
 	}
 }

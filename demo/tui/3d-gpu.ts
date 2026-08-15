@@ -24,11 +24,13 @@
 
 import { readFile } from "node:fs/promises"
 import { createServer } from "node:http"
+import type { AddressInfo } from "node:net"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { AsciifyTerminal } from "../../out/tui/index.js"
-import { createTerminalSession, parseDemoArguments } from "./common.mjs"
+import { AsciifyTerminal } from "#tui"
+
+import { createTerminalSession, parseDemoArguments } from "./common.ts"
 
 const { size: fixedSize, time: fixedTime } = parseDemoArguments()
 
@@ -54,7 +56,7 @@ const camera = {
 	distance: Math.hypot(600, 800, 250),
 }
 
-const onKey = (input) => {
+const onKey = (input: string) => {
 	if (input.includes("[D") || input.includes("a")) {
 		camera.azimuth -= 0.12
 	}
@@ -232,7 +234,14 @@ const server = createServer(async (request, response) => {
 		}
 
 		response.setHeader("content-type", "application/json")
-		response.end(JSON.stringify({ width: asciify.sourceWidth, height: asciify.sourceHeight, camera }))
+
+		response.end(
+			JSON.stringify({
+				width: asciify.sourceWidth,
+				height: asciify.sourceHeight,
+				camera,
+			})
+		)
 
 		return
 	}
@@ -253,7 +262,7 @@ createTerminalSession({ onKey, onResize: () => asciify.setSize() })
 asciify.setSize(fixedSize?.columns, fixedSize?.rows)
 
 server.listen(0, "127.0.0.1", async () => {
-	const { port } = server.address()
+	const { port } = server.address() as AddressInfo
 
 	// Playwright is loaded lazily so the import cost lands after the terminal is already prepared.
 	const { chromium } = await import("playwright")
@@ -264,14 +273,14 @@ server.listen(0, "127.0.0.1", async () => {
 	// what createTerminalSession already restores.
 	const pageUrl = new URL(`http://127.0.0.1:${port}/`)
 
-	pageUrl.searchParams.set("width", asciify.sourceWidth)
-	pageUrl.searchParams.set("height", asciify.sourceHeight)
-	pageUrl.searchParams.set("azimuth", camera.azimuth)
-	pageUrl.searchParams.set("polar", camera.polar)
-	pageUrl.searchParams.set("distance", camera.distance)
+	pageUrl.searchParams.set("width", String(asciify.sourceWidth))
+	pageUrl.searchParams.set("height", String(asciify.sourceHeight))
+	pageUrl.searchParams.set("azimuth", String(camera.azimuth))
+	pageUrl.searchParams.set("polar", String(camera.polar))
+	pageUrl.searchParams.set("distance", String(camera.distance))
 
 	if (fixedTime !== null) {
-		pageUrl.searchParams.set("time", fixedTime)
+		pageUrl.searchParams.set("time", String(fixedTime))
 	}
 
 	await page.goto(pageUrl.href)

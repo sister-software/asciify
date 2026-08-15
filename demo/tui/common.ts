@@ -10,19 +10,19 @@
 
 import { parseArgs } from "node:util"
 
-/**
- * @typedef {Object} DemoArguments
- * @property {Object | null} [size] - The grid size, if specified.
- * @property {number} [size.columns] - The number of columns in the grid.
- * @property {number} [size.rows] - The number of rows in the grid.
- * @property {number | null} [time] - The animation clock time, if specified.
- */
+export type ColorTuple = [r: number, g: number, b: number]
 
-/**
- * @typedef {Object} TerminalSessionOptions
- * @property {function(string): void} [onKey] - Callback for keypresses.
- * @property {function(): void} [onResize] - Callback for terminal resize events.
- */
+export interface DemoArguments {
+	size?: { columns: number; rows: number } | null
+	columns?: number
+	rows?: number
+	time?: number | null
+}
+
+export interface TerminalSessionOptions {
+	onKey?: (input: string) => void
+	onResize?: () => void
+}
 
 /**
  * Prepares the terminal for an animation and restores it on the way out.
@@ -31,10 +31,8 @@ import { parseArgs } from "node:util"
  * in raw mode — tmux panes, IDE terminals, agent harnesses — Ctrl-C never becomes a signal; it arrives as a plain
  * `0x03` byte on stdin. So the demos take stdin in raw mode themselves and treat `0x03` and `q` as quit, with the
  * signal handlers kept as a fallback for plainer environments.
- *
- * @param {TerminalSessionOptions} [options] - Options for the terminal session.
  */
-export function createTerminalSession({ onKey, onResize } = {}) {
+export function createTerminalSession({ onKey, onResize }: TerminalSessionOptions = {}) {
 	// The alternate screen keeps the animation out of the scrollback, and the cursor is hidden while frames paint.
 	process.stdout.write("\u001B[?1049h\u001B[?25l")
 

@@ -30,6 +30,10 @@
 	"main": "./out/index.js",
 	"module": "./out/index.js",
 	"types": "./out/index.d.ts",
+	"imports": {
+		"#asciify": "./index.ts",
+		"#tui": "./tui/index.ts"
+	},
 	"exports": {
 		"./package.json": "./package.json",
 		".": {

@@ -121,7 +121,7 @@ export interface AsciifyTerminalOptions {
 	/**
 	 * The available characters, in order of "brightness". Only used by `glyph` mode.
 	 *
-	 * @default { CharacterPresets.ascii }
+	 * @default CharacterPresets.ascii
 	 * @see {@linkcode AsciifyOptions.characterSet}
 	 */
 	characterSet: string | string[]

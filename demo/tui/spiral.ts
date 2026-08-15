@@ -15,19 +15,20 @@
  * anywhere Node runs, including over SSH.
  */
 
-import { AsciifyTerminal } from "../../out/tui/index.js"
-import { createTerminalSession, parseDemoArguments } from "./common.mjs"
+import { AsciifyTerminal } from "#tui"
 
-const smoothstep = (edge0, edge1, x) => {
+import { createTerminalSession, parseDemoArguments, type ColorTuple } from "./common.ts"
+
+const smoothstep = (edge0: number, edge1: number, x: number): number => {
 	const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1)
 
 	return t * t * (3 - 2 * t)
 }
 
 // GLSL's `mod` is a floored modulo, unlike JavaScript's remainder operator.
-const mod = (x, y) => x - y * Math.floor(x / y)
+const mod = (x: number, y: number): number => x - y * Math.floor(x / y)
 
-const clamp01 = (x) => (x < 0 ? 0 : Math.min(1, x))
+const clamp01 = (x: number): number => (x < 0 ? 0 : Math.min(1, x))
 
 /**
  * The spiral fragment shader. `u`, `v` are in [0, 1] with `v` up, matching `vUv`; `timeMs` matches the `time` uniform.
@@ -35,7 +36,7 @@ const clamp01 = (x) => (x < 0 ? 0 : Math.min(1, x))
  *
  * Compare against the GLSL in `demo/spiral/main.mjs` — the variable names and order match deliberately.
  */
-function spiralShader(u, v, timeMs, out) {
+function spiralShader(u: number, v: number, timeMs: number, out: ColorTuple): void {
 	const screenCoordinateX = -1 + 2 * u
 	const animationTime = (timeMs / 1000) * 40
 	const scale = 1 / 40
@@ -49,6 +50,7 @@ function spiralShader(u, v, timeMs, out) {
 	const spiralPower = 1 - smoothstep(0, 1, logScrollProgress)
 
 	let intensity = 200 + Math.sin(xCoord * scale + animationTime / 150) * 20
+
 	let distance = 140 + Math.cos((yCoord * scale) / 2) * 18 + Math.cos(xCoord * scale) * 7
 
 	const radius = Math.sqrt(
@@ -114,6 +116,7 @@ let frameBuffer = new Uint8ClampedArray(0)
 
 const resize = () => {
 	asciify.setSize(fixedSize?.columns, fixedSize?.rows)
+
 	// The terminal source is a plain buffer, so `applySizeTo` has nothing to resize — allocation is our job.
 	frameBuffer = new Uint8ClampedArray(asciify.sourceWidth * asciify.sourceHeight * 4)
 }
@@ -121,9 +124,9 @@ const resize = () => {
 /**
  * Evaluates the shader across the subpixel grid, exactly as the GPU would across a render target.
  */
-const renderSource = (timeMs) => {
+const renderSource = (timeMs: number): void => {
 	const { sourceWidth, sourceHeight } = asciify
-	const rgb = [0, 0, 0]
+	const rgb: ColorTuple = [0, 0, 0]
 
 	let byteIndex = 0
 

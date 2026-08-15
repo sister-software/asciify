@@ -1,0 +1,12 @@
+{
+	"extends": "@sister.software/tsconfig/node",
+	"include": ["./**/*.ts"],
+	"compilerOptions": {
+		"erasableSyntaxOnly": true
+	},
+	"references": [
+		{
+			"path": "../.."
+		}
+	]
+}

@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"emitDeclarationOnly": false,
 		"rewriteRelativeImportExtensions": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"erasableSyntaxOnly": true
 	},
 	"include": ["index.ts", "Asciify*.ts", "createAsciify.ts", "options/**/*.ts", "tui/**/*.ts", "utils/**/*.ts"],
 	"exclude": ["./out/**/*", "./node_modules/**/*", "./test/**/*", "./vite.config.ts"]

@@ -32,12 +32,13 @@ export class LookupTable {
 	 */
 	public readonly cellCount: number
 
-	constructor(
-		public rowCount: number,
-		public columnCount: number,
-		characterSize: number,
-		pixelRatio: number
-	) {
+	public rowCount: number
+	public columnCount: number
+
+	constructor(rowCount: number, columnCount: number, characterSize: number, pixelRatio: number) {
+		this.rowCount = rowCount
+		this.columnCount = columnCount
+
 		const cellCount = rowCount * columnCount
 		const step = characterSize * pixelRatio
 

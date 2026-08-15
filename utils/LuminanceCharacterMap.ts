@@ -18,10 +18,7 @@ export class LuminanceCharacterMap extends Map<
 	 */
 	string
 > {
-	constructor(
-		readonly characterSet: string | string[],
-		contrastRatio: number
-	) {
+	constructor(characterSet: string | string[], contrastRatio: number) {
 		const asciiCharacters = Array.from(characterSet)
 		const averagedCharacterSet: Array<[number, string]> = []
 
