@@ -817,6 +817,7 @@ __metadata:
     "@sister.software/oxlint-config": "npm:^12.1.3"
     "@sister.software/tsconfig": "npm:^12.1.3"
     "@types/node": "npm:^26.2.0"
+    "@types/semver": "npm:^7.8.0"
     "@types/three": "npm:^0.185.4"
     "@vitest/browser": "npm:^4.1.10"
     "@vitest/browser-playwright": "npm:^4.1.10"
@@ -827,6 +828,7 @@ __metadata:
     oxlint: "npm:1.78.0"
     playwright: "npm:^1.62.1"
     release-it: "npm:^21.0.2"
+    semver: "npm:^7.8.5"
     stats-js: "npm:^1.0.1"
     three: "npm:^0.185.1"
     typescript: "npm:^7.0.2"
@@ -910,6 +912,13 @@ __metadata:
   version: 7.0.3
   resolution: "@types/parse-path@npm:7.0.3"
   checksum: 10/21a12c228d38f5a75659dfd7cb127dc2001ed3f6acbd1b2e0575d1348c735594c0bab06a97fe849c151438384829f20ea5971cb045f7ecd37d53c76a9fcb9de3
+  languageName: node
+  linkType: hard
+
+"@types/semver@npm:^7.8.0":
+  version: 7.8.0
+  resolution: "@types/semver@npm:7.8.0"
+  checksum: 10/bbb33a88cdbc72759cf6b2750f1a28468f4470a61a1543061f494c21a53ad53bb85976e5282d79c811579e7073db0ecb6643ee0bcbf0466e8b5b3cb57ea97de0
   languageName: node
   linkType: hard
 
@@ -4111,7 +4120,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.8.5, semver@npm:^7.3.5":
+"semver@npm:7.8.5, semver@npm:^7.3.5, semver@npm:^7.8.5":
   version: 7.8.5
   resolution: "semver@npm:7.8.5"
   bin:

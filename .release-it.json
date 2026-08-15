@@ -1,5 +1,5 @@
 {
 	"hooks": {
-		"after:bump": "node scripts/sync-demo-import-maps.mjs && git add demo"
+		"after:bump": "node scripts/sync-demo-import-maps.ts && git add demo"
 	}
 }
