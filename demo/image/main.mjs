@@ -129,7 +129,7 @@ async function initialize() {
 		clearTimeout(timeoutRef)
 		canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
 
-		asciify.setSize(canvasContainer.clientHeight, canvasContainer.clientWidth)
+		asciify.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight)
 
 		if (sourceRef) {
 			updateDemo(sourceRef)
