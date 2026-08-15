@@ -1,0 +1,10 @@
+{
+	"extends": "@sister.software/tsconfig/web",
+	"include": ["./vendor.d.ts", "./common/*.mjs", "./3d/*.mjs", "./image/*.mjs", "./spiral/*.mjs"],
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"emitDeclarationOnly": false,
+		"noEmit": true
+	}
+}

@@ -7,24 +7,33 @@
 import { AsciifyGUI } from "../common/gui.mjs"
 
 const isLocal = ["localhost", "127.0.0.1"].includes(globalThis.location.hostname)
+
 const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+// The specifier is only known at runtime, so the module's type is asserted from the compiled declarations.
+const { createAsciify, createDefaultOptions } = /** @type {typeof import("../../out/index.js")} */ (
+	await import(asciifyModuleID)
+)
 
 // `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
 // `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
-const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
+const rendererPreference = /** @type {"auto" | "webgl" | "2d"} */ (
+	new URLSearchParams(location.search).get("renderer") ?? "auto"
+)
 
 async function initialize() {
-	const canvasContainer = document.getElementById("canvas-container")
-	const imagePreviewerSource = document.getElementById("image-previewer-source")
+	const canvasContainer = /** @type {HTMLElement} */ (document.getElementById("canvas-container"))
+
+	const imagePreviewerSource = /** @type {HTMLImageElement} */ (document.getElementById("image-previewer-source"))
+
 	const canvas = document.createElement("canvas")
 
 	canvas.style.maxHeight = `${canvasContainer.clientHeight}px`
 	canvas.style.height = "100%"
 	canvas.style.width = "100%"
+
 	canvasContainer.appendChild(canvas)
 
 	const asciiOptions = createDefaultOptions({
@@ -33,13 +42,29 @@ async function initialize() {
 		// fontSize: 17,
 	})
 
-	const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
+	console.debug("Default ASCII options:", asciiOptions)
+	console.debug("Renderer preference:", rendererPreference)
 
-	const filePicker = document.getElementById("file-picker")
+	const asciify = createAsciify(canvas, {
+		...asciiOptions,
+		renderer: rendererPreference,
+	})
+
+	const filePicker = /** @type {HTMLInputElement} */ (document.getElementById("file-picker"))
+
+	/** @type {File | URL | null} */
 	let sourceRef = null
+
+	/** @type {HTMLImageElement | null} */
 	let imageElementRef = null
+
 	let timeoutRef = -1
 
+	/**
+	 * @param {File | URL} fileOrURL
+	 *
+	 * @returns {Promise<HTMLImageElement>}
+	 */
 	function decodeImageFromFile(fileOrURL) {
 		return new Promise((resolve, reject) => {
 			// We use an image element to take advantage of the browser's built-in image
@@ -53,17 +78,23 @@ async function initialize() {
 				resolve(imageElement)
 			}
 
-			const normalizedURL = fileOrURL instanceof URL ? fileOrURL : URL.createObjectURL(fileOrURL)
+			const normalizedURL = fileOrURL instanceof URL ? fileOrURL.href : URL.createObjectURL(fileOrURL)
+
 			imageElement.src = normalizedURL
 			imagePreviewerSource.src = normalizedURL
 		})
 	}
 
 	// Expose asciify to the window for debugging
-	globalThis.asciify = asciify
-	asciify.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight)
-	imagePreviewerSource.style.width = `${canvas.parentElement.clientWidth}px`
+	;/** @type {any} */ (globalThis).asciify = asciify
 
+	asciify.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight)
+
+	imagePreviewerSource.style.width = `${canvasContainer.clientWidth}px`
+
+	/**
+	 * @param {File | URL} nextSourceRef
+	 */
 	async function updateDemo(nextSourceRef) {
 		sourceRef = nextSourceRef
 		imageElementRef = await decodeImageFromFile(sourceRef)
@@ -84,7 +115,9 @@ async function initialize() {
 
 	const gui = new AsciifyGUI(asciiOptions, onOptionChange)
 	gui.domElement.classList.add("top", "right")
-	document.getElementById("options-fieldset").appendChild(gui.domElement)
+
+	const optionsFieldset = /** @type {HTMLElement} */ (document.getElementById("options-fieldset"))
+	optionsFieldset.appendChild(gui.domElement)
 
 	const onWindowResize = async () => {
 		// Check for upward overscrolling...
@@ -105,10 +138,10 @@ async function initialize() {
 
 	window.addEventListener("resize", onWindowResize)
 
-	filePicker.addEventListener("change", async (e) => {
-		const file = e.target.files[0]
+	filePicker.addEventListener("change", async () => {
+		const file = filePicker.files?.[0]
 
-		console.log("CHANGE")
+		if (!file) return
 
 		await updateDemo(new File([file], file.name, { type: file.type }))
 

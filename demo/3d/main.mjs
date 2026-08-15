@@ -16,13 +16,19 @@ const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+// The specifier is only known at runtime, so the module's type is asserted from the compiled declarations.
+const { createAsciify, createDefaultOptions } = /** @type {typeof import("../../out/index.js")} */ (
+	await import(asciifyModuleID)
+)
 
 // `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
 // `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
-const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
+const rendererPreference = /** @type {"auto" | "webgl" | "2d"} */ (
+	new URLSearchParams(location.search).get("renderer") ?? "auto"
+)
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 4000)
+
 camera.position.y = 800
 camera.position.x = -600
 camera.position.z = 250
@@ -55,7 +61,10 @@ scene.add(sphere)
 
 const ground = new THREE.Mesh(
 	new THREE.PlaneGeometry(2000, 2000),
-	new THREE.MeshPhongMaterial({ color: "hsl(200, 30%, 65%)", depthWrite: false })
+	new THREE.MeshPhongMaterial({
+		color: "hsl(200, 30%, 65%)",
+		depthWrite: false,
+	})
 )
 
 ground.position.y = -200
@@ -70,7 +79,7 @@ grid.material.transparent = true
 scene.add(grid)
 
 const startTime = Date.now()
-const canvas = document.getElementById("demo")
+const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("demo"))
 
 const renderer = new THREE.WebGLRenderer({
 	powerPreference: "high-performance",
@@ -82,10 +91,17 @@ const rendererContext = renderer.getContext()
 camera.lookAt(sphere.position)
 
 const asciiOptions = createDefaultOptions()
-const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
+
+console.debug("Default ASCII options:", asciiOptions)
+console.debug("Renderer preference:", rendererPreference)
+
+const asciify = createAsciify(canvas, {
+	...asciiOptions,
+	renderer: rendererPreference,
+})
 
 // Expose asciify to the window for debugging
-globalThis.asciify = asciify
+;/** @type {any} */ (globalThis).asciify = asciify
 // document.body.appendChild(renderer.domElement)
 
 asciify.setSize(window.innerWidth, window.innerHeight, renderer)
@@ -107,9 +123,12 @@ const onOptionChange = () => {
 const gui = new AsciifyGUI(asciiOptions, onOptionChange)
 gui.domElement.classList.add("fixed", "top", "right")
 
+// `Scene#background` widens to a union with textures, so the color set above is reasserted where it's read.
+const backgroundColor = /** @type {THREE.Color} */ (scene.background)
+
 const sceneOptions = {
 	"Sphere Color": "#" + sphere.material.color.getHexString(),
-	"Background Color": "#" + scene.background.getHexString(),
+	"Background Color": "#" + backgroundColor.getHexString(),
 }
 
 const sceneFolder = gui.addFolder("Scene")
@@ -120,7 +139,7 @@ sceneFolder.addColor(sceneOptions, "Sphere Color").onChange((hex) => {
 })
 
 sceneFolder.addColor(sceneOptions, "Background Color").onChange((hex) => {
-	scene.background.set(hex)
+	backgroundColor.set(hex)
 })
 
 const onWindowResize = () => {

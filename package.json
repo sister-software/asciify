@@ -50,7 +50,7 @@
 		"registry": "https://registry.npmjs.org"
 	},
 	"scripts": {
-		"check-types": "tsc --build .",
+		"check-types": "tsc --build . && tsc --project demo",
 		"clean": "tsc -b --clean",
 		"compile": "tsc -b",
 		"demo": "http-server ./ -p 8081",

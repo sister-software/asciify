@@ -15,11 +15,16 @@ const asciifyModuleID = isLocal ? "/out/index.js" : "@sister.software/asciify"
 
 console.debug(`Loading Asciify module from ${asciifyModuleID}`)
 
-const { createAsciify, createDefaultOptions } = await import(asciifyModuleID)
+// The specifier is only known at runtime, so the module's type is asserted from the compiled declarations.
+const { createAsciify, createDefaultOptions } = /** @type {typeof import("../../out/index.js")} */ (
+	await import(asciifyModuleID)
+)
 
 // `createAsciify` prefers WebGL and falls back to Canvas2D on its own. `?renderer=2d` or
 // `?renderer=webgl` forces the choice, which is handy for comparing the two on identical content.
-const rendererPreference = new URLSearchParams(globalThis.location.search).get("renderer") ?? "auto"
+const rendererPreference = /** @type {"auto" | "webgl" | "2d"} */ (
+	new URLSearchParams(location.search).get("renderer") ?? "auto"
+)
 
 /**
  * Identity function for GLSL template literals.
@@ -147,23 +152,29 @@ async function initialize() {
 	const rendererContext = renderer.getContext()
 
 	const asciiOptions = createDefaultOptions()
-	const canvas = document.getElementById("demo")
-	const asciify = createAsciify(canvas, { ...asciiOptions, renderer: rendererPreference })
+
+	console.debug("Default ASCII options:", asciiOptions)
+	console.debug("Renderer preference:", rendererPreference)
+
+	const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById("demo"))
+
+	const asciify = createAsciify(canvas, {
+		...asciiOptions,
+		renderer: rendererPreference,
+	})
 
 	// Expose asciify to the window for debugging
-	globalThis.asciify = asciify
+	;/** @type {any} */ (globalThis).asciify = asciify
 	// document.body.appendChild(renderer.domElement)
 
 	asciify.setSize(window.innerWidth, window.innerHeight, renderer)
-
-	camera.aspect = canvas.clientWidth / canvas.clientHeight
 
 	const onOptionChange = () => {
 		cancelAnimationFrame(animationFrame)
 		asciify.setOptions(asciiOptions)
 		asciify.applySizeTo(renderer)
 
-		animate()
+		animate(performance.now())
 	}
 
 	const gui = new AsciifyGUI(asciiOptions, onOptionChange)
@@ -173,10 +184,9 @@ async function initialize() {
 		cancelAnimationFrame(animationFrame)
 		asciify.setSize(window.innerWidth, window.innerHeight, renderer)
 
-		camera.aspect = window.innerWidth / window.innerHeight
 		camera.updateProjectionMatrix()
 
-		animate()
+		animate(performance.now())
 	}
 
 	window.addEventListener("resize", onWindowResize)
@@ -192,10 +202,13 @@ async function initialize() {
 	// Animation
 	let animationFrame = -1
 
+	/**
+	 * @param {number} now
+	 */
 	const animate = (now) => {
 		stats.begin()
 
-		vortexMat.uniforms.time.value = now
+		uniforms.time.value = now
 
 		renderer.render(scene, camera)
 		asciify.rasterizeWebGLRenderer(renderer, rendererContext)
