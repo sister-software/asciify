@@ -1,6 +1,6 @@
 {
 	"name": "@sister.software/asciify",
-	"version": "4.2.2",
+	"version": "4.3.0",
 	"description": "Converts images, videos, and 3D renders into ASCII art.",
 	"keywords": [
 		"3d",
