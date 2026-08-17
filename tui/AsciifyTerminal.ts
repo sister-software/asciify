@@ -27,6 +27,18 @@ import {
 const SPACE = 0x20
 
 /**
+ * Sentinel meaning "no background set" for a cell.
+ *
+ * @remarks
+ *   A canonical color occupies bits 0-23: `truecolor` packs 8-bit RGB into 24 bits, and `ansi256` never exceeds index
+ *   255, so both fit comfortably under `0x01_00_00_00`. That makes 0 a legitimate color — black — so it cannot double
+ *   as "absent": a cell explicitly painted black would be indistinguishable from a cell nobody ever touched. This
+ *   sentinel sits one bit above the packed range, so no canonical color can ever collide with it.
+ * @category Terminal
+ */
+export const NO_BACKGROUND = 0x01_00_00_00 as const
+
+/**
  * A 4x4 Bayer ordered-dither matrix, pre-scaled to luminance thresholds (0–255) and indexed by `(y & 3) * 4 + (x & 3)`.
  *
  * @remarks
@@ -68,6 +80,9 @@ const MAX_UNCHANGED_GAP = 4
  *   changed spans are emitted, cursor-addressed into the pane. This is the frame-to-frame diff the canvas renderers
  *   deliberately dropped — there, rebuilding the mask wholesale beat per-cell bookkeeping, but a terminal's budget is
  *   bytes down a possibly-remote wire, and there the diff wins by orders of magnitude on mostly-static content.
+ *   Rasterizing writes characters and foregrounds only — a background painted via {@linkcode fillBackground} or
+ *   {@linkcode setCell} persists across `rasterize` calls until something changes it, so a caller can paint a uniform
+ *   sky or body of water once rather than every frame.
  *
  *   ```ts
  *   const asciify = new AsciifyTerminal(process.stdout)
@@ -134,6 +149,18 @@ export class AsciifyTerminal {
 	protected _cellColors = new Uint32Array(0)
 
 	/**
+	 * The current frame's background per cell, indexed the same way as {@linkcode _cellChars}. {@linkcode NO_BACKGROUND}
+	 * means no background is set, so the terminal's own background shows through.
+	 *
+	 * @remarks
+	 *   Deliberately untouched by {@linkcode _computeBrailleCells} and {@linkcode _computeGlyphCells} — rasterizing
+	 *   writes characters and foregrounds only, so a background set via {@linkcode fillBackground} or {@linkcode setCell}
+	 *   persists across `rasterize` calls until something changes it.
+	 * @internal
+	 */
+	protected _cellBackgrounds = new Uint32Array(0)
+
+	/**
 	 * The previously-emitted frame, for damage diffing. A revival of the `_frameBuffer` comparison the canvas renderers
 	 * once had, back where skipping unchanged cells actually pays.
 	 *
@@ -141,6 +168,7 @@ export class AsciifyTerminal {
 	 */
 	protected _previousChars = new Uint32Array(0)
 	protected _previousColors = new Uint32Array(0)
+	protected _previousBackgrounds = new Uint32Array(0)
 
 	/**
 	 * Forces the next frame to emit every cell, changed or not. Set on construction, resize, and option changes.
@@ -218,8 +246,10 @@ export class AsciifyTerminal {
 
 		this._cellChars = new Uint32Array(cellCount)
 		this._cellColors = new Uint32Array(cellCount)
+		this._cellBackgrounds = new Uint32Array(cellCount).fill(NO_BACKGROUND)
 		this._previousChars = new Uint32Array(cellCount)
 		this._previousColors = new Uint32Array(cellCount)
+		this._previousBackgrounds = new Uint32Array(cellCount).fill(NO_BACKGROUND)
 
 		this._repaintAll = true
 	}
@@ -311,7 +341,15 @@ export class AsciifyTerminal {
 		 *
 		 * @optional
 		 */
-		color?: readonly [red: number, green: number, blue: number]
+		color?: readonly [red: number, green: number, blue: number],
+		/**
+		 * RGB channels, 0–255 each, for the cell's background. Omitted leaves the cell's existing background untouched —
+		 * the same choice the rasterizers make — so a background set once via this parameter or {@linkcode fillBackground}
+		 * survives further overlay calls.
+		 *
+		 * @optional
+		 */
+		background?: readonly [red: number, green: number, blue: number]
 	): void {
 		if (column < 0 || column >= this.columnCount || row < 0 || row >= this.rowCount) return
 
@@ -322,9 +360,38 @@ export class AsciifyTerminal {
 
 		const [red, green, blue] = color ?? [255, 255, 255]
 
-		// Inkless cells are normalized just as the rasterizers do, so overlays don't fake damage.
+		// Inkless cells are normalized just as the rasterizers do, so overlays don't fake damage. Background is not
+		// normalized the same way: an inkless cell is exactly where a background is visible, so it must be honored.
 		this._cellColors[cellIndex] =
 			codePoint === SPACE || codePoint === BRAILLE_BLANK ? 0 : this._canonicalColor(red, green, blue)
+
+		if (background) {
+			this._cellBackgrounds[cellIndex] = this._canonicalColor(background[0], background[1], background[2])
+		}
+	}
+
+	/**
+	 * Sets every cell's background in one call.
+	 *
+	 * @remarks
+	 *   The common case: a caller painting a uniform sky or body of water per frame, without visiting every cell
+	 *   individually through {@linkcode setCell}. Canonicalized through the same {@linkcode _canonicalColor} path as
+	 *   every other color, so `ansi256` quantization applies here too.
+	 * @category Rasterization
+	 */
+	public fillBackground(
+		/**
+		 * RGB channels, 0–255 each. Pass {@linkcode NO_BACKGROUND} or `null` to clear every cell back to the terminal's own
+		 * background.
+		 */
+		background: readonly [red: number, green: number, blue: number] | typeof NO_BACKGROUND | null
+	): void {
+		const canonical =
+			background === null || background === NO_BACKGROUND
+				? NO_BACKGROUND
+				: this._canonicalColor(background[0], background[1], background[2])
+
+		this._cellBackgrounds.fill(canonical)
 	}
 
 	/**
@@ -365,11 +432,13 @@ export class AsciifyTerminal {
 
 		this.output.write(payload)
 
-		// The pane now holds spaces, so the next frame diffs against exactly that.
+		// The pane now holds spaces on the terminal's own background, so the next frame diffs against exactly that.
 		this._cellChars.fill(SPACE)
 		this._cellColors.fill(0)
+		this._cellBackgrounds.fill(NO_BACKGROUND)
 		this._previousChars.fill(SPACE)
 		this._previousColors.fill(0)
+		this._previousBackgrounds.fill(NO_BACKGROUND)
 		this._repaintAll = false
 	}
 
@@ -531,14 +600,37 @@ export class AsciifyTerminal {
 	}
 
 	/**
+	 * Builds the escape that selects a canonical color as the background, mirroring {@linkcode _colorEscape}.
+	 *
+	 * @remarks
+	 *   Passing {@linkcode NO_BACKGROUND} emits `49` — SGR's own "default background" — so a region can hand control back
+	 *   to the terminal's own background mid-frame, the same way {@linkcode SGR_RESET} does for a whole frame.
+	 * @internal
+	 */
+	protected _backgroundEscape(canonicalBackground: number): string {
+		switch (this.options.colorDepth) {
+			case "truecolor":
+				return canonicalBackground === NO_BACKGROUND
+					? "\u001B[49m"
+					: `\u001B[48;2;${(canonicalBackground >> 16) & 0xff};${(canonicalBackground >> 8) & 0xff};${canonicalBackground & 0xff}m`
+			case "ansi256":
+				return canonicalBackground === NO_BACKGROUND ? "\u001B[49m" : `\u001B[48;5;${canonicalBackground}m`
+			case "none":
+				return ""
+		}
+	}
+
+	/**
 	 * Diffs the current cells against the previously-emitted frame and builds the escape payload for what changed.
 	 *
 	 * @remarks
 	 *   Changed cells are grouped into cursor-addressed spans per row, tolerating small unchanged gaps (rewriting a few
 	 *   cells is cheaper than the cursor move to skip them — mapscii applies the same reasoning to color escapes). Color
 	 *   escapes are emitted only when the color actually changes between emitted cells, and inkless cells (spaces, blank
-	 *   braille) never touch color state at all. Returns an empty string when nothing changed, in which case nothing
-	 *   should be written — the wire cost of an unchanged frame is zero bytes.
+	 *   braille) never touch color state at all. Background escapes follow the same change-only rule but, unlike
+	 *   foreground, are emitted for inkless cells too — a background is exactly what makes an inkless cell visible.
+	 *   Returns an empty string when nothing changed, in which case nothing should be written — the wire cost of an
+	 *   unchanged frame is zero bytes.
 	 * @internal
 	 */
 	protected _emitDamage(): string {
@@ -549,8 +641,10 @@ export class AsciifyTerminal {
 		const { origin, synchronizedOutput, colorDepth } = this.options
 		const chars = this._cellChars
 		const colors = this._cellColors
+		const backgrounds = this._cellBackgrounds
 		const previousChars = this._previousChars
 		const previousColors = this._previousColors
+		const previousBackgrounds = this._previousBackgrounds
 		const repaintAll = this._repaintAll
 
 		const pieces: string[] = []
@@ -558,6 +652,10 @@ export class AsciifyTerminal {
 		// The terminal's color state persists across cursor moves, so one tracker spans the whole frame.
 		// -1 is a sentinel no canonical color can take, forcing the first colored cell to emit an escape.
 		let activeColor = -1
+		// Each payload ends in SGR_RESET, so the terminal genuinely is at its default background when a frame
+		// begins — starting here at the sentinel, rather than a value no background can take, means a consumer who
+		// never sets a background gets byte-identical output to before backgrounds existed.
+		let activeBackground: number = NO_BACKGROUND
 
 		for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
 			const rowOffset = rowIndex * columnCount
@@ -570,7 +668,8 @@ export class AsciifyTerminal {
 					while (
 						columnIndex < columnCount &&
 						chars[rowOffset + columnIndex] === previousChars[rowOffset + columnIndex] &&
-						colors[rowOffset + columnIndex] === previousColors[rowOffset + columnIndex]
+						colors[rowOffset + columnIndex] === previousColors[rowOffset + columnIndex] &&
+						backgrounds[rowOffset + columnIndex] === previousBackgrounds[rowOffset + columnIndex]
 					) {
 						columnIndex++
 					}
@@ -586,7 +685,8 @@ export class AsciifyTerminal {
 					if (
 						repaintAll ||
 						chars[rowOffset + scan] !== previousChars[rowOffset + scan] ||
-						colors[rowOffset + scan] !== previousColors[rowOffset + scan]
+						colors[rowOffset + scan] !== previousColors[rowOffset + scan] ||
+						backgrounds[rowOffset + scan] !== previousBackgrounds[rowOffset + scan]
 					) {
 						lastDamaged = scan
 					}
@@ -598,9 +698,17 @@ export class AsciifyTerminal {
 					// Span bounds stay within the row by construction, so these reads cannot miss.
 					const char = chars[rowOffset + emitIndex]!
 					const color = colors[rowOffset + emitIndex]!
+					const background = backgrounds[rowOffset + emitIndex]!
 
 					// Inkless cells render nothing, so they must not disturb color state.
 					const inkless = char === SPACE || char === BRAILLE_BLANK
+
+					// Unlike foreground, background is emitted regardless of inkiness: an inkless cell is exactly
+					// where a background is visible, so it must not be skipped the way ink-only color is.
+					if (colorDepth !== "none" && background !== activeBackground) {
+						pieces.push(this._backgroundEscape(background))
+						activeBackground = background
+					}
 
 					if (!inkless && colorDepth !== "none" && color !== activeColor) {
 						pieces.push(this._colorEscape(color))
@@ -616,6 +724,7 @@ export class AsciifyTerminal {
 
 		this._previousChars.set(chars)
 		this._previousColors.set(colors)
+		this._previousBackgrounds.set(backgrounds)
 		this._repaintAll = false
 
 		if (!pieces.length) return ""

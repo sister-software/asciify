@@ -8,7 +8,7 @@
 import { describe, expect, it } from "vitest"
 
 import { quantizeToAnsi256 } from "../tui/ansi.ts"
-import { AsciifyTerminal } from "../tui/AsciifyTerminal.ts"
+import { AsciifyTerminal, NO_BACKGROUND } from "../tui/AsciifyTerminal.ts"
 import { BRAILLE_BLANK, brailleDotBit } from "../tui/braille.ts"
 import type { AsciifyTerminalOptions, TerminalLike } from "../tui/common.ts"
 import { LuminanceCharacterMap } from "../utils/LuminanceCharacterMap.ts"
@@ -365,5 +365,176 @@ describe("quantizeToAnsi256", () => {
 		asciify.rasterize(createSource(asciify, () => [101, 101, 101]))
 
 		expect(sink.output).toBe("")
+	})
+})
+
+describe("AsciifyTerminal background", () => {
+	it("produces byte-identical output to before backgrounds existed, when none are set", () => {
+		// Same scene as the "addresses only the damaged span" case above, but at the default (truecolor) color
+		// depth instead of "none" — the color-escape path is exactly where a stray background escape would leak in.
+		const { sink, asciify } = createHarness(8, 4)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		// Light one cell: column 5, row 2 covers subpixels x 10-11, y 8-11.
+		asciify.rasterize(
+			createSource(asciify, (x, y) => (x >= 10 && x <= 11 && y >= 8 && y <= 11 ? [255, 255, 255] : [0, 0, 0]))
+		)
+
+		expect(sink.output).toBe("\u001B[3;6H\u001B[38;2;255;255;255m⣿\u001B[0m")
+
+		// Same scene as "emits spaces for luminance padded out by the contrast ratio", re-asserted here as a
+		// background regression guard for the colorDepth: "none" path.
+		const { sink: noneSink, asciify: noneAsciify } = createHarness(4, 1, {
+			mode: "glyph",
+			colorDepth: "none",
+			contrastRatio: 3,
+		})
+
+		noneAsciify.rasterize(createSource(noneAsciify, () => [0, 0, 0]))
+
+		expect(noneSink.output).toBe("\u001B[1;1H    \u001B[0m")
+	})
+
+	it("emits 48;2 for a background under truecolor", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.setCell(0, 0, "@", [255, 255, 255], [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).toContain("\u001B[48;2;10;20;30m")
+	})
+
+	it("emits 48;5 for a background under ansi256", () => {
+		const { sink, asciify } = createHarness(2, 1, { colorDepth: "ansi256" })
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.setCell(0, 0, "@", [255, 255, 255], [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).toContain(`\u001B[48;5;${quantizeToAnsi256(10, 20, 30)}m`)
+	})
+
+	it("emits nothing for a background under colorDepth none", () => {
+		const { sink, asciify } = createHarness(2, 1, { colorDepth: "none" })
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.setCell(0, 0, "@", [255, 255, 255], [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).toBe("\u001B[1;1H@\u001B[0m")
+	})
+
+	it("paints the background of an inkless cell", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		// A space carries no ink, but its background must still show — that's the entire point of the feature.
+		asciify.setCell(0, 0, " ", undefined, [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).toBe("\u001B[1;1H\u001B[48;2;10;20;30m \u001B[0m")
+	})
+
+	it("repaints a cell whose only change between frames is its background", () => {
+		const { sink, asciify } = createHarness(8, 1)
+
+		for (let column = 0; column < 8; column++) {
+			asciify.setCell(column, 0, "@", [10, 10, 10])
+		}
+
+		asciify.flush()
+		sink.clear()
+
+		// Same character, same foreground — only the background is new.
+		asciify.setCell(3, 0, "@", [10, 10, 10], [0, 0, 255])
+		asciify.flush()
+
+		expect(sink.output).toBe("\u001B[1;4H\u001B[48;2;0;0;255m\u001B[38;2;10;10;10m@\u001B[0m")
+	})
+
+	it("emits 49 when a cell returns to the sentinel", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.setCell(0, 0, "@", [255, 255, 255], [0, 0, 255])
+		// No background argument: this cell's background was never set, so it stays at the sentinel while the
+		// frame's active background tracker is mid-span at blue from the cell before it.
+		asciify.setCell(1, 0, "@", [255, 255, 255])
+		asciify.flush()
+
+		expect(sink.output).toBe("\u001B[1;1H\u001B[48;2;0;0;255m\u001B[38;2;255;255;255m@\u001B[49m@\u001B[0m")
+	})
+
+	it("fillBackground paints every cell, and the sentinel clears it", () => {
+		const { sink, asciify } = createHarness(3, 2)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.fillBackground([50, 60, 70])
+		asciify.flush()
+
+		const backgroundEscape = "\u001B[48;2;50;60;70m"
+
+		expect(sink.output).toContain(backgroundEscape)
+		// Uniform across the whole 3x2 grid needs exactly one escape: the tracker spans every row.
+		expect(sink.output.split(backgroundEscape)).toHaveLength(2)
+
+		sink.clear()
+		asciify.fillBackground(NO_BACKGROUND)
+		asciify.flush()
+
+		// The clear itself repaints (every cell's background genuinely changed)...
+		expect(sink.output).not.toBe("")
+		expect(sink.output).not.toContain(backgroundEscape)
+
+		// ...and once applied, it sticks: a further flush with nothing new to say writes nothing.
+		sink.clear()
+		asciify.flush()
+
+		expect(sink.output).toBe("")
+	})
+
+	it("clears via null the same way it clears via the sentinel", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.setCell(0, 0, "@", [255, 255, 255], [1, 2, 3])
+		asciify.setCell(1, 0, "@", [255, 255, 255], [1, 2, 3])
+		asciify.flush()
+		sink.clear()
+
+		asciify.fillBackground(null)
+		asciify.flush()
+
+		expect(sink.output).not.toBe("")
+		expect(sink.output).not.toContain("\u001B[48;2;1;2;3m")
+	})
+
+	it("keeps a background across a rasterize call, since the rasterizers do not touch it", () => {
+		const { sink, asciify } = createHarness(4, 1)
+
+		asciify.rasterize(createSource(asciify, () => [255, 255, 255]))
+		sink.clear()
+
+		asciify.fillBackground([50, 60, 70])
+		asciify.flush()
+		sink.clear()
+
+		// A different pattern forces real char/color damage, with no further background call in between.
+		asciify.rasterize(createSource(asciify, (x) => (x % 2 ? [0, 0, 0] : [255, 255, 255])))
+
+		// The background from fillBackground is still in force, so it must reappear here even though nothing set
+		// it again this frame — proof the rasterizer left `_cellBackgrounds` alone.
+		expect(sink.output).toContain("\u001B[48;2;50;60;70m")
 	})
 })
