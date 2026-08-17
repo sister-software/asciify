@@ -371,12 +371,36 @@ export class AsciifyTerminal {
 	}
 
 	/**
+	 * Sets a single cell's background without touching its character or foreground.
+	 *
+	 * @remarks
+	 *   Unlike {@linkcode setCell}, which writes a character, this cannot destroy the glyphs already composited into a
+	 *   frame — it is the per-cell primitive that fills that gap, and {@linkcode fillBackground}'s whole-grid counterpart.
+	 *   A caller painting a sky above a waterline and a body of water below it composes both regions from this.
+	 *   Out-of-bounds coordinates are ignored rather than thrown, the same clipping behavior as `setCell`.
+	 * @category Rasterization
+	 */
+	public setCellBackground(
+		column: number,
+		row: number,
+		/**
+		 * RGB channels, 0–255 each. Pass {@linkcode NO_BACKGROUND} or `null` to clear this cell back to the terminal's own
+		 * background.
+		 */
+		background: readonly [red: number, green: number, blue: number] | typeof NO_BACKGROUND | null
+	): void {
+		if (column < 0 || column >= this.columnCount || row < 0 || row >= this.rowCount) return
+
+		this._cellBackgrounds[row * this.columnCount + column] = this._canonicalBackground(background)
+	}
+
+	/**
 	 * Sets every cell's background in one call.
 	 *
 	 * @remarks
 	 *   The common case: a caller painting a uniform sky or body of water per frame, without visiting every cell
-	 *   individually through {@linkcode setCell}. Canonicalized through the same {@linkcode _canonicalColor} path as
-	 *   every other color, so `ansi256` quantization applies here too.
+	 *   individually through {@linkcode setCellBackground}. Canonicalized through the same {@linkcode _canonicalColor}
+	 *   path as every other color, so `ansi256` quantization applies here too.
 	 * @category Rasterization
 	 */
 	public fillBackground(
@@ -386,12 +410,7 @@ export class AsciifyTerminal {
 		 */
 		background: readonly [red: number, green: number, blue: number] | typeof NO_BACKGROUND | null
 	): void {
-		const canonical =
-			background === null || background === NO_BACKGROUND
-				? NO_BACKGROUND
-				: this._canonicalColor(background[0], background[1], background[2])
-
-		this._cellBackgrounds.fill(canonical)
+		this._cellBackgrounds.fill(this._canonicalBackground(background))
 	}
 
 	/**
@@ -562,6 +581,21 @@ export class AsciifyTerminal {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Canonicalizes a background input, folding the sentinel and `null` to {@linkcode NO_BACKGROUND} and everything else
+	 * through {@linkcode _canonicalColor}. Shared by {@linkcode setCellBackground} and {@linkcode fillBackground} so
+	 * "what counts as clearing" is decided in exactly one place.
+	 *
+	 * @internal
+	 */
+	protected _canonicalBackground(
+		background: readonly [red: number, green: number, blue: number] | typeof NO_BACKGROUND | null
+	): number {
+		return background === null || background === NO_BACKGROUND
+			? NO_BACKGROUND
+			: this._canonicalColor(background[0], background[1], background[2])
 	}
 
 	/**

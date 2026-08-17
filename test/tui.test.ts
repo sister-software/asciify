@@ -538,3 +538,64 @@ describe("AsciifyTerminal background", () => {
 		expect(sink.output).toContain("\u001B[48;2;50;60;70m")
 	})
 })
+
+describe("AsciifyTerminal setCellBackground", () => {
+	it("sets a background without disturbing an existing character or foreground", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.setCell(0, 0, "@", [200, 201, 202])
+		asciify.flush()
+		sink.clear()
+
+		asciify.setCellBackground(0, 0, [10, 20, 30])
+		asciify.flush()
+
+		// The character and foreground from the earlier setCell survive untouched.
+		expect(sink.output).toBe("\u001B[1;1H\u001B[48;2;10;20;30m\u001B[38;2;200;201;202m@\u001B[0m")
+	})
+
+	it("clears a single cell back to the terminal default via NO_BACKGROUND or null", () => {
+		const { sink, asciify } = createHarness(3, 1)
+
+		asciify.setCell(0, 0, "@", [255, 255, 255])
+		asciify.setCellBackground(0, 0, [0, 0, 255])
+		asciify.setCellBackground(0, 0, NO_BACKGROUND)
+
+		asciify.setCell(1, 0, "@", [255, 255, 255])
+		asciify.setCellBackground(1, 0, [0, 255, 0])
+		asciify.setCellBackground(1, 0, null)
+
+		asciify.setCell(2, 0, "@", [255, 255, 255])
+		asciify.flush()
+
+		// Both cells net out to no background at all — identical to the untouched third cell.
+		expect(sink.output).toBe("\u001B[1;1H\u001B[38;2;255;255;255m@@@\u001B[0m")
+	})
+
+	it("clips out-of-bounds coordinates instead of throwing", () => {
+		const { sink, asciify } = createHarness(4, 2)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.setCellBackground(-1, 0, [10, 20, 30])
+		asciify.setCellBackground(4, 0, [10, 20, 30])
+		asciify.setCellBackground(0, 2, [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).toBe("")
+	})
+
+	it("repaints on the next flush after changing a cell's background", () => {
+		const { sink, asciify } = createHarness(2, 1)
+
+		asciify.rasterize(createSource(asciify, () => [0, 0, 0]))
+		sink.clear()
+
+		asciify.setCellBackground(0, 0, [10, 20, 30])
+		asciify.flush()
+
+		expect(sink.output).not.toBe("")
+		expect(sink.output).toContain("\u001B[48;2;10;20;30m")
+	})
+})
