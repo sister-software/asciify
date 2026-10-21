@@ -59,6 +59,26 @@ export class AsciifyWebGL extends AsciifyBase implements Asciify {
 	protected _allocatedColumns = -1
 	protected _allocatedRows = -1
 
+	/**
+	 * Cancelling `webglcontextlost` is what lets the browser restore the context later.
+	 *
+	 * @internal
+	 */
+	protected _onContextLost = (event: Event): void => {
+		event.preventDefault()
+	}
+
+	/**
+	 * A restored context comes back empty: every program and texture made before the loss is gone.
+	 *
+	 * @internal
+	 */
+	protected _onContextRestored = (): void => {
+		this._createResources()
+		this._onOptionsChanged()
+		this._onResize()
+	}
+
 	constructor(
 		/**
 		 * The canvas where the ASCII art will be rendered to.
@@ -80,7 +100,8 @@ export class AsciifyWebGL extends AsciifyBase implements Asciify {
 			antialias: false,
 			depth: false,
 			stencil: false,
-			desynchronized: true,
+			// No `desynchronized`: it trades the compositor's normal path for input latency this renderer doesn't need,
+			// and that path is where platform-specific blank-canvas bugs live.
 			premultipliedAlpha: false,
 			preserveDrawingBuffer: false,
 		}) as WebGL2RenderingContext | null
@@ -90,8 +111,10 @@ export class AsciifyWebGL extends AsciifyBase implements Asciify {
 		}
 
 		this.gl = gl
-		this._glyphProgram = new GlyphProgram(gl)
-		this._sourceTexture = this._glyphProgram.createSourceTexture()
+		this._createResources()
+
+		outputCanvas.addEventListener("webglcontextlost", this._onContextLost)
+		outputCanvas.addEventListener("webglcontextrestored", this._onContextRestored)
 
 		// Class fields are initialized by the time we reach here, so it is safe to build derived state.
 		this.setOptions(options)
@@ -172,14 +195,34 @@ export class AsciifyWebGL extends AsciifyBase implements Asciify {
 	}
 
 	/**
-	 * Releases every GPU resource this renderer owns.
+	 * Releases every GPU resource this renderer owns, then the context itself. The output canvas cannot be drawn to
+	 * afterwards.
 	 */
-	public dispose(): void {
-		this.gl.deleteTexture(this._sourceTexture)
+	public override dispose(): void {
+		const { gl, canvas } = this
+
+		canvas.removeEventListener("webglcontextlost", this._onContextLost)
+		canvas.removeEventListener("webglcontextrestored", this._onContextRestored)
+
+		gl.deleteTexture(this._sourceTexture)
 		this._glyphProgram.dispose()
+		// The context would otherwise hold a slot under the browser's live-context cap until it is garbage collected.
+		gl.getExtension("WEBGL_lose_context")?.loseContext()
 	}
 
 	//#region Protected Methods
+
+	/**
+	 * Builds the program and source texture, on construction and again after a context restore.
+	 *
+	 * @internal
+	 */
+	protected _createResources(): void {
+		this._glyphProgram = new GlyphProgram(this.gl)
+		this._sourceTexture = this._glyphProgram.createSourceTexture()
+		this._allocatedColumns = -1
+		this._allocatedRows = -1
+	}
 
 	/**
 	 * @internal

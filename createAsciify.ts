@@ -45,9 +45,10 @@ export interface CreateAsciifyOptions extends Partial<AsciifyOptions> {
  *   Probed on a throwaway 1x1 canvas so that asking the question does not answer it: requesting a WebGL context from a
  *   canvas claims that canvas permanently, and a canvas that has handed out a WebGL context can never hand out a 2D
  *   one. Asking on a scratch canvas keeps the real output canvas uncommitted until we have decided. A `true` here is
- *   not a promise. Browsers cap the number of live WebGL contexts — around 16 in Chrome — and creating the seventeenth
- *   returns null even though the platform clearly supports WebGL. {@linkcode createAsciify} therefore probes _and_
- *   catches.
+ *   not a promise: a blocklisted driver or a shader that will not compile still fails later, so
+ *   {@linkcode createAsciify} probes _and_ catches. The probe context is released as soon as it answers. Browsers cap
+ *   live WebGL contexts (about 16 in Chrome) and, past the cap, drop the oldest one to make room, so a probe left for
+ *   the garbage collector could blank someone's live canvas.
  * @category Helper
  */
 export function isWebGL2Available(): boolean {
@@ -56,7 +57,15 @@ export function isWebGL2Available(): boolean {
 		canvas.width = 1
 		canvas.height = 1
 
-		return canvas.getContext("webgl2") !== null
+		const gl = canvas.getContext("webgl2") as WebGL2RenderingContext | null
+
+		if (!gl) return false
+
+		// Release the probe now. Left to the garbage collector, it counts against the browser's context cap until it is
+		// collected, and reaching the cap makes the browser drop its oldest context, which is someone's live output.
+		gl.getExtension("WEBGL_lose_context")?.loseContext()
+
+		return true
 	} catch {
 		// Some environments throw rather than returning null. Either way, the answer is no.
 		return false

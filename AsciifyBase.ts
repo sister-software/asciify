@@ -261,6 +261,11 @@ export abstract class AsciifyBase implements Asciify {
 
 	public abstract clearCanvas(): void
 
+	/**
+	 * Releases GPU resources. Canvas2D holds none, so the base does nothing.
+	 */
+	public dispose(): void {}
+
 	//#endregion
 
 	//#region Protected Methods

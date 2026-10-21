@@ -155,4 +155,11 @@ export interface Asciify {
 	 * Clears the frame buffers. Asciify will automatically handle this for you in most cases.
 	 */
 	clearFrameBuffers(): void
+
+	/**
+	 * Releases what the renderer holds on the GPU. Call it when the output is torn down. Browsers cap live WebGL
+	 * contexts, and one that is left for the garbage collector still counts against the cap until it is collected. The
+	 * renderer cannot be used afterwards.
+	 */
+	dispose(): void
 }

@@ -191,7 +191,7 @@ export class AsciifyPass extends AsciifyBase implements Asciify {
 	/**
 	 * Releases the GPU resources this renderer created. The host's context is left alone.
 	 */
-	public dispose(): void {
+	public override dispose(): void {
 		if (this._uploadTexture) {
 			this.gl.deleteTexture(this._uploadTexture)
 			this._uploadTexture = null
