@@ -4,7 +4,6 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@sister.software/asciify"><img alt="npm version" src="https://img.shields.io/npm/v/@sister.software/asciify"></a>
-  <a href="https://deno.land/x/asciify"><img alt="deno module" src="https://shield.deno.dev/x/asciify"></a>
   <img alt="npm downloads" src="https://img.shields.io/npm/dm/@sister.software/asciify">
   <img alt="license" src="https://img.shields.io/github/license/sister-software/asciify">
 </p>
